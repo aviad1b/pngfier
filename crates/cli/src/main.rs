@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result, bail};
 use clap::Parser;
 
 use crate::commands::{Command, ImgSrc};
@@ -28,7 +28,14 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    todo!()
+    if let ImgSrc::Query(_) = img_src {
+        bail!("Query-based compiling is not supported yet.");
+    }
+    println!(
+        "'compile' command invoked with input: {:?}, img-src: {:?}, key-file: {:?}.",
+        input, img_src, key_file
+    );
+    Ok(())
 }
 
 /// Handles 'extract' command.
@@ -37,5 +44,9 @@ fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> R
 /// * `key_file` - Optional path to read key from (instead of assuming PNG riding).
 /// Returns error if occured.
 fn handle_extract(img_path: String, output: String, key_file: Option<String>) -> Result<()> {
-    todo!()
+    println!(
+        "'extract' command invoked with img-path: {:?}, output: {:?}, key_file: {:?}.",
+        img_path, output, key_file
+    );
+    Ok(())
 }

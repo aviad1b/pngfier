@@ -1,3 +1,5 @@
+use std::fmt;
+
 use anyhow::{Result, bail};
 use clap::Subcommand;
 
@@ -56,6 +58,15 @@ impl ImgSrc {
             (Some(_), Some(_)) => bail!(
                 "Image source is ambiguous: Only one of the arguments --img-query or --img-path must be provided."
             ),
+        }
+    }
+}
+
+impl fmt::Display for ImgSrc {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ImgSrc::Query(query) => write!(f, "Query({})", query),
+            ImgSrc::Path(path) => write!(f, "Path({})", path),
         }
     }
 }

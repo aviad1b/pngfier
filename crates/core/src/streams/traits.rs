@@ -41,7 +41,7 @@ impl ConstBinParsible for u8 {
 pub trait Stream {
     /// Rewinds cursor back to the beggining of the stream.
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn rewind(&mut self) -> io::Result<()>;
 
@@ -55,19 +55,19 @@ pub trait Stream {
     /// 
     /// * `pos` - New position for cursor in stream.
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn set_pos(&mut self, pos: StreamPos) -> io::Result<()>;
 
     /// Gets current size of entire stream.
     /// 
-    /// Returns stream size, or error if occured.
+    /// Returns stream size, or error if occurred.
     /// 
     fn get_size(&mut self) -> io::Result<StreamPos>;
 
     /// Updates internal state of stream (for internal module use).
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn update(&mut self) -> io::Result<()> { Ok(()) }
 }
@@ -80,7 +80,7 @@ pub trait Streams<N: ArrayLength> {
     /// 
     /// * `I` - Stream index in set.
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn rewind<const I: usize>(&mut self) -> io::Result<()>;
 
@@ -98,7 +98,7 @@ pub trait Streams<N: ArrayLength> {
     /// 
     /// * `pos` - New position for cursor in stream.
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()>;
 
@@ -106,7 +106,7 @@ pub trait Streams<N: ArrayLength> {
     /// 
     /// * `I` - Stream index in set.
     /// 
-    /// Returns stream size, or error if occured.
+    /// Returns stream size, or error if occurred.
     /// 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos>;
 
@@ -114,7 +114,7 @@ pub trait Streams<N: ArrayLength> {
     /// 
     /// * `I` - Stream index in set.
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn update<const I: usize>(&mut self) -> io::Result<()> { Ok(()) }
 }
@@ -125,7 +125,7 @@ pub trait InputBinaryStream : Stream {
     /// 
     /// * `buff` - Buffer (bytes slice) to read data into (exact size).
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()>;
 
@@ -135,7 +135,7 @@ pub trait InputBinaryStream : Stream {
     /// 
     /// * `endianness` - Endianness to use when reading binary data (for both bytes and bits).
     /// 
-    /// Returns bit reader object, or error if occured.
+    /// Returns bit reader object, or error if occurred.
     /// 
     fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead>;
 }
@@ -149,7 +149,7 @@ pub trait InputBinaryStreams<N: ArrayLength> : Stream {
     /// 
     /// * `buff` - Buffer (bytes slice) to read data into (exact size).
     /// 
-    /// Returns error if occured.
+    /// Returns error if occurred.
     /// 
     fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()>;
 
@@ -161,7 +161,7 @@ pub trait InputBinaryStreams<N: ArrayLength> : Stream {
     /// 
     /// * `endianness` - Endianness to use when reading binary data (for both bytes and bits).
     /// 
-    /// Returns bit reader object, or error if occured.
+    /// Returns bit reader object, or error if occurred.
     /// 
     fn obtain_bits_reader<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead>;
 }
@@ -174,7 +174,7 @@ pub trait InputBinaryStreams<N: ArrayLength> : Stream {
 /// * `endianness` - Endianness to use when reading binary data (for both bytes and bits).
 /// * `i` - Stream index in set (if relevant).
 /// 
-/// Returns bit reader object, or error if occured.
+/// Returns bit reader object, or error if occurred.
 /// 
 #[macro_export]
 macro_rules! obtain_bits_reader {
@@ -197,7 +197,7 @@ macro_rules! obtain_bits_reader {
 /// Assumes `reader` was indeed obtained from `parent`.
 /// Otherwise, behaviour is considered undefined.
 /// 
-/// Returns error if occured.
+/// Returns error if occurred.
 #[macro_export]
 macro_rules! return_bits_reader {
     ($reader:expr, $parent:expr) => {{

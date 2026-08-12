@@ -73,6 +73,7 @@ pub trait Stream {
 }
 
 /// Abstraction over an indexed set of cursor-based streams.
+/// 
 /// * `N` - Amount of streams in set.
 /// 
 pub trait Streams<N: ArrayLength> {
@@ -141,6 +142,7 @@ pub trait InputBinaryStream : Stream {
 }
 
 /// Abstraction over an indexed set of cursor-based stream of binary input.
+/// 
 /// * `N` - Amount of streams in set.
 /// 
 pub trait InputBinaryStreams<N: ArrayLength> : Stream {
@@ -254,6 +256,7 @@ pub trait OutputBinaryStream : Stream {
 }
 
 /// Abstraction over an indexed set of cursor-based stream of binary output.
+/// 
 /// * `N` - Amount of streams in set.
 /// 
 pub trait OutputBinaryStreams<N: ArrayLength> : Streams<N> {

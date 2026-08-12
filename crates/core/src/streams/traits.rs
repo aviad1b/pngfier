@@ -410,3 +410,54 @@ pub trait InputElemStreams<E, N: ArrayLength> : Streams<N> {
         todo!() // TODO: Add default implementation of element lookup.
     }
 }
+
+/// Abstraction over a cursor-based stream of output made of elements.
+pub trait OutputElemStream<E> : Stream {
+    /// Writes element stream.
+    /// 
+    /// * `elem` - Element to write.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn write_next_elem(&mut self, elem: E) -> io::Result<()>;
+
+    /// Truncates stream data.
+    /// 
+    /// * `len` - New total length for stream data to have.
+    /// 
+    /// Note: If cursor is beyond `len` at the time of truncating, 
+    /// it should be moved to `len`.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()>;
+}
+
+/// Abstraction over an indexed set of cursor-based stream of output made of elements.
+/// 
+/// * `N` - Amount of streams in set.
+/// 
+pub trait OutputElemStreams<E, N: ArrayLength> : Streams<N> {
+    /// Writes element stream.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `elem` - Element to write.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn write_next_elem<const I: usize>(&mut self, elem: E) -> io::Result<()>;
+
+    /// Truncates stream data.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `len` - New total length for stream data to have.
+    /// 
+    /// Note: If cursor is beyond `len` at the time of truncating, 
+    /// it should be moved to `len`.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()>;
+}

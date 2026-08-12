@@ -1,6 +1,6 @@
 use std::io;
 
-use bitstream_io::{BitRead, Endianness};
+use bitstream_io::{BitRead, BitWrite, Endianness};
 use generic_array::{ArrayLength, GenericArray, typenum::U1};
 
 use super::StreamPos;
@@ -213,6 +213,131 @@ macro_rules! return_bits_reader {
         {
             let mut reader = $reader;
             reader.byte_align();
+        }
+        $parent.update::<i>()?;
+        Ok::<(), io::Error>(())
+    }};
+}
+
+/// Abstraction over a cursor-based stream of binary output.
+pub trait OutputBinaryStream : Stream {
+    /// Writes bytes to stream.
+    /// 
+    /// * `buff` - Buffer (bytes slice) of data to write.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()>;
+
+    /// Gets object used to writing bits from stream.
+    /// The returned object mutably borrows the stream.
+    /// To revoke the borrow, invoke macro `return_bits_writer!`.
+    /// 
+    /// * `endianness` - Endianness to use when writing binary data (for both bytes and bits).
+    /// 
+    /// Returns bit writer object, or error if occurred.
+    /// 
+    fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite>;
+
+    /// Truncates stream data.
+    /// 
+    /// * `len` - New total length for stream data to have.
+    /// 
+    /// Note: If cursor is beyond `len` at the time of truncating, 
+    /// it should be moved to `len`.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()>;
+}
+
+/// Abstraction over an indexed set of cursor-based stream of binary output.
+/// * `N` - Amount of streams in set.
+pub trait OutputBinaryStreams<N: ArrayLength> : Streams<N> {
+    /// Writes bytes to stream.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `buff` - Buffer (bytes slice) of data to write.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn write_bytes<const I: usize>(&mut self, buff: &[u8]) -> io::Result<()>;
+
+    /// Gets object used to writing bits from stream.
+    /// The returned object mutably borrows the stream.
+    /// To revoke the borrow, invoke macro `return_bits_writer!`.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `endianness` - Endianness to use when writing binary data (for both bytes and bits).
+    /// 
+    /// Returns bit writer object, or error if occurred.
+    /// 
+    fn obtain_bits_writer<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite>;
+
+    /// Truncates stream data.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `len` - New total length for stream data to have.
+    /// 
+    /// Note: If cursor is beyond `len` at the time of truncating, 
+    /// it should be moved to `len`.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()>;
+}
+
+/// Gets object used to writing bits from stream.
+/// The returned object mutably borrows the stream.
+/// To revoke the borrow, invoke macro `return_bits_writer!`.
+/// 
+/// * `stream` - Binary output stream to obtain bits writer from.
+/// * `endianness` - Endianness to use when writing binary data (for both bytes and bits).
+/// * `i` - Stream index in set (if relevant).
+/// 
+/// Returns bit writer object, or error if occurred.
+/// 
+#[macro_export]
+macro_rules! obtain_bits_writer {
+    ($stream:expr, $endianness:expr) => {
+        $stream.obtain_bits_writer($endianness)
+    };
+
+    ($stream:expr, $endianness:expr, $i:expr) => {
+        $stream.obtain_bits_writer::<i>($endianness)
+    };
+}
+
+/// Revokes stream borrow done by `obtain_bits_writer!` or 
+/// `{OutputBinaryStream,OutputBinaryStreams}::obtain_bits_writer`.
+/// 
+/// * `writer` - Bits writer to revoke borrow of its stream.
+/// * `parent` - Stream to revoke its borrow.
+/// * `i` - Stream index in set (if relevant).
+/// 
+/// Assumes `writer` was indeed obtained from `parent`.
+/// Otherwise, behaviour is considered undefined.
+/// 
+/// Returns error if occurred.
+/// 
+#[macro_export]
+macro_rules! return_bits_writer {
+    ($writer:expr, $parent:expr) => {{
+        {
+            let mut writer = $writer;
+            writer.byte_align()?;
+        }
+        $parent.update()?;
+        Ok::<(), io::Error>(())
+    }};
+
+    ($writer:expr, $parent:expr, $i:expr) => {{
+        {
+            let mut writer = $writer;
+            writer.byte_align()?;
         }
         $parent.update::<i>()?;
         Ok::<(), io::Error>(())

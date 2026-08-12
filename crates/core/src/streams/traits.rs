@@ -19,3 +19,16 @@ pub trait ConstBinParsible {
     /// 
     fn const_bin_unparse(&self, buff: &mut GenericArray<u8, Self::BuffSize>);
 }
+
+impl ConstBinParsible for u8 {
+    type BuffSize = U1;
+
+    fn const_bin_parse(buff: &GenericArray<u8, Self::BuffSize>) -> Self {
+        buff[0]
+    }
+
+    fn const_bin_unparse(&self, buff: &mut GenericArray<u8, Self::BuffSize>) {
+        buff[0] = *self;
+    }
+}
+

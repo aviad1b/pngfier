@@ -2,7 +2,7 @@ use std::io;
 
 use generic_array::{ArrayLength, GenericArray, typenum::U1};
 
-use crate::streams::StreamPos;
+use super::StreamPos;
 
 /// Used for types that can be parsed from&to bytes, using a fixed-sized buffer.
 pub trait ConstBinParsible {

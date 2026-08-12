@@ -377,6 +377,10 @@ pub trait InputElemStream<E> : Stream {
     }
 }
 
+/// Abstraction over an indexed set of cursor-based stream of input made of elements.
+/// 
+/// * `N` - Amount of streams in set.
+/// 
 pub trait InputElemStreams<E, N: ArrayLength> : Streams<N> {
     /// Reads next element from stream.
     /// 

@@ -3,7 +3,7 @@ use std::io;
 use bitstream_io::{BitRead, BitWrite, Endianness};
 use generic_array::{ArrayLength, GenericArray, typenum::U1};
 
-use super::StreamPos;
+use super::{StreamPos, utils};
 
 /// Used for types that can be parsed from&to bytes, using a fixed-sized buffer.
 pub trait ConstBinParsible {
@@ -372,8 +372,11 @@ pub trait InputElemStream<E> : Stream {
     /// 
     fn lookup(&mut self, data: &[E]) -> io::Result<Option<StreamPos>>
     where E: Eq {
-        let _ = data;
-        todo!() // TODO: Add default implementation of element lookup.
+        utils::lookup(
+            self.get_pos()?,
+            || self.read_next_elem(),
+            data
+        )
     }
 }
 
@@ -406,8 +409,11 @@ pub trait InputElemStreams<E, N: ArrayLength> : Streams<N> {
     /// 
     fn lookup<const I: usize>(&mut self, data: &[E]) -> io::Result<Option<StreamPos>>
     where E: Eq {
-        let _ = data;
-        todo!() // TODO: Add default implementation of element lookup.
+        utils::lookup(
+            self.get_pos::<I>()?,
+            || self.read_next_elem::<I>(),
+            data
+        )
     }
 }
 

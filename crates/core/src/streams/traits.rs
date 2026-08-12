@@ -119,7 +119,7 @@ pub trait Streams<N: ArrayLength> {
     fn update<const I: usize>(&mut self) -> io::Result<()> { Ok(()) }
 }
 
-/// Abstraction over a cursor-based stream of binary data.
+/// Abstraction over a cursor-based stream of binary input.
 pub trait InputBinaryStream : Stream {
     /// Reads bytes from stream.
     /// 
@@ -140,7 +140,7 @@ pub trait InputBinaryStream : Stream {
     fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead>;
 }
 
-/// Abstraction over an indexed set of cursor-based stream of binary data.
+/// Abstraction over an indexed set of cursor-based stream of binary input.
 /// * `N` - Amount of streams in set.
 pub trait InputBinaryStreams<N: ArrayLength> : Stream {
     /// Reads bytes from stream.

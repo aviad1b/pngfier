@@ -1,5 +1,6 @@
 use std::io;
 
+use bitstream_io::{BitRead, Endianness};
 use generic_array::{ArrayLength, GenericArray, typenum::U1};
 
 use super::StreamPos;
@@ -116,4 +117,104 @@ pub trait Streams<N: ArrayLength> {
     /// Returns error if occured.
     /// 
     fn update<const I: usize>(&mut self) -> io::Result<()> { Ok(()) }
+}
+
+/// Abstraction over a cursor-based stream of binary data.
+pub trait InputBinaryStream : Stream {
+    /// Reads bytes from stream.
+    /// 
+    /// * `buff` - Buffer (bytes slice) to read data into (exact size).
+    /// 
+    /// Returns error if occured.
+    /// 
+    fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()>;
+
+    /// Gets object used to reading bits from stream.
+    /// The returned object mutably borrows the stream.
+    /// To revoke the borrow, invoke macro `return_bits_reader!`.
+    /// 
+    /// * `endianness` - Endianness to use when reading binary data (for both bytes and bits).
+    /// 
+    /// Returns bit reader object, or error if occured.
+    /// 
+    fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead>;
+}
+
+/// Abstraction over an indexed set of cursor-based stream of binary data.
+/// * `N` - Amount of streams in set.
+pub trait InputBinaryStreams<N: ArrayLength> : Stream {
+    /// Reads bytes from stream.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `buff` - Buffer (bytes slice) to read data into (exact size).
+    /// 
+    /// Returns error if occured.
+    /// 
+    fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()>;
+
+    /// Gets object used to reading bits from stream.
+    /// The returned object mutably borrows the stream.
+    /// To revoke the borrow, invoke macro `return_bits_reader!`.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `endianness` - Endianness to use when reading binary data (for both bytes and bits).
+    /// 
+    /// Returns bit reader object, or error if occured.
+    /// 
+    fn obtain_bits_reader<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead>;
+}
+
+/// Gets object used to reading bits from a binary input stream.
+/// The returned object mutably borrows the stream.
+/// To revoke the borrow, invoke macro `return_bits_reader!`.
+/// 
+/// * `stream` - Binary input stream to obtain bits reader from.
+/// * `endianness` - Endianness to use when reading binary data (for both bytes and bits).
+/// * `i` - Stream index in set (if relevant).
+/// 
+/// Returns bit reader object, or error if occured.
+/// 
+#[macro_export]
+macro_rules! obtain_bits_reader {
+    ($stream:expr, $endianness:expr) => {
+        $stream.obtain_bits_reader($endianness)
+    };
+
+    ($stream:expr, $endianness:expr, $i:expr) => {
+        $stream.obtain_bits_reader::<i>($endianness)
+    };
+}
+
+/// Revokes stream borrow done by `obtain_bits_reader!` or 
+/// `{InputBinaryStream,InputBinaryStreams}::obtain_bits_reader`.
+/// 
+/// * `reader` - Bits reader to revoke borrow of its stream.
+/// * `parent` - Stream to revoke its borrow.
+/// * `i` - Stream index in set (if relevant).
+/// 
+/// Assumes `reader` was indeed obtained from `parent`.
+/// Otherwise, behaviour is considered undefined.
+/// 
+/// Returns error if occured.
+#[macro_export]
+macro_rules! return_bits_reader {
+    ($reader:expr, $parent:expr) => {{
+        {
+            let mut reader = $reader;
+            reader.byte_align();
+        }
+        $parent.update()?;
+        Ok::<(), io::Error>(())
+    }};
+
+    ($reader:expr, $parent:expr, $i:expr) => {{
+        {
+            let mut reader = $reader;
+            reader.byte_align();
+        }
+        $parent.update::<i>()?;
+        Ok::<(), io::Error>(())
+    }};
 }

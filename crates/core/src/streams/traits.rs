@@ -129,7 +129,7 @@ pub trait InputBinaryStream : Stream {
     /// 
     fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()>;
 
-    /// Gets object used to reading bits from stream.
+    /// Gets object used for reading bits from stream.
     /// The returned object mutably borrows the stream.
     /// To revoke the borrow, invoke macro `return_bits_reader!`.
     /// 
@@ -153,7 +153,7 @@ pub trait InputBinaryStreams<N: ArrayLength> : Stream {
     /// 
     fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()>;
 
-    /// Gets object used to reading bits from stream.
+    /// Gets object used for reading bits from stream.
     /// The returned object mutably borrows the stream.
     /// To revoke the borrow, invoke macro `return_bits_reader!`.
     /// 
@@ -166,7 +166,7 @@ pub trait InputBinaryStreams<N: ArrayLength> : Stream {
     fn obtain_bits_reader<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead>;
 }
 
-/// Gets object used to reading bits from a binary input stream.
+/// Gets object used for reading bits from a binary input stream.
 /// The returned object mutably borrows the stream.
 /// To revoke the borrow, invoke macro `return_bits_reader!`.
 /// 
@@ -229,7 +229,7 @@ pub trait OutputBinaryStream : Stream {
     /// 
     fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()>;
 
-    /// Gets object used to writing bits from stream.
+    /// Gets object used for writing bits from stream.
     /// The returned object mutably borrows the stream.
     /// To revoke the borrow, invoke macro `return_bits_writer!`.
     /// 
@@ -264,7 +264,7 @@ pub trait OutputBinaryStreams<N: ArrayLength> : Streams<N> {
     /// 
     fn write_bytes<const I: usize>(&mut self, buff: &[u8]) -> io::Result<()>;
 
-    /// Gets object used to writing bits from stream.
+    /// Gets object used for writing bits from stream.
     /// The returned object mutably borrows the stream.
     /// To revoke the borrow, invoke macro `return_bits_writer!`.
     /// 
@@ -290,7 +290,7 @@ pub trait OutputBinaryStreams<N: ArrayLength> : Streams<N> {
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()>;
 }
 
-/// Gets object used to writing bits from stream.
+/// Gets object used for writing bits from stream.
 /// The returned object mutably borrows the stream.
 /// To revoke the borrow, invoke macro `return_bits_writer!`.
 /// 

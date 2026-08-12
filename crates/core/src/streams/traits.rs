@@ -346,3 +346,60 @@ macro_rules! return_bits_writer {
         Ok::<(), io::Error>(())
     }};
 }
+
+/// Abstraction over a cursor-based stream of input made of elements.
+pub trait InputElemStream<E> : Stream {
+    /// Reads next element from stream.
+    /// 
+    /// Returns read element, or `None` if reached end-of-stream.
+    /// Returns error if occurred.
+    /// 
+    fn read_next_elem(&mut self) -> io::Result<Option<E>>;
+
+    /// Locates the first instance of a chunk of data in the file, 
+    /// starting at the cursor's current position.
+    /// 
+    /// Requires `E` implementing `Eq` for comparation.
+    /// 
+    /// * `data` - Chunk of data to look for in the stream.
+    /// 
+    /// Returns starting position of chunk found in stream,
+    /// or `None` if wasn't found.
+    /// Returns error if occurred.
+    /// 
+    fn lookup(&mut self, data: &[E]) -> io::Result<Option<StreamPos>>
+    where E: Eq {
+        let _ = data;
+        todo!() // TODO: Add default implementation of element lookup.
+    }
+}
+
+pub trait InputElemStreams<E, N: ArrayLength> : Streams<N> {
+    /// Reads next element from stream.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// Returns read element, or `None` if reached end-of-stream.
+    /// Returns error if occurred.
+    /// 
+    fn read_next_elem<const I: usize>(&mut self) -> io::Result<Option<E>>;
+
+    /// Locates the first instance of a chunk of data in the file, 
+    /// starting at the cursor's current position.
+    /// 
+    /// Requires `E` implementing `Eq` for comparation.
+    /// 
+    /// * `I` - Stream index in set.
+    /// 
+    /// * `data` - Chunk of data to look for in the stream.
+    /// 
+    /// Returns starting position of chunk found in stream,
+    /// or `None` if wasn't found.
+    /// Returns error if occurred.
+    /// 
+    fn lookup<const I: usize>(&mut self, data: &[E]) -> io::Result<Option<StreamPos>>
+    where E: Eq {
+        let _ = data;
+        todo!() // TODO: Add default implementation of element lookup.
+    }
+}

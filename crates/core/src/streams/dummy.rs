@@ -30,25 +30,32 @@ impl<E: Copy> DummyInputElemStream<E> {
 
 impl<E: Copy> Stream for DummyInputElemStream<E> {
     fn rewind(&mut self) -> std::io::Result<()> {
-        todo!()
+        self.pos = 0;
+        Ok(())
     }
 
     fn get_pos(&mut self) -> std::io::Result<StreamPos> {
-        todo!()
+        Ok(self.pos)
     }
 
     fn set_pos(&mut self, pos: StreamPos) -> std::io::Result<()> {
-        todo!()
+        self.pos = pos;
+        Ok(())
     }
 
     fn get_size(&mut self) -> std::io::Result<StreamPos> {
-        todo!()
+        Ok(self.elems.len() as StreamPos)
     }
 }
 
 impl<E: Copy> InputElemStream<E> for DummyInputElemStream<E> {
     fn read_next_elem(&mut self) -> std::io::Result<Option<E>> {
-        todo!()
+        if self.pos >= self.elems.len() as StreamPos {
+            return Ok(None); // end-of-stream
+        }
+        let res = self.elems[self.pos as usize];
+        self.pos += 1;
+        Ok(Some(res))
     }
 }
 
@@ -80,28 +87,37 @@ impl<E: Copy> DummyOutputElemStream<E> {
 
 impl<E: Copy> Stream for DummyOutputElemStream<E> {
     fn rewind(&mut self) -> std::io::Result<()> {
-        todo!()
+        self.pos = 0;
+        Ok(())
     }
 
     fn get_pos(&mut self) -> std::io::Result<StreamPos> {
-        todo!()
+        Ok(self.pos)
     }
 
     fn set_pos(&mut self, pos: StreamPos) -> std::io::Result<()> {
-        todo!()
+        self.pos = pos;
+        Ok(())
     }
 
     fn get_size(&mut self) -> std::io::Result<StreamPos> {
-        todo!()
+        Ok(self.elems.len() as StreamPos)
     }
 }
 
 impl<E: Copy> OutputElemStream<E> for DummyOutputElemStream<E> {
     fn write_next_elem(&mut self, elem: E) -> std::io::Result<()> {
-        todo!()
+        self.elems[self.pos as usize] = elem;
+        self.pos += 1;
+        Ok(())
     }
 
     fn truncate(&mut self, len: StreamPos) -> std::io::Result<()> {
-        todo!()
+        if 0 == len {
+            self.elems.clear();
+        } else {
+            self.elems.resize(len as usize, self.elems[0]);
+        }
+        Ok(())
     }
 }

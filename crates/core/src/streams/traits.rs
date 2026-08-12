@@ -142,6 +142,7 @@ pub trait InputBinaryStream : Stream {
 
 /// Abstraction over an indexed set of cursor-based stream of binary input.
 /// * `N` - Amount of streams in set.
+/// 
 pub trait InputBinaryStreams<N: ArrayLength> : Stream {
     /// Reads bytes from stream.
     /// 
@@ -198,6 +199,7 @@ macro_rules! obtain_bits_reader {
 /// Otherwise, behaviour is considered undefined.
 /// 
 /// Returns error if occurred.
+/// 
 #[macro_export]
 macro_rules! return_bits_reader {
     ($reader:expr, $parent:expr) => {{
@@ -253,6 +255,7 @@ pub trait OutputBinaryStream : Stream {
 
 /// Abstraction over an indexed set of cursor-based stream of binary output.
 /// * `N` - Amount of streams in set.
+/// 
 pub trait OutputBinaryStreams<N: ArrayLength> : Streams<N> {
     /// Writes bytes to stream.
     /// 

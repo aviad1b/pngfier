@@ -1,2 +1,2 @@
 #[cfg(test)]
-mod streams;
+mod test_streams;

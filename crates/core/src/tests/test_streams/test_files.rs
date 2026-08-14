@@ -211,3 +211,50 @@ fn output_set_pos_overwrites_at_offset() {
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
 	assert_eq!(contents, vec![1, 2, 99, 99]);
 }
+
+#[test]
+fn output_get_size_reports_file_len_without_moving_pos() {
+	let tmp = TempFile::new("input_size.bin");
+	tmp.write_initial(&[0; 10]);
+	let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	stream.set_pos(3).unwrap();
+	let size = stream.get_size().unwrap();
+	assert_eq!(size, 10);
+	
+    // position should be restored after `get_size`
+	assert_eq!(stream.get_pos().unwrap(), 3);
+}
+
+#[test]
+fn output_set_pos_and_get_pos_roundtrip() {
+	let tmp = TempFile::new("input_pos.bin");
+	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	stream.set_pos(2).unwrap();
+	assert_eq!(stream.get_pos().unwrap(), 2);
+
+	let buf = [6, 7];
+	stream.write_bytes(&buf).unwrap();
+	
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents, vec![1, 2, 6, 7, 5]);
+}
+
+#[test]
+fn output_rewind_resets_to_start() {
+	let tmp = TempFile::new("input_rewind.bin");
+	tmp.write_initial(&[7, 8, 5]);
+	let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	let buf1 = [1, 2];
+	stream.write_bytes(&buf1).unwrap();
+	stream.rewind().unwrap();
+	assert_eq!(stream.get_pos().unwrap(), 0);
+	let buf2 = [4, 3];
+	stream.write_bytes(&buf2).unwrap();
+
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents, vec![4, 3, 5]);
+}

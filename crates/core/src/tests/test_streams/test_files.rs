@@ -198,3 +198,16 @@ fn output_truncate_grows_file() {
 	assert_eq!(contents[1], 2);
 	assert_eq!(contents.len(), 5);
 }
+
+#[test]
+fn output_set_pos_overwrites_at_offset() {
+	let tmp = TempFile::new("output_set_pos.bin");
+	tmp.write_initial(&[1, 2, 3, 4]);
+	{
+		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+		stream.set_pos(2).unwrap();
+		stream.write_bytes(&[99, 99]).unwrap();
+	}
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents, vec![1, 2, 99, 99]);
+}

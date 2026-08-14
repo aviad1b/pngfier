@@ -1,6 +1,6 @@
 use bitstream_io::{BitRead, BitReader, BitWriter, Endianness};
 use std::{
-    fs::File,
+    fs::{File, OpenOptions},
     io,
 };
 
@@ -12,6 +12,26 @@ use super::{
         Stream
     }
 };
+
+/// Utility used by binary file abstractions.
+struct BinaryFileStreamBase {
+    file: File,
+}
+
+impl BinaryFileStreamBase {
+    /// Constructs a new `BinaryFileStreamBase` instance.
+    /// 
+    /// * `path` - Path of file to open.
+    /// * `opts` - Open options to use for opening the file.
+    /// 
+    /// Returns constructed instance, or error if occurred.
+    /// 
+    fn new(path: &str, opts: &OpenOptions) -> io::Result<Self> {
+        Ok(Self{
+            file: opts.open(path)?,
+        })
+    }
+}
 
 /// Abstraction over a file of binary input.
 pub struct InputBinaryFileStream {

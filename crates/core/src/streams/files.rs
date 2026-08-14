@@ -160,10 +160,7 @@ impl OutputBinaryStream for OutputBinaryFileStream {
     }
 
     fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl bitstream_io::BitWrite> {
-        let _ = endianness;
-        Err::<BitWriter<File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implemen
+        Ok(BitWriter::endian(&self.base.file, endianness))
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {

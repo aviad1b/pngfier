@@ -1,7 +1,4 @@
-use bitstream_io::BigEndian;
-use bitstream_io::BitRead;
-use bitstream_io::BitWrite;
-use bitstream_io::LittleEndian;
+use bitstream_io::{BigEndian, BitRead, BitWrite, LittleEndian};
 
 use crate::{
     obtain_bits_reader,

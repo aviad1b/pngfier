@@ -160,3 +160,41 @@ fn output_write_bytes_overwrites_correct_data() {
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
 	assert_eq!(contents, vec![9, 8, 7, 6]);
 }
+
+#[test]
+fn output_truncate_to_zero_empties_file() {
+	let tmp = TempFile::new("output_truncate_zero.bin");
+	tmp.write_initial(&[1, 2, 3, 4]);
+	{
+		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+		stream.truncate(0).unwrap();
+	}
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert!(contents.is_empty());
+}
+
+#[test]
+fn output_truncate_shrinks_file() {
+	let tmp = TempFile::new("output_truncate_shrink.bin");
+	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	{
+		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+		stream.truncate(2).unwrap();
+	}
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents, vec![1, 2]);
+}
+
+#[test]
+fn output_truncate_grows_file() {
+	let tmp = TempFile::new("output_truncate_grow.bin");
+	tmp.write_initial(&[1, 2]);
+	{
+		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+		stream.truncate(5).unwrap();
+	}
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents[0], 1);
+	assert_eq!(contents[1], 2);
+	assert_eq!(contents.len(), 5);
+}

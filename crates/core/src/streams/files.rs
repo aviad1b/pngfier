@@ -50,6 +50,13 @@ impl BinaryFileStreamBase {
         self.file.seek(SeekFrom::Start(pos as u64))?;
         Ok(())
     }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        let pos = self.file.stream_position()?;
+        let size = self.file.seek(SeekFrom::End(0))?;
+        self.file.seek(SeekFrom::Start(pos as u64))?;
+        Ok(size as StreamPos)
+    }
 }
 
 /// Abstraction over a file of binary input.

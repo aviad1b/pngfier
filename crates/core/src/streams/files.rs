@@ -93,7 +93,7 @@ impl Stream for InputBinaryFileStream {
     }
 
     fn get_size(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_size()
     }
 }
 

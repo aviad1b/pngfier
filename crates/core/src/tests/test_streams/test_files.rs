@@ -26,3 +26,11 @@ fn input_new_fails_for_nonexistent_file() {
 	let result = InputBinaryFileStream::new(&path);
 	assert!(result.is_err());
 }
+
+#[test]
+fn input_new_opens_existing_file() {
+	let tmp = TempFile::new("input_open.bin");
+	tmp.write_initial(&[1, 2, 3]);
+	let stream = InputBinaryFileStream::new(tmp.path_str());
+	assert!(stream.is_ok());
+}

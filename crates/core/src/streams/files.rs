@@ -78,12 +78,11 @@ impl Stream for InputBinaryFileStream {
     }
 
     fn get_pos(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_pos()
     }
 
     fn set_pos(&mut self, pos: super::StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.base.set_pos(pos)
     }
 
     fn get_size(&mut self) -> io::Result<StreamPos> {

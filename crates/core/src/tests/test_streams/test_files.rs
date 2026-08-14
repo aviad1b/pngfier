@@ -34,3 +34,14 @@ fn input_new_opens_existing_file() {
 	let stream = InputBinaryFileStream::new(tmp.path_str());
 	assert!(stream.is_ok());
 }
+
+#[test]
+fn input_read_bytes_reads_correct_data() {
+	let tmp = TempFile::new("input_read.bin");
+	tmp.write_initial(&[10, 20, 30, 40]);
+	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	let mut buf = [0_u8; 4];
+	stream.read_bytes(&mut buf).unwrap();
+	assert_eq!(buf, [10, 20, 30, 40]);
+}

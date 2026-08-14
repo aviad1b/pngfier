@@ -171,7 +171,7 @@ impl OutputBinaryStream for OutputBinaryFileStream {
 
 /// Abstraction over a file of binary data (input & output).
 pub struct TwoWayBinaryFileStream {
-
+    base: BinaryFileStreamBase,
 }
 
 impl TwoWayBinaryFileStream {
@@ -182,59 +182,51 @@ impl TwoWayBinaryFileStream {
     /// Returns stream instance, or error if occurred.
     /// 
     pub fn new(path: &str) -> io::Result<Self> {
-        let _ = path;
-        todo!() // TODO: Implement
+        let mut opts = OpenOptions::new();
+        let opts = opts.read(true).write(true);
+        Ok(Self { base: BinaryFileStreamBase::new(path, opts)? })
     }
 }
 
 impl Stream for TwoWayBinaryFileStream {
     fn rewind(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.base.rewind()
     }
 
     fn get_pos(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_pos()
     }
 
     fn set_pos(&mut self, pos: super::StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.base.set_pos(pos)
     }
 
     fn get_size(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_size()
     }
 }
 
 impl InputBinaryStream for TwoWayBinaryFileStream {
     fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.base.file.read_exact(buff)
     }
 
     fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
-        let _ = endianness;
-        Err::<BitReader<File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        Ok(BitReader::endian(&self.base.file, endianness))
     }
 }
 
 impl OutputBinaryStream for TwoWayBinaryFileStream {
     fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.base.file.write_all(buff)
     }
 
     fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl bitstream_io::BitWrite> {
-        let _ = endianness;
-        Err::<BitWriter<File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implemen
+        Ok(BitWriter::endian(&self.base.file, endianness))
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.base.file.set_len(len as u64)?;
+        Ok(())
     }
 }

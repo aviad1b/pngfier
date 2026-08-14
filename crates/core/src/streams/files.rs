@@ -112,10 +112,7 @@ impl InputBinaryStream for InputBinaryFileStream {
     }
 
     fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
-        let _ = endianness;
-        Err::<BitReader<File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        Ok(BitReader::endian(&mut self.base.file, endianness))
     }
 }
 

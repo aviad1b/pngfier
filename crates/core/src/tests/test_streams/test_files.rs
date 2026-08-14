@@ -127,3 +127,13 @@ fn output_new_works_for_existent_file() {
 	let result = OutputBinaryFileStream::new(tmp.path_str());
 	assert!(!result.is_err());
 }
+
+#[test]
+fn output_new_works_for_nonexistent_file() {
+	let path = {
+        let tmp = TempFile::new("output_missing.bin");
+        String::from(tmp.path_str())
+    };
+	let result = OutputBinaryFileStream::new(&path);
+	assert!(!result.is_err());
+}

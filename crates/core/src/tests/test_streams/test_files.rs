@@ -45,3 +45,17 @@ fn input_read_bytes_reads_correct_data() {
 	stream.read_bytes(&mut buf).unwrap();
 	assert_eq!(buf, [10, 20, 30, 40]);
 }
+
+#[test]
+fn input_get_size_reports_file_len_without_moving_pos() {
+	let tmp = TempFile::new("input_size.bin");
+	tmp.write_initial(&[0; 10]);
+	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	stream.set_pos(3).unwrap();
+	let size = stream.get_size().unwrap();
+	assert_eq!(size, 10);
+	
+    // position should be restored after `get_size`
+	assert_eq!(stream.get_pos().unwrap(), 3);
+}

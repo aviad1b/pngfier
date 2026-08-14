@@ -89,3 +89,30 @@ fn input_rewind_resets_to_start() {
 	stream.read_bytes(&mut buf2).unwrap();
 	assert_eq!(buf2, [7]);
 }
+
+#[test]
+fn input_bits_reader_reads_expected_big_endian() {
+	let tmp = TempFile::new("input_bits_be.bin");
+	tmp.write_initial(&[0b10110000]);
+	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+    let mut reader = obtain_bits_reader!(stream, BigEndian).unwrap();
+	let bit0: u8 = reader.read(1).unwrap();
+	let bit1: u8 = reader.read(1).unwrap();
+	let bit2: u8 = reader.read(1).unwrap();
+	let bit3: u8 = reader.read(1).unwrap();
+    return_bits_reader!(reader, stream).unwrap();
+	assert_eq!((bit0, bit1, bit2, bit3), (1, 0, 1, 1));
+}
+
+#[test]
+fn input_bits_reader_reads_expected_little_endian() {
+	let tmp = TempFile::new("input_bits_le.bin");
+	tmp.write_initial(&[0b00000001]);
+	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+    let mut reader = obtain_bits_reader!(stream, LittleEndian).unwrap();
+	let bit0: u8 = reader.read(1).unwrap();
+    return_bits_reader!(reader, stream).unwrap();
+	assert_eq!(bit0, 1);
+}

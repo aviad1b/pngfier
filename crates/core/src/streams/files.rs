@@ -4,12 +4,11 @@ use std::{
     io,
 };
 
-use crate::streams::traits::OutputBinaryStream;
-
 use super::{
     StreamPos,
     traits::{
         InputBinaryStream,
+        OutputBinaryStream,
         Stream
     }
 };

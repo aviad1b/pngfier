@@ -107,7 +107,11 @@ impl<E: Copy> Stream for DummyOutputElemStream<E> {
 
 impl<E: Copy> OutputElemStream<E> for DummyOutputElemStream<E> {
     fn write_next_elem(&mut self, elem: E) -> std::io::Result<()> {
-        self.elems[self.pos as usize] = elem;
+        if self.pos as usize >= self.elems.len() {
+            self.elems.push(elem);
+        } else {
+            self.elems[self.pos as usize] = elem;
+        }
         self.pos += 1;
         Ok(())
     }

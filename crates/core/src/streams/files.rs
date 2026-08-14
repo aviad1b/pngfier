@@ -32,6 +32,15 @@ impl BinaryFileStreamBase {
         })
     }
 
+    /// Rewinds cursor back to the beggining of the file.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn rewind(&mut self) -> io::Result<()> {
+        self.file.rewind()?;
+        Ok(())
+    }
+
     /// Gets current position of cursor in file.
     /// 
     /// Returns current position of cursor in file, or error if occurred.

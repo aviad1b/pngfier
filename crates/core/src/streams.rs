@@ -4,3 +4,4 @@ pub type StreamPos = i64;
 mod utils;
 pub mod traits;
 pub mod dummy;
+pub mod files;

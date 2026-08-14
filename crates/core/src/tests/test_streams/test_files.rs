@@ -73,3 +73,19 @@ fn input_set_pos_and_get_pos_roundtrip() {
 	stream.read_bytes(&mut buf).unwrap();
 	assert_eq!(buf, [3, 4]);
 }
+
+#[test]
+fn input_rewind_resets_to_start() {
+	let tmp = TempFile::new("input_rewind.bin");
+	tmp.write_initial(&[7, 8, 9]);
+	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	let mut buf = [0_u8; 2];
+	stream.read_bytes(&mut buf).unwrap();
+	stream.rewind().unwrap();
+	assert_eq!(stream.get_pos().unwrap(), 0);
+
+	let mut buf2 = [0_u8; 1];
+	stream.read_bytes(&mut buf2).unwrap();
+	assert_eq!(buf2, [7]);
+}

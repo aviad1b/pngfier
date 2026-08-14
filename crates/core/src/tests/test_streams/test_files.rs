@@ -148,3 +148,15 @@ fn output_write_bytes_writes_correct_data() {
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
 	assert_eq!(contents, vec![9, 8, 7, 6]);
 }
+
+#[test]
+fn output_write_bytes_overwrites_correct_data() {
+	let tmp = TempFile::new("output_write.bin");
+	tmp.write_initial(&[0; 4]); // pre-create with placeholder content to be overwritten
+	{
+		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+		stream.write_bytes(&[9, 8, 7, 6]).unwrap();
+	}
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents, vec![9, 8, 7, 6]);
+}

@@ -1,7 +1,7 @@
 use bitstream_io::{BitRead, BitReader, BitWriter, Endianness};
 use std::{
     fs::{File, OpenOptions},
-    io::{self, Read},
+    io::{self, Read, Seek, SeekFrom},
 };
 
 use super::{
@@ -30,6 +30,25 @@ impl BinaryFileStreamBase {
         Ok(Self{
             file: opts.open(path)?,
         })
+    }
+
+    /// Gets current position of cursor in file.
+    /// 
+    /// Returns current position of cursor in file, or error if occurred.
+    /// 
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        Ok(self.file.stream_position()? as StreamPos)
+    }
+
+    /// Sets current position of cursor in file.
+    /// 
+    /// * `pos` - New position for cursor in file.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
+        self.file.seek(SeekFrom::Start(pos as u64))?;
+        Ok(())
     }
 }
 

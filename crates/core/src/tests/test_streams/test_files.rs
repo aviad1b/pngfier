@@ -59,3 +59,17 @@ fn input_get_size_reports_file_len_without_moving_pos() {
     // position should be restored after `get_size`
 	assert_eq!(stream.get_pos().unwrap(), 3);
 }
+
+#[test]
+fn input_set_pos_and_get_pos_roundtrip() {
+	let tmp = TempFile::new("input_pos.bin");
+	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	stream.set_pos(2).unwrap();
+	assert_eq!(stream.get_pos().unwrap(), 2);
+
+	let mut buf = [0_u8; 2];
+	stream.read_bytes(&mut buf).unwrap();
+	assert_eq!(buf, [3, 4]);
+}

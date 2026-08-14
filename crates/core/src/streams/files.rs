@@ -118,7 +118,7 @@ impl InputBinaryStream for InputBinaryFileStream {
 
 /// Abstraction over a file of binary output.
 pub struct OutputBinaryFileStream {
-
+    base: BinaryFileStreamBase,
 }
 
 impl OutputBinaryFileStream {
@@ -129,8 +129,9 @@ impl OutputBinaryFileStream {
     /// Returns stream instance, or error if occurred.
     /// 
     pub fn new(path: &str) -> io::Result<Self> {
-        let _ = path;
-        todo!() // TODO: Implement
+        let mut opts = OpenOptions::new();
+        let opts = opts.create(true).write(true);
+        Ok(Self{ base: BinaryFileStreamBase::new(path, opts)? })
     }
 }
 

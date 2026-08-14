@@ -90,7 +90,7 @@ impl InputBinaryFileStream {
 
 impl Stream for InputBinaryFileStream {
     fn rewind(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.base.rewind()
     }
 
     fn get_pos(&mut self) -> io::Result<StreamPos> {

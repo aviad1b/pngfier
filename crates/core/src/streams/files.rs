@@ -1,7 +1,7 @@
 use bitstream_io::{BitRead, BitReader, BitWriter, Endianness};
 use std::{
     fs::{File, OpenOptions},
-    io,
+    io::{self, Read},
 };
 
 use super::{
@@ -74,8 +74,7 @@ impl Stream for InputBinaryFileStream {
 
 impl InputBinaryStream for InputBinaryFileStream {
     fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.base.file.read_exact(buff)
     }
 
     fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {

@@ -276,3 +276,77 @@ fn output_bits_writer_writes_expected() {
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
 	assert_eq!(contents[0], 0b10110000);
 }
+
+//////////////////////////////////////////////////////////////////
+// ---------- TwoWayBinaryFileStream (read + write) ---------- ///
+//////////////////////////////////////////////////////////////////
+
+#[test]
+fn two_way_new_fails_for_nonexistent_file() {
+	let tmp = TempFile::new("two_way_missing.bin");
+	let result = TwoWayBinaryFileStream::new(tmp.path_str());
+	assert!(result.is_err());
+}
+
+#[test]
+fn two_way_can_write_then_read_back() {
+	let tmp = TempFile::new("two_way_rw.bin");
+	tmp.write_initial(&[0; 4]);
+	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	stream.write_bytes(&[1, 2, 3, 4]).unwrap();
+	stream.rewind().unwrap();
+
+	let mut buf = [0u8; 4];
+	stream.read_bytes(&mut buf).unwrap();
+	assert_eq!(buf, [1, 2, 3, 4]);
+}
+
+#[test]
+fn two_way_get_pos_tracks_both_read_and_write() {
+	let tmp = TempFile::new("two_way_pos.bin");
+	tmp.write_initial(&[0; 6]);
+	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	stream.write_bytes(&[1, 2, 3]).unwrap();
+	assert_eq!(stream.get_pos().unwrap(), 3);
+
+	stream.rewind().unwrap();
+	let mut buf = [0u8; 2];
+	stream.read_bytes(&mut buf).unwrap();
+	assert_eq!(stream.get_pos().unwrap(), 2);
+	assert_eq!(buf, [1, 2]);
+}
+
+#[test]
+fn two_way_truncate_affects_size() {
+	let tmp = TempFile::new("two_way_truncate.bin");
+	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	stream.truncate(3).unwrap();
+	assert_eq!(stream.get_size().unwrap(), 3);
+}
+
+#[test]
+fn two_way_bits_reader_and_writer_roundtrip() {
+	let tmp = TempFile::new("two_way_bits.bin");
+	tmp.write_initial(&[0; 1]);
+	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
+
+	{
+        let mut writer = obtain_bits_writer!(stream, BigEndian).unwrap();
+		writer.write(4, 0b1010u8).unwrap();
+		writer.write(4, 0b0101u8).unwrap();
+		return_bits_writer!(writer, stream).unwrap();
+	}
+	stream.rewind().unwrap();
+	{
+        let mut reader = obtain_bits_reader!(stream, BigEndian).unwrap();
+		let high: u8 = reader.read(4).unwrap();
+		let low: u8 = reader.read(4).unwrap();
+		assert_eq!(high, 0b1010);
+		assert_eq!(low, 0b0101);
+        return_bits_reader!(reader, stream).unwrap();
+	}
+}

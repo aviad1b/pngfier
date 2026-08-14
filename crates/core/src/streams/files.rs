@@ -35,7 +35,7 @@ impl BinaryFileStreamBase {
 
 /// Abstraction over a file of binary input.
 pub struct InputBinaryFileStream {
-
+    base: BinaryFileStreamBase,
 }
 
 impl InputBinaryFileStream {
@@ -46,8 +46,10 @@ impl InputBinaryFileStream {
     /// Returns stream instance, or error if occurred.
     /// 
     pub fn new(path: &str) -> io::Result<Self> {
-        let _ = path;
-        todo!() // TODO: Implement
+        let mut opts = OpenOptions::new();
+        let opts = opts.read(true);
+        let base = BinaryFileStreamBase::new(path, opts)?;
+        Ok(Self{ base })
     }
 }
 

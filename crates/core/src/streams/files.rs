@@ -137,20 +137,19 @@ impl OutputBinaryFileStream {
 
 impl Stream for OutputBinaryFileStream {
     fn rewind(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.base.rewind()
     }
 
     fn get_pos(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_pos()
     }
 
     fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.base.set_pos(pos)
     }
 
     fn get_size(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_size()
     }
 }
 

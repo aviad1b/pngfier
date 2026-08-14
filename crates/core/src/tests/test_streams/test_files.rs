@@ -137,3 +137,14 @@ fn output_new_works_for_nonexistent_file() {
 	let result = OutputBinaryFileStream::new(&path);
 	assert!(!result.is_err());
 }
+
+#[test]
+fn output_write_bytes_writes_correct_data() {
+	let tmp = TempFile::new("output_write.bin");
+	{
+		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+		stream.write_bytes(&[9, 8, 7, 6]).unwrap();
+	}
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents, vec![9, 8, 7, 6]);
+}

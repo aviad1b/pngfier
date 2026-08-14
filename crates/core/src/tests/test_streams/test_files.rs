@@ -116,3 +116,14 @@ fn input_bits_reader_reads_expected_little_endian() {
     return_bits_reader!(reader, stream).unwrap();
 	assert_eq!(bit0, 1);
 }
+
+//////////////////////////////////////////////////
+// ---------- OutputBinaryFileStream ---------- //
+//////////////////////////////////////////////////
+
+#[test]
+fn output_new_works_for_existent_file() {
+	let tmp = TempFile::new("output_missing.bin");
+	let result = OutputBinaryFileStream::new(tmp.path_str());
+	assert!(!result.is_err());
+}

@@ -168,8 +168,8 @@ impl OutputBinaryStream for OutputBinaryFileStream {
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.base.file.set_len(len as u64)?;
+        Ok(())
     }
 }
 

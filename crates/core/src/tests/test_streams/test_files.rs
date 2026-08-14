@@ -258,3 +258,21 @@ fn output_rewind_resets_to_start() {
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
 	assert_eq!(contents, vec![4, 3, 5]);
 }
+
+#[test]
+fn output_bits_writer_writes_expected() {
+	let tmp = TempFile::new("output_bits.bin");
+	tmp.write_initial(&[0; 1]);
+	{
+		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+        let mut writer = obtain_bits_writer!(stream, BigEndian).unwrap();
+		writer.write(1, 1u8).unwrap();
+		writer.write(1, 0u8).unwrap();
+		writer.write(1, 1u8).unwrap();
+		writer.write(1, 1u8).unwrap();
+		writer.write(4, 0u8).unwrap();
+        return_bits_writer!(writer, stream).unwrap();
+	}
+	let contents = std::fs::read(&tmp.path_str()).unwrap();
+	assert_eq!(contents[0], 0b10110000);
+}

@@ -209,8 +209,7 @@ macro_rules! return_bits_reader {
             let mut reader = $reader; // take local ownership, discarding borrow
             reader.byte_align(); // ensure no bits are left in queue
         }
-        $parent.update()?; // force an internal stream update
-        Ok::<(), io::Error>(())
+        $parent.update() // force an internal stream update
     }};
 
     ($reader:expr, $parent:expr, $i:expr) => {{
@@ -218,8 +217,7 @@ macro_rules! return_bits_reader {
             let mut reader = $reader; // take local ownership, discarding borrow
             reader.byte_align(); // ensure no bits are left in queue
         }
-        $parent.update::<i>()?; // force an internal stream update
-        Ok::<(), io::Error>(())
+        $parent.update::<i>() // force an internal stream update
     }};
 }
 
@@ -332,21 +330,23 @@ macro_rules! obtain_bits_writer {
 #[macro_export]
 macro_rules! return_bits_writer {
     ($writer:expr, $parent:expr) => {{
-        {
+        let r1 = {
             let mut writer = $writer; // take local ownership, discarding borrow
-            writer.byte_align()?; // ensure no bits are left in queue
+            writer.byte_align() // ensure no bits are left in queue
+        };
+        if r1.is_err() { r1 } else {
+            $parent.update() // force an internal stream update
         }
-        $parent.update()?; // force an internal stream update
-        Ok::<(), io::Error>(())
     }};
 
     ($writer:expr, $parent:expr, $i:expr) => {{
-        {
+        let r1 = {
             let mut writer = $writer; // take local ownership, discarding borrow
-            writer.byte_align()?; // ensure no bits are left in queue
+            writer.byte_align() // ensure no bits are left in queue
+        };
+        if r1.is_err() { r1 } else {
+            $parent.update::<i>() // force an internal stream update
         }
-        $parent.update::<i>()?; // force an internal stream update
-        Ok::<(), io::Error>(())
     }};
 }
 

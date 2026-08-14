@@ -39,8 +39,8 @@ impl TempFile {
 }
 
 impl Drop for TempFile {
-        fn drop(&mut self) {
-            // delete temp file on scope exit
-            let _ = std::fs::remove_file(&self.path);
-        }
+    fn drop(&mut self) {
+        // delete temp file on scope exit
+        let _ = std::fs::remove_file(&self.path);
     }
+}

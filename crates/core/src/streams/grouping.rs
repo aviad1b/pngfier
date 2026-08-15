@@ -100,8 +100,7 @@ impl<'a, const I: usize, E, N: ArrayLength, S: Streams<N>> UngroupedElemStream<'
     /// Returns constructed instance.
     /// 
     pub fn new(streams: &'a mut S) -> Self {
-        let _ = streams;
-        todo!() // TODO: Implement
+        Self { streams, phantom: PhantomData }
     }
 }
 

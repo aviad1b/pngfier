@@ -75,8 +75,7 @@ for GroupedElemStreams<'a, E, N, S> {
     }
 
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.streams[I].truncate(len)
     }
 }
 

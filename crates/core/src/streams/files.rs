@@ -230,6 +230,9 @@ impl OutputBinaryStream for TwoWayBinaryFileStream {
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
         self.base.file.set_len(len as u64)?;
+        if self.get_pos()? > len {
+            self.set_pos(len)?;
+        }
         Ok(())
     }
 }

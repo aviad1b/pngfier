@@ -8,3 +8,6 @@ mod test_files;
 
 #[cfg(test)]
 mod test_grouping;
+
+#[cfg(test)]
+mod test_elem_spans;

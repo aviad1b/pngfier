@@ -235,20 +235,19 @@ impl<'a, const I: usize, N: ArrayLength, S: Streams<N>> UngroupedBinaryStream<'a
 impl<'a, const I: usize, N: ArrayLength, S: Streams<N>>
 Stream for UngroupedBinaryStream<'a, I, N, S> {
     fn rewind(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.streams.rewind::<I>()
     }
 
     fn get_pos(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams.get_pos::<I>()
     }
 
     fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.streams.set_pos::<I>(pos)
     }
 
     fn get_size(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams.get_size::<I>()
     }
 }
 

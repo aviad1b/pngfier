@@ -137,8 +137,7 @@ OutputElemStream<E> for UngroupedElemStream<'a, I, E, N, S> {
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.streams.truncate::<I>(len)
     }
 }
 

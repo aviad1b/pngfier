@@ -1,5 +1,4 @@
-use super::super::super::streams::traits::*;
-use super::super::super::streams::dummy::*;
+use super::super::super::streams::{traits::*, dummy::*};
 
 ////////////////////////////////////////////////
 // ---------- DummyInputElemStream ---------- //

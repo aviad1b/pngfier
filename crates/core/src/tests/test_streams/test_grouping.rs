@@ -1,10 +1,7 @@
 use bitstream_io::{BigEndian, BitRead, BitWrite};
-use generic_array::GenericArray;
-use generic_array::typenum::U2;
+use generic_array::{GenericArray, typenum::U2};
 
-use super::super::super::streams::grouping::*;
-use super::super::super::streams::traits::*;
-use super::super::super::streams::dummy::*;
+use super::super::super::streams::{grouping::*, traits::*, dummy::*};
 
 //////////////////////////////////////////////////////
 // ---------- GroupedElemStreams (input) ---------- //

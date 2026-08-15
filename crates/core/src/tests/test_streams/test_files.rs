@@ -7,9 +7,10 @@ use crate::{
     return_bits_writer,
 };
 
-use super::super::super::streams::traits::*;
-use super::super::super::streams::files::*;
-use super::utils::TempFile;
+use super::{
+	super::super::streams::{traits::*, files::*},
+	utils::TempFile,
+};
 
 /////////////////////////////////////////////////
 // ---------- InputBinaryFileStream ---------- //

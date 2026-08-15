@@ -65,7 +65,7 @@ impl<'a, E, N: ArrayLength, S: Stream> Streams<N> for GroupedElemStreams<'a, E, 
 impl<'a, E, N: ArrayLength, S: InputElemStream<E>> InputElemStreams<E, N>
 for GroupedElemStreams<'a, E, N, S> {
     fn read_next_elem<const I: usize>(&mut self) -> io::Result<Option<E>> {
-        todo!() // TODO: Implement
+        self.streams[I].read_next_elem()
     }
 }
 

@@ -1,3 +1,4 @@
+use bitstream_io::{BigEndian, BitRead, BitWrite};
 use generic_array::GenericArray;
 use generic_array::typenum::U2;
 
@@ -166,4 +167,42 @@ fn grouped_binary_streams_read_write_correct_index() {
 	let mut buf = [0x00u8; 4];
 	grouped.read_bytes::<0>(&mut buf).unwrap();
 	assert_eq!(buf, [0x01, 0x02, 0x03, 0x04]);
+}
+
+#[test]
+fn grouped_binary_streams_truncate_only_affects_target_index() {
+	let mut s0 = DummyBinaryStream::new(vec![0x01, 0x02, 0x03, 0x04]);
+	let mut s1 = DummyBinaryStream::new(vec![0x05, 0x06, 0x07, 0x08]);
+	let arr: GenericArray<&mut DummyBinaryStream, U2> =
+		GenericArray::from_iter([&mut s0, &mut s1]);
+	let mut grouped = GroupedBinaryStreams::new(arr);
+
+	grouped.truncate::<0>(1).unwrap();
+
+	assert_eq!(grouped.get_size::<0>().unwrap(), 1);
+	assert_eq!(grouped.get_size::<1>().unwrap(), 4);
+}
+
+#[test]
+fn grouped_binary_streams_bits_reader_writer_roundtrip() {
+	let mut s0 = DummyBinaryStream::new(vec![0x00; 1]);
+    let mut underlying = DummyBinaryStream::new(vec![0x00; 1]);
+	let arr: GenericArray<&mut DummyBinaryStream, U2> =
+		GenericArray::from_iter([&mut s0, &mut underlying]);
+	let mut grouped = GroupedBinaryStreams::new(arr);
+
+	{
+		let mut writer = grouped.obtain_bits_writer::<0>(BigEndian).unwrap();
+		writer.write(4, 0b1010u8).unwrap();
+		writer.write(4, 0b0101u8).unwrap();
+		writer.byte_align().unwrap();
+	}
+	grouped.rewind::<0>().unwrap();
+	{
+		let mut reader = grouped.obtain_bits_reader::<0>(BigEndian).unwrap();
+		let high: u8 = reader.read(4).unwrap();
+		let low: u8 = reader.read(4).unwrap();
+		assert_eq!(high, 0b1010);
+		assert_eq!(low, 0b0101);
+	}
 }

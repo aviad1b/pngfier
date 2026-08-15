@@ -338,6 +338,15 @@ fn two_way_truncate_affects_size() {
 }
 
 #[test]
+fn two_way_truncate_moves_cursor_back() {
+    let tmp = TempFile::new("output_truncate_back.bin");
+    let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
+    stream.write_bytes(&[1, 2, 3, 4]).unwrap();
+    stream.truncate(2).unwrap();
+    assert_eq!(stream.get_pos().unwrap(), 2);
+}
+
+#[test]
 fn two_way_bits_reader_and_writer_roundtrip() {
 	let tmp = TempFile::new("two_way_bits.bin");
 	tmp.write_initial(&[0; 1]);

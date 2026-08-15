@@ -45,20 +45,19 @@ impl<'a, E, N: ArrayLength, S: Stream> GroupedElemStreams<'a, E, N, S> {
 
 impl<'a, E, N: ArrayLength, S: Stream> Streams<N> for GroupedElemStreams<'a, E, N, S> {
     fn rewind<const I: usize>(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.streams[I].rewind()
     }
 
     fn get_pos<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams[I].get_pos()
     }
 
     fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.streams[I].set_pos(pos)
     }
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams[I].get_size()
     }
 }
 

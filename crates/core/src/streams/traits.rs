@@ -145,7 +145,7 @@ pub trait InputBinaryStream : Stream {
 /// 
 /// * `N` - Amount of streams in set.
 /// 
-pub trait InputBinaryStreams<N: ArrayLength> : Stream {
+pub trait InputBinaryStreams<N: ArrayLength> : Streams<N> {
     /// Reads bytes from stream.
     /// 
     /// * `I` - Stream index in set.

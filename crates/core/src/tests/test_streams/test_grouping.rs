@@ -15,7 +15,7 @@ fn grouped_elem_streams_read_from_correct_index() {
 	let mut s1 = DummyInputElemStream::new(vec![10, 20, 30]);
 	let arr: GenericArray<&mut DummyInputElemStream<i32>, U2> =
 		GenericArray::from_iter([&mut s0, &mut s1]);
-	let mut grouped = GroupedElemStreams::<i32, U2, _>::new(arr);
+	let mut grouped = GroupedElemStreams::new(arr);
 
 	assert_eq!(grouped.read_next_elem::<0>().unwrap(), Some(1));
 	assert_eq!(grouped.read_next_elem::<1>().unwrap(), Some(10));
@@ -29,7 +29,7 @@ fn grouped_elem_streams_stream_methods_are_per_index() {
 	let mut s1 = DummyInputElemStream::new(vec![10, 20]);
 	let arr: GenericArray<&mut DummyInputElemStream<i32>, U2> =
 		GenericArray::from_iter([&mut s0, &mut s1]);
-	let mut grouped = GroupedElemStreams::<i32, U2, _>::new(arr);
+	let mut grouped = GroupedElemStreams::new(arr);
 
 	assert_eq!(grouped.get_size::<0>().unwrap(), 3);
 	assert_eq!(grouped.get_size::<1>().unwrap(), 2);
@@ -70,7 +70,7 @@ fn grouped_elem_streams_truncate_only_affects_target_index() {
 	let mut s1 = DummyOutputElemStream::new(vec![4, 5, 6]);
 	let arr: GenericArray<&mut DummyOutputElemStream<i32>, U2> =
 		GenericArray::from_iter([&mut s0, &mut s1]);
-	let mut grouped = GroupedElemStreams::<i32, U2, _>::new(arr);
+	let mut grouped = GroupedElemStreams::new(arr);
 
 	grouped.truncate::<0>(1).unwrap();
 

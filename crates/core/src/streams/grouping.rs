@@ -196,20 +196,15 @@ for GroupedBinaryStreams<'a, N, S> {
 impl<'a, N: ArrayLength, S: OutputBinaryStream> OutputBinaryStreams<N>
 for GroupedBinaryStreams<'a, N, S> {
     fn write_bytes<const I: usize>(&mut self, buff: &[u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.streams[I].write_bytes(buff)
     }
 
     fn obtain_bits_writer<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite> {
-        let _ = endianness;
-        Err::<bitstream_io::BitWriter<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        self.streams[I].obtain_bits_writer(endianness)
     }
 
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.streams[I].truncate(len)
     }
 }
 

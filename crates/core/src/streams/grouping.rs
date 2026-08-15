@@ -166,20 +166,19 @@ impl<'a, N: ArrayLength, S: Stream> GroupedBinaryStreams<'a, N, S> {
 
 impl<'a, N: ArrayLength, S: Stream> Streams<N> for GroupedBinaryStreams<'a, N, S> {
     fn rewind<const I: usize>(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.streams[I].rewind()
     }
 
     fn get_pos<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams[I].get_pos()
     }
 
     fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.streams[I].set_pos(pos)
     }
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams[I].get_size()
     }
 }
 

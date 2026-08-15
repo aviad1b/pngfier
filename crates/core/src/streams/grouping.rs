@@ -226,3 +226,83 @@ for GroupedBinaryStreams<'a, N, S> {
         todo!() // TODO: Implement
     }
 }
+
+/// Implementation of binary stream abstractions that simply reference 
+/// one stream out of a set.
+/// 
+/// * `I` - Index of referenced stream in set.
+/// * `N` - Amount of streams in original set.
+/// * `S` - Base streams set type.
+/// 
+pub struct UngroupedBinaryStream<'a, const I: usize, N: ArrayLength, S: Streams<N>> {
+    streams: &'a mut S,
+    phantom: PhantomData<N>,
+}
+
+impl<'a, const I: usize, N: ArrayLength, S: Streams<N>> UngroupedBinaryStream<'a, I, N, S> {
+    /// Constructs a new instance.
+    /// 
+    /// * `streams` - Streams set to reference one stream from (index `I`).
+    /// 
+    /// Returns constructed instance.
+    /// 
+    pub fn new(streams: &'a mut S) -> Self {
+        let _ = streams;
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, const I: usize, N: ArrayLength, S: Streams<N>>
+Stream for UngroupedBinaryStream<'a, I, N, S> {
+    fn rewind(&mut self) -> io::Result<()> {
+        todo!() // TODO: Implement
+    }
+
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+
+    fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
+        let _ = pos;
+        todo!() // TODO: Implement
+    }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, const I: usize, N: ArrayLength, S: InputBinaryStreams<N>>
+InputBinaryStream for UngroupedBinaryStream<'a, I, N, S> {
+    fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
+        let _ = endianness;
+        Err::<bitstream_io::BitReader<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+}
+
+impl<'a, const I: usize, N: ArrayLength, S: OutputBinaryStreams<N>>
+OutputBinaryStream for UngroupedBinaryStream<'a, I, N, S> {
+    fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite> {
+        let _ = endianness;
+        Err::<bitstream_io::BitWriter<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
+        let _ = len;
+        todo!() // TODO: Implement
+    }
+}

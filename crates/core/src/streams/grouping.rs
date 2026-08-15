@@ -134,8 +134,7 @@ InputElemStream<E> for UngroupedElemStream<'a, I, E, N, S> {
 impl<'a, const I: usize, E, N: ArrayLength, S: OutputElemStreams<E, N>>
 OutputElemStream<E> for UngroupedElemStream<'a, I, E, N, S> {
     fn write_next_elem(&mut self, elem: E) -> io::Result<()> {
-        let _ = elem;
-        todo!() // TODO: Implement
+        self.streams.write_next_elem::<I>(elem)
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {

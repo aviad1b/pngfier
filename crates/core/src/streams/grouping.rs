@@ -127,7 +127,7 @@ Stream for UngroupedElemStream<'a, I, E, N, S> {
 impl<'a, const I: usize, E, N: ArrayLength, S: InputElemStreams<E, N>>
 InputElemStream<E> for UngroupedElemStream<'a, I, E, N, S> {
     fn read_next_elem(&mut self) -> io::Result<Option<E>> {
-        todo!() // TODO: Implement
+        self.streams.read_next_elem::<I>()
     }
 }
 

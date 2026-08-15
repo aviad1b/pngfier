@@ -228,8 +228,7 @@ impl<'a, const I: usize, N: ArrayLength, S: Streams<N>> UngroupedBinaryStream<'a
     /// Returns constructed instance.
     /// 
     pub fn new(streams: &'a mut S) -> Self {
-        let _ = streams;
-        todo!() // TODO: Implement
+        Self { streams, phantom: PhantomData }
     }
 }
 

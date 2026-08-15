@@ -6,3 +6,4 @@ pub mod traits;
 pub mod dummy;
 pub mod files;
 pub mod grouping;
+pub mod spans;

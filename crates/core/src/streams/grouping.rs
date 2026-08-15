@@ -254,15 +254,11 @@ Stream for UngroupedBinaryStream<'a, I, N, S> {
 impl<'a, const I: usize, N: ArrayLength, S: InputBinaryStreams<N>>
 InputBinaryStream for UngroupedBinaryStream<'a, I, N, S> {
     fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.streams.read_bytes::<I>(buff)
     }
 
     fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
-        let _ = endianness;
-        Err::<bitstream_io::BitReader<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        self.streams.obtain_bits_reader::<I>(endianness)
     }
 }
 

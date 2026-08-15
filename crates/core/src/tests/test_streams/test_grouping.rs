@@ -164,6 +164,25 @@ fn ungrouped_elem_stream_truncates_only_its_index() {
 	assert_eq!(s1.get_size().unwrap(), 1);
 }
 
+#[test]
+fn ungrouped_elem_stream_write_grows_correctly() {
+    let mut s0 = DummyOutputElemStream::new(vec![]);
+    let mut s1 = DummyOutputElemStream::new(vec![]);
+    let arr: GenericArray<&mut DummyOutputElemStream<i32>, U2> =
+        GenericArray::from_iter([&mut s0, &mut s1]);
+    let mut grouped = GroupedElemStreams::new(arr);
+
+    {
+        let mut ungrouped_0 = UngroupedElemStream::<0, _, _, _>::new(&mut grouped);
+        ungrouped_0.write_next_elem(5).unwrap();
+        ungrouped_0.write_next_elem(6).unwrap();
+        ungrouped_0.write_next_elem(7).unwrap();
+    }
+
+    assert_eq!(s0.get_all(), &[5, 6, 7]);
+    assert_eq!(s1.get_all(), &[] as &[i32]);
+}
+
 ////////////////////////////////////////////////
 // ---------- GroupedBinaryStreams ---------- //
 ////////////////////////////////////////////////

@@ -107,20 +107,19 @@ impl<'a, const I: usize, E, N: ArrayLength, S: Streams<N>> UngroupedElemStream<'
 impl<'a, const I: usize, E, N: ArrayLength, S: Streams<N>>
 Stream for UngroupedElemStream<'a, I, E, N, S> {
     fn rewind(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.streams.rewind::<I>()
     }
 
     fn get_pos(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams.get_pos::<I>()
     }
 
     fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.streams.set_pos::<I>(pos)
     }
 
     fn get_size(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.streams.get_size::<I>()
     }
 }
 

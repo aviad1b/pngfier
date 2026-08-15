@@ -77,3 +77,21 @@ fn grouped_elem_streams_truncate_only_affects_target_index() {
 	assert_eq!(s0.get_all(), &[1]);
 	assert_eq!(s1.get_all(), &[4, 5, 6]);
 }
+
+///////////////////////////////////////////////
+// ---------- UngroupedElemStream ---------- //
+///////////////////////////////////////////////
+
+#[test]
+fn ungrouped_elem_stream_reads_only_its_index() {
+	let mut s0 = DummyInputElemStream::new(vec![1, 2]);
+	let mut s1 = DummyInputElemStream::new(vec![100, 200]);
+	let arr: GenericArray<&mut DummyInputElemStream<i32>, U2> =
+		GenericArray::from_iter([&mut s0, &mut s1]);
+	let mut grouped = GroupedElemStreams::new(arr);
+
+	let mut ungrouped_0 = UngroupedElemStream::<0, _, _, _>::new(&mut grouped);
+	assert_eq!(ungrouped_0.read_next_elem().unwrap(), Some(1));
+	assert_eq!(ungrouped_0.read_next_elem().unwrap(), Some(2));
+	assert_eq!(ungrouped_0.read_next_elem().unwrap(), None);
+}

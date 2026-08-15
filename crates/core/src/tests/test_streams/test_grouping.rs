@@ -79,6 +79,22 @@ fn grouped_elem_streams_truncate_only_affects_target_index() {
 	assert_eq!(s1.get_all(), &[4, 5, 6]);
 }
 
+#[test]
+fn grouped_elem_streams_write_grows_correctly() {
+    let mut s0 = DummyOutputElemStream::new(vec![0x00; 1]);
+    let mut s1 = DummyOutputElemStream::new(vec![0x00; 1]);
+    let arr: GenericArray<&mut DummyOutputElemStream<i32>, U2> =
+        GenericArray::from_iter([&mut s0, &mut s1]);
+    let mut grouped = GroupedElemStreams::new(arr);
+
+    grouped.write_next_elem::<0>(0x01).unwrap(); // overwrite
+    grouped.write_next_elem::<0>(0x02).unwrap(); // grow
+    grouped.write_next_elem::<0>(0x03).unwrap(); // grow
+
+    assert_eq!(s0.get_all(), &[0x01, 0x02, 0x03]);
+    assert_eq!(s1.get_all(), &[0x00]); // untouched
+}
+
 ///////////////////////////////////////////////
 // ---------- UngroupedElemStream ---------- //
 ///////////////////////////////////////////////
@@ -205,20 +221,4 @@ fn grouped_binary_streams_bits_reader_writer_roundtrip() {
 		assert_eq!(high, 0b1010);
 		assert_eq!(low, 0b0101);
 	}
-}
-
-#[test]
-fn grouped_elem_streams_write_grows_correctly() {
-    let mut s0 = DummyOutputElemStream::new(vec![0x00; 1]);
-    let mut s1 = DummyOutputElemStream::new(vec![0x00; 1]);
-    let arr: GenericArray<&mut DummyOutputElemStream<i32>, U2> =
-        GenericArray::from_iter([&mut s0, &mut s1]);
-    let mut grouped = GroupedElemStreams::new(arr);
-
-    grouped.write_next_elem::<0>(0x01).unwrap(); // overwrite
-    grouped.write_next_elem::<0>(0x02).unwrap(); // grow
-    grouped.write_next_elem::<0>(0x03).unwrap(); // grow
-
-    assert_eq!(s0.get_all(), &[0x01, 0x02, 0x03]);
-    assert_eq!(s1.get_all(), &[0x00]); // untouched
 }

@@ -265,19 +265,14 @@ InputBinaryStream for UngroupedBinaryStream<'a, I, N, S> {
 impl<'a, const I: usize, N: ArrayLength, S: OutputBinaryStreams<N>>
 OutputBinaryStream for UngroupedBinaryStream<'a, I, N, S> {
     fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.streams.write_bytes::<I>(buff)
     }
 
     fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite> {
-        let _ = endianness;
-        Err::<bitstream_io::BitWriter<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        self.streams.obtain_bits_writer::<I>(endianness)
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.streams.truncate::<I>(len)
     }
 }

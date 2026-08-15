@@ -200,6 +200,15 @@ fn output_truncate_grows_file() {
 }
 
 #[test]
+fn output_truncate_moves_cursor_back() {
+    let tmp = TempFile::new("output_truncate_back.bin");
+    let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
+    stream.write_bytes(&[1, 2, 3]).unwrap();
+    stream.truncate(2).unwrap();
+    assert_eq!(stream.get_pos().unwrap(), 1);
+}
+
+#[test]
 fn output_set_pos_overwrites_at_offset() {
 	let tmp = TempFile::new("output_set_pos.bin");
 	tmp.write_initial(&[1, 2, 3, 4]);

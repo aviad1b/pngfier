@@ -30,7 +30,7 @@ fn input_new_fails_for_nonexistent_file() {
 #[test]
 fn input_new_opens_existing_file() {
 	let tmp = TempFile::new("input_open.bin");
-	tmp.write_initial(&[1, 2, 3]);
+	tmp.write_initial(&[0x01, 0x02, 0x03]);
 	let stream = InputBinaryFileStream::new(tmp.path_str());
 	assert!(stream.is_ok());
 }
@@ -38,18 +38,18 @@ fn input_new_opens_existing_file() {
 #[test]
 fn input_read_bytes_reads_correct_data() {
 	let tmp = TempFile::new("input_read.bin");
-	tmp.write_initial(&[10, 20, 30, 40]);
+	tmp.write_initial(&[0x0A, 0x0B, 0x0C, 0x0D]);
 	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
 
-	let mut buf = [0_u8; 4];
+	let mut buf = [0x00_u8; 4];
 	stream.read_bytes(&mut buf).unwrap();
-	assert_eq!(buf, [10, 20, 30, 40]);
+	assert_eq!(buf, [0x0A, 0x0B, 0x0C, 0x0D]);
 }
 
 #[test]
 fn input_get_size_reports_file_len_without_moving_pos() {
 	let tmp = TempFile::new("input_size.bin");
-	tmp.write_initial(&[0; 10]);
+	tmp.write_initial(&[0x00; 10]);
 	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
 
 	stream.set_pos(3).unwrap();
@@ -63,31 +63,31 @@ fn input_get_size_reports_file_len_without_moving_pos() {
 #[test]
 fn input_set_pos_and_get_pos_roundtrip() {
 	let tmp = TempFile::new("input_pos.bin");
-	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	tmp.write_initial(&[0x01, 0x02, 0x03, 0x04, 0x05]);
 	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
 
 	stream.set_pos(2).unwrap();
 	assert_eq!(stream.get_pos().unwrap(), 2);
 
-	let mut buf = [0_u8; 2];
+	let mut buf = [0x00_u8; 2];
 	stream.read_bytes(&mut buf).unwrap();
-	assert_eq!(buf, [3, 4]);
+	assert_eq!(buf, [0x03, 0x04]);
 }
 
 #[test]
 fn input_rewind_resets_to_start() {
 	let tmp = TempFile::new("input_rewind.bin");
-	tmp.write_initial(&[7, 8, 9]);
+	tmp.write_initial(&[0x07, 0x08, 0x09]);
 	let mut stream = InputBinaryFileStream::new(tmp.path_str()).unwrap();
 
-	let mut buf = [0_u8; 2];
+	let mut buf = [0x00_u8; 2];
 	stream.read_bytes(&mut buf).unwrap();
 	stream.rewind().unwrap();
 	assert_eq!(stream.get_pos().unwrap(), 0);
 
-	let mut buf2 = [0_u8; 1];
+	let mut buf2 = [0x00_u8; 1];
 	stream.read_bytes(&mut buf2).unwrap();
-	assert_eq!(buf2, [7]);
+	assert_eq!(buf2, [0x07]);
 }
 
 #[test]
@@ -143,28 +143,28 @@ fn output_write_bytes_writes_correct_data() {
 	let tmp = TempFile::new("output_write.bin");
 	{
 		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
-		stream.write_bytes(&[9, 8, 7, 6]).unwrap();
+		stream.write_bytes(&[0x09, 0x08, 0x07, 0x06]).unwrap();
 	}
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
-	assert_eq!(contents, vec![9, 8, 7, 6]);
+	assert_eq!(contents, vec![0x09, 0x08, 0x07, 0x06]);
 }
 
 #[test]
 fn output_write_bytes_overwrites_correct_data() {
 	let tmp = TempFile::new("output_write.bin");
-	tmp.write_initial(&[0; 4]); // pre-create with placeholder content to be overwritten
+	tmp.write_initial(&[0x00; 4]); // pre-create with placeholder content to be overwritten
 	{
 		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
-		stream.write_bytes(&[9, 8, 7, 6]).unwrap();
+		stream.write_bytes(&[0x09, 0x08, 0x07, 0x06]).unwrap();
 	}
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
-	assert_eq!(contents, vec![9, 8, 7, 6]);
+	assert_eq!(contents, vec![0x09, 0x08, 0x07, 0x06]);
 }
 
 #[test]
 fn output_truncate_to_zero_empties_file() {
 	let tmp = TempFile::new("output_truncate_zero.bin");
-	tmp.write_initial(&[1, 2, 3, 4]);
+	tmp.write_initial(&[0x01, 0x02, 0x03, 0x04]);
 	{
 		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
 		stream.truncate(0).unwrap();
@@ -176,34 +176,34 @@ fn output_truncate_to_zero_empties_file() {
 #[test]
 fn output_truncate_shrinks_file() {
 	let tmp = TempFile::new("output_truncate_shrink.bin");
-	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	tmp.write_initial(&[0x01, 0x02, 0x03, 0x04, 0x05]);
 	{
 		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
 		stream.truncate(2).unwrap();
 	}
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
-	assert_eq!(contents, vec![1, 2]);
+	assert_eq!(contents, vec![0x01, 0x02]);
 }
 
 #[test]
 fn output_truncate_grows_file() {
 	let tmp = TempFile::new("output_truncate_grow.bin");
-	tmp.write_initial(&[1, 2]);
+	tmp.write_initial(&[0x01, 0x02]);
 	{
 		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
 		stream.truncate(5).unwrap();
 	}
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
-	assert_eq!(contents[0], 1);
-	assert_eq!(contents[1], 2);
-	assert_eq!(contents.len(), 5);
+	assert_eq!(contents[0], 0x01);
+	assert_eq!(contents[1], 0x02);
+	assert_eq!(contents.len(), 0x05);
 }
 
 #[test]
 fn output_truncate_moves_cursor_back() {
     let tmp = TempFile::new("output_truncate_back.bin");
     let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
-    stream.write_bytes(&[1, 2, 3, 4]).unwrap();
+    stream.write_bytes(&[0x01, 0x02, 0x03, 0x04]).unwrap();
     stream.truncate(2).unwrap();
     assert_eq!(stream.get_pos().unwrap(), 2);
 }
@@ -211,20 +211,20 @@ fn output_truncate_moves_cursor_back() {
 #[test]
 fn output_set_pos_overwrites_at_offset() {
 	let tmp = TempFile::new("output_set_pos.bin");
-	tmp.write_initial(&[1, 2, 3, 4]);
+	tmp.write_initial(&[0x01, 0x02, 0x03, 0x04]);
 	{
 		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
 		stream.set_pos(2).unwrap();
-		stream.write_bytes(&[99, 99]).unwrap();
+		stream.write_bytes(&[0xFF, 0xFF]).unwrap();
 	}
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
-	assert_eq!(contents, vec![1, 2, 99, 99]);
+	assert_eq!(contents, vec![0x01, 0x02, 0xFF, 0xFF]);
 }
 
 #[test]
 fn output_get_size_reports_file_len_without_moving_pos() {
 	let tmp = TempFile::new("input_size.bin");
-	tmp.write_initial(&[0; 10]);
+	tmp.write_initial(&[0x00; 10]);
 	let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
 
 	stream.set_pos(3).unwrap();
@@ -238,40 +238,40 @@ fn output_get_size_reports_file_len_without_moving_pos() {
 #[test]
 fn output_set_pos_and_get_pos_roundtrip() {
 	let tmp = TempFile::new("input_pos.bin");
-	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	tmp.write_initial(&[0x01, 0x02, 0x03, 0x04, 0x05]);
 	let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
 
 	stream.set_pos(2).unwrap();
 	assert_eq!(stream.get_pos().unwrap(), 2);
 
-	let buf = [6, 7];
+	let buf = [0x06, 0x07];
 	stream.write_bytes(&buf).unwrap();
 	
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
-	assert_eq!(contents, vec![1, 2, 6, 7, 5]);
+	assert_eq!(contents, vec![0x01, 0x02, 0x06, 0x07, 0x05]);
 }
 
 #[test]
 fn output_rewind_resets_to_start() {
 	let tmp = TempFile::new("input_rewind.bin");
-	tmp.write_initial(&[7, 8, 5]);
+	tmp.write_initial(&[0x07, 0x08, 0x05]);
 	let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
 
-	let buf1 = [1, 2];
+	let buf1 = [0x01, 0x02];
 	stream.write_bytes(&buf1).unwrap();
 	stream.rewind().unwrap();
 	assert_eq!(stream.get_pos().unwrap(), 0);
-	let buf2 = [4, 3];
+	let buf2 = [0x04, 0x03];
 	stream.write_bytes(&buf2).unwrap();
 
 	let contents = std::fs::read(&tmp.path_str()).unwrap();
-	assert_eq!(contents, vec![4, 3, 5]);
+	assert_eq!(contents, vec![0x04, 0x03, 0x05]);
 }
 
 #[test]
 fn output_bits_writer_writes_expected() {
 	let tmp = TempFile::new("output_bits.bin");
-	tmp.write_initial(&[0; 1]);
+	tmp.write_initial(&[0x00; 1]);
 	{
 		let mut stream = OutputBinaryFileStream::new(tmp.path_str()).unwrap();
         let mut writer = obtain_bits_writer!(stream, BigEndian).unwrap();
@@ -300,37 +300,37 @@ fn two_way_new_fails_for_nonexistent_file() {
 #[test]
 fn two_way_can_write_then_read_back() {
 	let tmp = TempFile::new("two_way_rw.bin");
-	tmp.write_initial(&[0; 4]);
+	tmp.write_initial(&[0x00; 4]);
 	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
 
-	stream.write_bytes(&[1, 2, 3, 4]).unwrap();
+	stream.write_bytes(&[0x01, 0x02, 0x03, 0x04]).unwrap();
 	stream.rewind().unwrap();
 
-	let mut buf = [0u8; 4];
+	let mut buf = [0x00u8; 4];
 	stream.read_bytes(&mut buf).unwrap();
-	assert_eq!(buf, [1, 2, 3, 4]);
+	assert_eq!(buf, [0x01, 0x02, 0x03, 0x04]);
 }
 
 #[test]
 fn two_way_get_pos_tracks_both_read_and_write() {
 	let tmp = TempFile::new("two_way_pos.bin");
-	tmp.write_initial(&[0; 6]);
+	tmp.write_initial(&[0x00; 6]);
 	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
 
-	stream.write_bytes(&[1, 2, 3]).unwrap();
+	stream.write_bytes(&[0x01, 0x02, 0x03]).unwrap();
 	assert_eq!(stream.get_pos().unwrap(), 3);
 
 	stream.rewind().unwrap();
-	let mut buf = [0u8; 2];
+	let mut buf = [0x00u8; 2];
 	stream.read_bytes(&mut buf).unwrap();
 	assert_eq!(stream.get_pos().unwrap(), 2);
-	assert_eq!(buf, [1, 2]);
+	assert_eq!(buf, [0x01, 0x02]);
 }
 
 #[test]
 fn two_way_truncate_affects_size() {
 	let tmp = TempFile::new("two_way_truncate.bin");
-	tmp.write_initial(&[1, 2, 3, 4, 5]);
+	tmp.write_initial(&[0x01, 0x02, 0x03, 0x04, 0x05]);
 	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
 
 	stream.truncate(3).unwrap();
@@ -343,7 +343,7 @@ fn two_way_truncate_moves_cursor_back() {
     tmp.write_initial(&[]); // empty file
 
     let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
-    stream.write_bytes(&[1, 2, 3, 4]).unwrap();
+    stream.write_bytes(&[0x01, 0x02, 0x03, 0x04]).unwrap();
     stream.truncate(2).unwrap();
     assert_eq!(stream.get_pos().unwrap(), 2);
 }
@@ -351,7 +351,7 @@ fn two_way_truncate_moves_cursor_back() {
 #[test]
 fn two_way_bits_reader_and_writer_roundtrip() {
 	let tmp = TempFile::new("two_way_bits.bin");
-	tmp.write_initial(&[0; 1]);
+	tmp.write_initial(&[0x00; 1]);
 	let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
 
 	{

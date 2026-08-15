@@ -340,6 +340,8 @@ fn two_way_truncate_affects_size() {
 #[test]
 fn two_way_truncate_moves_cursor_back() {
     let tmp = TempFile::new("two_way_truncate_back.bin");
+    tmp.write_initial(&[]); // empty file
+
     let mut stream = TwoWayBinaryFileStream::new(tmp.path_str()).unwrap();
     stream.write_bytes(&[1, 2, 3, 4]).unwrap();
     stream.truncate(2).unwrap();

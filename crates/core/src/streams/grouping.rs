@@ -185,15 +185,11 @@ impl<'a, N: ArrayLength, S: Stream> Streams<N> for GroupedBinaryStreams<'a, N, S
 impl<'a, N: ArrayLength, S: InputBinaryStream> InputBinaryStreams<N>
 for GroupedBinaryStreams<'a, N, S> {
     fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.streams[I].read_bytes(buff)
     }
 
     fn obtain_bits_reader<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
-        let _ = endianness;
-        Err::<bitstream_io::BitReader<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        self.streams[I].obtain_bits_reader(endianness)
     }
 }
 

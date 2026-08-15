@@ -5,3 +5,6 @@ mod test_dummy;
 
 #[cfg(test)]
 mod test_files;
+
+#[cfg(test)]
+mod test_grouping;

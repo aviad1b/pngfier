@@ -63,3 +63,17 @@ fn grouped_elem_streams_write_to_correct_index() {
 	assert_eq!(s0.get_all(), &[11, 22]);
 	assert_eq!(s1.get_all(), &[99, 0]);
 }
+
+#[test]
+fn grouped_elem_streams_truncate_only_affects_target_index() {
+	let mut s0 = DummyOutputElemStream::new(vec![1, 2, 3]);
+	let mut s1 = DummyOutputElemStream::new(vec![4, 5, 6]);
+	let arr: GenericArray<&mut DummyOutputElemStream<i32>, U2> =
+		GenericArray::from_iter([&mut s0, &mut s1]);
+	let mut grouped = GroupedElemStreams::<i32, U2, _>::new(arr);
+
+	grouped.truncate::<0>(1).unwrap();
+
+	assert_eq!(s0.get_all(), &[1]);
+	assert_eq!(s1.get_all(), &[4, 5, 6]);
+}

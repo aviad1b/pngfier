@@ -71,8 +71,7 @@ for GroupedElemStreams<'a, E, N, S> {
 impl<'a, E, N: ArrayLength, S: OutputElemStream<E>> OutputElemStreams<E, N>
 for GroupedElemStreams<'a, E, N, S> {
     fn write_next_elem<const I: usize>(&mut self, elem: E) -> io::Result<()> {
-        let _ = elem;
-        todo!() // TODO: Implement
+        self.streams[I].write_next_elem(elem)
     }
 
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {

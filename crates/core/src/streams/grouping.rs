@@ -1,5 +1,6 @@
 use std::{io, marker::PhantomData};
 
+use bitstream_io::{BitRead, BitWrite, Endianness};
 use generic_array::{ArrayLength, GenericArray};
 
 use super::{
@@ -7,6 +8,10 @@ use super::{
     traits::{
         Stream,
         Streams,
+        InputBinaryStream,
+        InputBinaryStreams,
+        OutputBinaryStream,
+        OutputBinaryStreams,
         InputElemStream,
         InputElemStreams,
         OutputElemStream,
@@ -139,6 +144,84 @@ OutputElemStream<E> for UngroupedElemStream<'a, I, E, N, S> {
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
+        let _ = len;
+        todo!() // TODO: Implement
+    }
+}
+
+/// Implementation of binary-stream-set abstractions that simply groups together
+/// a bunch of streams of the same type.
+/// 
+/// * `N` - Amount of streams in set (amount of grouped streams).
+/// * `S` - Base stream type.
+/// 
+pub struct GroupedBinaryStreams<'a, N: ArrayLength, S: Stream> {
+    streams: GenericArray<&'a mut S, N>,
+    phantom: PhantomData<N>,
+}
+
+impl<'a, N: ArrayLength, S: Stream> GroupedBinaryStreams<'a, N, S> {
+    /// Constructs a new instance.
+    /// 
+    /// * `streams` - Array of streams to group together as a set.
+    /// 
+    /// Returns constructed instance.
+    /// 
+    pub fn new(streams: GenericArray<&'a mut S, N>) -> Self {
+        let _ = streams;
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, N: ArrayLength, S: Stream> Streams<N> for GroupedBinaryStreams<'a, N, S> {
+    fn rewind<const I: usize>(&mut self) -> io::Result<()> {
+        todo!() // TODO: Implement
+    }
+
+    fn get_pos<const I: usize>(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+
+    fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()> {
+        let _ = pos;
+        todo!() // TODO: Implement
+    }
+
+    fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, N: ArrayLength, S: InputBinaryStream> InputBinaryStreams<N>
+for GroupedBinaryStreams<'a, N, S> {
+    fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_reader<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
+        let _ = endianness;
+        Err::<bitstream_io::BitReader<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+}
+
+impl<'a, N: ArrayLength, S: OutputBinaryStream> OutputBinaryStreams<N>
+for GroupedBinaryStreams<'a, N, S> {
+    fn write_bytes<const I: usize>(&mut self, buff: &[u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_writer<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite> {
+        let _ = endianness;
+        Err::<bitstream_io::BitWriter<std::fs::File, bitstream_io::LittleEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+
+    fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
         let _ = len;
         todo!() // TODO: Implement
     }

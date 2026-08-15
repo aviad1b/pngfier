@@ -75,3 +75,63 @@ for GroupedElemStreams<'a, E, N, S> {
         todo!() // TODO: Implement
     }
 }
+
+/// Implementation of element-based stream abstractions that simply reference 
+/// one stream out of a set.
+/// 
+/// * `I` - Index of referenced stream in set.
+/// * `E` - Element type.
+/// * `N` - Amount of streams in original set.
+/// * `S` - Base streams set type.
+/// 
+pub struct UngroupedElemStream<'a, const I: usize, E, N: ArrayLength, S: Streams<N>> {
+    streams: &'a mut S,
+    phantom: PhantomData<(E, N)>,
+}
+
+impl<'a, const I: usize, E, N: ArrayLength, S: Streams<N>> UngroupedElemStream<'a, I, E, N, S> {
+    pub fn new(streams: &'a mut S) -> Self {
+        let _ = streams;
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, const I: usize, E, N: ArrayLength, S: Streams<N>>
+Stream for UngroupedElemStream<'a, I, E, N, S> {
+    fn rewind(&mut self) -> io::Result<()> {
+        todo!() // TODO: Implement
+    }
+
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+
+    fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
+        let _ = pos;
+        todo!() // TODO: Implement
+    }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, const I: usize, E, N: ArrayLength, S: InputElemStreams<E, N>>
+InputElemStream<E> for UngroupedElemStream<'a, I, E, N, S> {
+    fn read_next_elem(&mut self) -> io::Result<Option<E>> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, const I: usize, E, N: ArrayLength, S: OutputElemStreams<E, N>>
+OutputElemStream<E> for UngroupedElemStream<'a, I, E, N, S> {
+    fn write_next_elem(&mut self, elem: E) -> io::Result<()> {
+        let _ = elem;
+        todo!() // TODO: Implement
+    }
+
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
+        let _ = len;
+        todo!() // TODO: Implement
+    }
+}

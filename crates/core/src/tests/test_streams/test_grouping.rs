@@ -241,3 +241,48 @@ fn grouped_binary_streams_bits_reader_writer_roundtrip() {
 		assert_eq!(low, 0b0101);
 	}
 }
+
+/////////////////////////////////////////////////
+// ---------- UngroupedBinaryStream ---------- //
+/////////////////////////////////////////////////
+
+#[test]
+fn ungrouped_binary_stream_writes_and_reads_only_its_index() {
+	let mut s0 = DummyBinaryStream::new(vec![0x00; 4]);
+	let mut s1 = DummyBinaryStream::new(vec![0x00; 4]);
+	let arr: GenericArray<&mut DummyBinaryStream, U2> =
+		GenericArray::from_iter([&mut s0, &mut s1]);
+	let mut grouped = GroupedBinaryStreams::new(arr);
+
+	{
+		let mut ungrouped_1 = UngroupedBinaryStream::<1, _, _>::new(&mut grouped);
+		ungrouped_1.write_bytes(&[0x07, 0x07, 0x07, 0x07]).unwrap();
+		ungrouped_1.rewind().unwrap();
+		let mut buf = [0x00u8; 4];
+		ungrouped_1.read_bytes(&mut buf).unwrap();
+		assert_eq!(buf, [0x07, 0x07, 0x07, 0x07]);
+	}
+
+	// Index 0 must remain untouched.
+	assert_eq!(grouped.get_size::<0>().unwrap(), 4);
+	let mut buf0 = [0x00u8; 4];
+	grouped.read_bytes::<0>(&mut buf0).unwrap();
+	assert_eq!(buf0, [0x00, 0x00, 0x00, 0x00]);
+}
+
+#[test]
+fn ungrouped_binary_stream_forwards_truncate() {
+	let mut s0 = DummyBinaryStream::new(vec![0x01, 0x02, 0x03, 0x04]);
+	let mut s1 = DummyBinaryStream::new(vec![0x01, 0x02, 0x03, 0x04]);
+	let arr: GenericArray<&mut DummyBinaryStream, U2> =
+		GenericArray::from_iter([&mut s0, &mut s1]);
+	let mut grouped = GroupedBinaryStreams::new(arr);
+
+	{
+		let mut ungrouped_0 = UngroupedBinaryStream::<0, _, _>::new(&mut grouped);
+		ungrouped_0.truncate(2).unwrap();
+	}
+
+	assert_eq!(grouped.get_size::<0>().unwrap(), 2);
+	assert_eq!(grouped.get_size::<1>().unwrap(), 4);
+}

@@ -90,6 +90,12 @@ pub struct UngroupedElemStream<'a, const I: usize, E, N: ArrayLength, S: Streams
 }
 
 impl<'a, const I: usize, E, N: ArrayLength, S: Streams<N>> UngroupedElemStream<'a, I, E, N, S> {
+    /// Constructs a new instance.
+    /// 
+    /// * `streams` - Streams set to reference one stream from (index `I`).
+    /// 
+    /// Returns constructed instance.
+    /// 
     pub fn new(streams: &'a mut S) -> Self {
         let _ = streams;
         todo!() // TODO: Implement

@@ -31,6 +31,8 @@ impl<'a, E, N: ArrayLength, S: Stream> GroupedElemStreams<'a, E, N, S> {
     /// 
     /// * `streams` - Array of streams to group together as a set.
     /// 
+    /// Returns constructed instance.
+    /// 
     pub fn new(streams: GenericArray<&'a mut S, N>) -> Self {
         let _ = streams;
         todo!() // TODO: Implement

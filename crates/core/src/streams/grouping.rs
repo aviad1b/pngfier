@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{io, marker::PhantomData};
 
 use generic_array::{ArrayLength, GenericArray};
 
@@ -38,39 +38,39 @@ impl<'a, E, N: ArrayLength, S: Stream> GroupedElemStreams<'a, E, N, S> {
 }
 
 impl<'a, E, N: ArrayLength, S: Stream> Streams<N> for GroupedElemStreams<'a, E, N, S> {
-    fn rewind<const I: usize>(&mut self) -> std::io::Result<()> {
+    fn rewind<const I: usize>(&mut self) -> io::Result<()> {
         todo!() // TODO: Implement
     }
 
-    fn get_pos<const I: usize>(&mut self) -> std::io::Result<StreamPos> {
+    fn get_pos<const I: usize>(&mut self) -> io::Result<StreamPos> {
         todo!() // TODO: Implement
     }
 
-    fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> std::io::Result<()> {
+    fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()> {
         let _ = pos;
         todo!() // TODO: Implement
     }
 
-    fn get_size<const I: usize>(&mut self) -> std::io::Result<StreamPos> {
+    fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
         todo!() // TODO: Implement
     }
 }
 
 impl<'a, E, N: ArrayLength, S: InputElemStream<E>> InputElemStreams<E, N>
 for GroupedElemStreams<'a, E, N, S> {
-    fn read_next_elem<const I: usize>(&mut self) -> std::io::Result<Option<E>> {
+    fn read_next_elem<const I: usize>(&mut self) -> io::Result<Option<E>> {
         todo!() // TODO: Implement
     }
 }
 
 impl<'a, E, N: ArrayLength, S: OutputElemStream<E>> OutputElemStreams<E, N>
 for GroupedElemStreams<'a, E, N, S> {
-    fn write_next_elem<const I: usize>(&mut self, elem: E) -> std::io::Result<()> {
+    fn write_next_elem<const I: usize>(&mut self, elem: E) -> io::Result<()> {
         let _ = elem;
         todo!() // TODO: Implement
     }
 
-    fn truncate<const I: usize>(&mut self, len: StreamPos) -> std::io::Result<()> {
+    fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
         let _ = len;
         todo!() // TODO: Implement
     }

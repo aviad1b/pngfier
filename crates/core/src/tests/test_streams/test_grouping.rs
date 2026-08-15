@@ -43,3 +43,23 @@ fn grouped_elem_streams_stream_methods_are_per_index() {
 	grouped.rewind::<0>().unwrap();
 	assert_eq!(grouped.get_pos::<0>().unwrap(), 0);
 }
+
+///////////////////////////////////////////////////////
+// ---------- GroupedElemStreams (output) ---------- //
+///////////////////////////////////////////////////////
+
+#[test]
+fn grouped_elem_streams_write_to_correct_index() {
+	let mut s0 = DummyOutputElemStream::new(vec![0; 2]);
+	let mut s1 = DummyOutputElemStream::new(vec![0; 2]);
+	let arr: GenericArray<&mut DummyOutputElemStream<i32>, U2> =
+		GenericArray::from_iter([&mut s0, &mut s1]);
+	let mut grouped = GroupedElemStreams::new(arr);
+
+	grouped.write_next_elem::<0>(11).unwrap();
+	grouped.write_next_elem::<1>(99).unwrap();
+	grouped.write_next_elem::<0>(22).unwrap();
+
+	assert_eq!(s0.get_all(), &[11, 22]);
+	assert_eq!(s1.get_all(), &[99, 0]);
+}

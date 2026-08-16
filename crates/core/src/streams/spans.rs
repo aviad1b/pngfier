@@ -169,14 +169,14 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> Streams<N> for BinaryEl
 impl<'a, E: ConstBinParsible, S: InputBinaryStream, N: ArrayLength>
 InputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
     fn read_next_elem<const I: usize>(&mut self) -> io::Result<Option<E>> {
-        // if reached end for this span
-        if let Some(byte_end) = self.byte_ends[I] && self.poses[I] >= byte_end {
-            return Ok(None) // nothing to read
-        }
-
         self.ensure_pos::<I>()?;
 
-        let bytes_left = self.stream.get_size()? - self.stream.get_pos()?;
+        let stream_pos = self.stream.get_pos()?;
+        if let Some(byte_end) = self.byte_ends[I] && stream_pos >= byte_end {
+            self.stream.get_pos()?;
+        }
+
+        let bytes_left = self.stream.get_size()? - stream_pos;
         assert!(bytes_left >= 0, "Internal error: Negative byte count in read_next_elem");
 
         if 0 == bytes_left {

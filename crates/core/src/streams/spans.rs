@@ -1,4 +1,4 @@
-use std::{io, marker::PhantomData};
+use std::{cmp, io, marker::PhantomData};
 
 use generic_array::{ArrayLength, GenericArray, functional::FunctionalSequence, typenum::Unsigned};
 
@@ -141,20 +141,28 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
 
 impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> Streams<N> for BinaryElemSpans<'a, E, S, N> {
     fn rewind<const I: usize>(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.set_pos::<I>(0)
     }
 
     fn get_pos<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        Ok(self.poses[I])
     }
 
     fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        let byte_pos = self.pos_local_to_global::<I>(pos);
+        self.stream.set_pos(byte_pos)?;
+        self.poses[I] = pos;
+        Ok(())
     }
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        let max_byte_size = self.byte_ends[I].map(|byte_end| byte_end - self.byte_offsets[I] + 1);
+        let read_byte_size = self.stream.get_size()? - self.byte_offsets[I];
+        let actual_byte_size = max_byte_size.map_or(read_byte_size, |max_byte_size| {
+            cmp::min(read_byte_size, max_byte_size)
+        });
+
+        Ok(actual_byte_size / Self::elem_size())
     }
 }
 

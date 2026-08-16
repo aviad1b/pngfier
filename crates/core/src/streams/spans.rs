@@ -192,12 +192,18 @@ InputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
 impl<'a, E: ConstBinParsible, S: OutputBinaryStream, N: ArrayLength>
 OutputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
     fn write_next_elem<const I: usize>(&mut self, elem: E) -> io::Result<()> {
-        let _ = elem;
-        todo!() // TODO: Implement
+        let mut buff: GenericArray<u8, E::BuffSize> = GenericArray::default();
+        elem.const_bin_unparse(&mut buff);
+        self.stream.write_bytes(buff.as_ref())?;
+        self.update_pos::<I>()?;
+        Ok(())
     }
 
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.byte_ends[I] = Some(self.byte_offsets[I] + len);
+        if self.get_pos::<I>()? > len {
+            self.set_pos::<I>(len)?;
+        }
+        Ok(())
     }
 }

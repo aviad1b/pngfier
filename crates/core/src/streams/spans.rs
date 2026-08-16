@@ -172,8 +172,8 @@ InputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
         self.ensure_pos::<I>()?;
 
         let bytes_left = self.stream.get_size()? - self.stream.get_pos()?;
-        assert!(bytes_left >= 0, "Internal error: negative byte count in read_next_elem");
-        
+        assert!(bytes_left >= 0, "Internal error: Negative byte count in read_next_elem");
+
         if 0 == bytes_left {
             return Ok(None); // nothing to read
         }

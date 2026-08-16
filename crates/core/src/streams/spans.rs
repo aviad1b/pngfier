@@ -1,6 +1,6 @@
 use std::{io, marker::PhantomData};
 
-use generic_array::{ArrayLength, GenericArray};
+use generic_array::{ArrayLength, GenericArray, functional::FunctionalSequence};
 
 use super::{
     StreamPos,
@@ -75,8 +75,15 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
     pub fn new(stream: &'a mut S,
                byte_offsets: GenericArray<Option<StreamPos>, N>,
                byte_ends: GenericArray<Option<StreamPos>, N>) -> Self {
-        let _ = (stream, byte_offsets, byte_ends);
-        todo!() // TODO: Implement
+        let byte_offsets = byte_offsets.map(|byte_offset| byte_offset.map_or(0, |x| x));
+        let poses = byte_offsets.clone();
+        Self {
+            stream,
+            byte_offsets,
+            byte_ends,
+            poses,
+            phantom: PhantomData,
+        }
     }
 
     /// Utility size which returns size of element based on its `ConstBinParsible` implementation.

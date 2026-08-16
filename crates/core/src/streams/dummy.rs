@@ -148,6 +148,11 @@ impl DummyBinaryStream {
     pub fn new(data: Vec<u8>) -> Self {
         Self { cursor: Cursor::new(data) }
     }
+
+    /// Gets slice to all stream bytes.
+    pub fn get_all(&self) -> &[u8] {
+        self.cursor.get_ref()
+    }
 }
 
 impl Stream for DummyBinaryStream {

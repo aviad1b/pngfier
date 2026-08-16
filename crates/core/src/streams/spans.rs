@@ -175,7 +175,7 @@ InputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
 
         let bytes_left = self.get_size::<I>()? * elem_size - base_pos;
         if 0 == bytes_left {
-            return Ok(None) // nothing to read
+            return Ok(None); // nothing to read
         }
 
         if bytes_left < elem_size {

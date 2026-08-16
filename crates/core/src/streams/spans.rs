@@ -76,7 +76,7 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
                byte_offsets: GenericArray<Option<StreamPos>, N>,
                byte_ends: GenericArray<Option<StreamPos>, N>) -> Self {
         let byte_offsets = byte_offsets.map(|byte_offset| byte_offset.map_or(0, |x| x));
-        let poses = byte_offsets.clone();
+        let poses = GenericArray::default(); // all start at local index 0
         Self {
             stream,
             byte_offsets,

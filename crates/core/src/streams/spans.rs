@@ -173,7 +173,7 @@ InputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
 
         let stream_pos = self.stream.get_pos()?;
         if let Some(byte_end) = self.byte_ends[I] && stream_pos >= byte_end {
-            self.stream.get_pos()?;
+            return Ok(None); // nothing to read
         }
 
         let bytes_left = self.stream.get_size()? - stream_pos;

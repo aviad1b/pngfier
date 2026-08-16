@@ -15,6 +15,11 @@ use super::{
     },
 };
 
+/// Makes a generic array of stream pos options from a slice of such.
+pub fn opt_array<N: ArrayLength>(vals: &[Option<StreamPos>]) -> GenericArray<Option<StreamPos>, N> {
+	GenericArray::from_iter(vals.iter().copied())
+}
+
 /// For types that can be constructed from a base stream, a start offset and an end index.
 pub trait ElemSpanConstructible<'a, S: Stream> {
     /// Constructs a new instance.

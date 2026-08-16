@@ -169,7 +169,23 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> Streams<N> for BinaryEl
 impl<'a, E: ConstBinParsible, S: InputBinaryStream, N: ArrayLength>
 InputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
     fn read_next_elem<const I: usize>(&mut self) -> io::Result<Option<E>> {
-        todo!() // TODO: Implement
+        let elem_size = Self::elem_size();
+        self.ensure_pos::<I>()?;
+        let base_pos = self.stream.get_pos()?;
+
+        let bytes_left = self.get_size::<I>()? * elem_size - base_pos;
+        if 0 == bytes_left {
+            return Ok(None) // nothing to read
+        }
+
+        if bytes_left < elem_size {
+            return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Unexpected EOF while reading element"));
+        }
+
+        let mut buff: GenericArray<u8, E::BuffSize> = GenericArray::default();
+        self.stream.read_bytes(buff.as_mut())?;
+        self.update_pos::<I>()?;
+        Ok(Some(E::const_bin_parse(&buff)))
     }
 }
 

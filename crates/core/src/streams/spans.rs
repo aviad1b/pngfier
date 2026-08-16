@@ -199,6 +199,7 @@ OutputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
     fn write_next_elem<const I: usize>(&mut self, elem: E) -> io::Result<()> {
         let mut buff: GenericArray<u8, E::BuffSize> = GenericArray::default();
         elem.const_bin_unparse(&mut buff);
+        self.ensure_pos::<I>()?;
         self.stream.write_bytes(buff.as_ref())?;
         self.update_pos::<I>()?;
         Ok(())

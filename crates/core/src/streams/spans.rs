@@ -1,6 +1,6 @@
 use std::{io, marker::PhantomData};
 
-use generic_array::{ArrayLength, GenericArray, functional::FunctionalSequence};
+use generic_array::{ArrayLength, GenericArray, functional::FunctionalSequence, typenum::Unsigned};
 
 use super::{
     StreamPos,
@@ -88,7 +88,7 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
 
     /// Utility size which returns size of element based on its `ConstBinParsible` implementation.
     fn elem_size() -> StreamPos {
-        todo!() // TODO: Implement
+        E::BuffSize::to_usize() as StreamPos
     }
 
     /// Converts a (global, stream) byte position to a (local, span) element one.
@@ -100,8 +100,7 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
     /// Returns local position (for stream indexed `I`).
     /// 
     fn pos_global_to_local<const I: usize>(&self, byte_pos: StreamPos) -> StreamPos {
-        let _ = byte_pos;
-        todo!() // TODO: Implement
+        (byte_pos - self.byte_offsets[I]) / Self::elem_size()
     }
 
     /// Converts a (local, span) element position to a (global, stream) byte one.
@@ -113,8 +112,7 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
     /// Returns global position (converted from local of stream indexed `I`).
     /// 
     fn pos_local_to_global<const I: usize>(&self, elem_pos: StreamPos) -> StreamPos {
-        let _ = elem_pos;
-        todo!() // TODO: Implement
+        (elem_pos * Self::elem_size()) + self.byte_offsets[I]
     }
 
     /// Updates cached pos to match file pos
@@ -124,7 +122,9 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
     /// Returns error if occurred.
     /// 
     fn update_pos<const I: usize>(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        let byte_pos = self.stream.get_pos()?;
+        self.poses[I] = self.pos_global_to_local::<I>(byte_pos);
+        Ok(())
     }
 
     /// Ensures file pos matches cached pos
@@ -134,7 +134,8 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> BinaryElemSpans<'a, E, 
     /// Returns error if occurred.
     /// 
     fn ensure_pos<const I: usize>(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.set_pos::<I>(self.poses[I])?;
+        Ok(())
     }
 }
 

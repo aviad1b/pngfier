@@ -11,3 +11,6 @@ mod test_grouping;
 
 #[cfg(test)]
 mod test_elem_spans;
+
+#[cfg(test)]
+mod test_elem_span;

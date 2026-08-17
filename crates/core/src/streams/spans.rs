@@ -27,39 +27,6 @@ pub fn opt_array<N: ArrayLength>(vals: &[Option<StreamPos>]) -> GenericArray<Opt
 	GenericArray::from_iter(vals.iter().copied())
 }
 
-/// For types that can be constructed from a base stream, a start offset and an end index.
-pub trait ElemSpanConstructible<'a, S: Stream> {
-    /// Constructs a new instance.
-    /// 
-    /// * `stream` - Base stream.
-    /// * `byte_offset` - Optional starting byte offset index.
-    /// * `byte_end` - Optional ending byte index.
-    /// Resulting instance will read `stream` in range [byte_offset,byte_end).
-    /// 
-    /// Returns constructed instance.
-    /// 
-    fn new(stream: &'a mut S,
-           byte_offset: Option<StreamPos>,
-           byte_end: Option<StreamPos>) -> Self;
-}
-
-/// For types that can be constructed from a base stream, start offsets and an end indexes.
-/// Used for having multiple spans over the same base stream.
-pub trait ElemSpansConstructible<'a, S: Stream, N: ArrayLength> {
-    /// Constructs a new instance.
-    /// 
-    /// * `stream` - Base stream.
-    /// * `byte_offsets` - Optional starting byte offset index for each span in the set.
-    /// * `byte_ends` - Optional ending byte index for each span in the set.
-    /// Resulting spans in set will each read `stream` in range [byte_offset,byte_end).
-    /// 
-    /// Returns constructed instance.
-    /// 
-    fn new(stream: &'a mut S,
-           byte_offsets: GenericArray<Option<StreamPos>, N>,
-           byte_ends: GenericArray<Option<StreamPos>, N>) -> Self;
-}
-
 /// Reads spans of elements over a binary stream.
 pub struct BinaryElemSpans<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> {
     stream: &'a mut S,

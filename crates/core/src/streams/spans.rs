@@ -4,7 +4,7 @@ use generic_array::{
     ArrayLength,
     GenericArray,
     functional::FunctionalSequence,
-    typenum::{U1, Unsigned}
+    typenum::{U1, Unsigned},
 };
 
 use super::{

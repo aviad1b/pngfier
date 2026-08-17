@@ -1,14 +1,16 @@
 use std::{cmp, io, marker::PhantomData};
 
-use generic_array::{ArrayLength, GenericArray, functional::FunctionalSequence, typenum::Unsigned};
+use generic_array::{ArrayLength, GenericArray, functional::FunctionalSequence, typenum::{U1, Unsigned}};
 
 use super::{
     StreamPos,
     traits::{
         ConstBinParsible,
         InputBinaryStream,
+        InputElemStream,
         InputElemStreams,
         OutputBinaryStream,
+        OutputElemStream,
         OutputElemStreams,
         Stream,
         Streams
@@ -211,5 +213,65 @@ OutputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
             self.set_pos::<I>(len)?;
         }
         Ok(())
+    }
+}
+
+/// Reads a span of elements over a binary stream.
+pub struct BinaryElemSpan<'a, E: ConstBinParsible, S: Stream> {
+    base: BinaryElemSpans<'a, E, S, U1>,
+}
+
+impl<'a, E: ConstBinParsible, S: Stream> BinaryElemSpan<'a, E, S> {
+    /// Constructs a new instance.
+    /// 
+    /// * `stream` - Base binary stream.
+    /// * `byte_offset` - Optional starting byte offset index.
+    /// * `byte_end` - Optional ending byte index.
+    /// Resulting span will read `stream` in range [byte_offset,byte_end).
+    /// 
+    /// Returns constructed instance.
+    /// 
+    pub fn new(stream: &'a mut S,
+               byte_offset: Option<StreamPos>,
+               byte_end: Option<StreamPos>) -> Self {
+        let _ = (stream, byte_offset, byte_end);
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, E: ConstBinParsible, S: Stream> Stream for BinaryElemSpan<'a, E, S> {
+    fn rewind(&mut self) -> io::Result<()> {
+        todo!() // TODO: Implement
+    }
+
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+
+    fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
+        let _ = pos;
+        todo!() // TODO: Implement
+    }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, E: ConstBinParsible, S: InputBinaryStream> InputElemStream<E> for BinaryElemSpan<'a, E, S> {
+    fn read_next_elem(&mut self) -> io::Result<Option<E>> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, E: ConstBinParsible, S: OutputBinaryStream> OutputElemStream<E> for BinaryElemSpan<'a, E, S> {
+    fn write_next_elem(&mut self, elem: E) -> io::Result<()> {
+        let _ = elem;
+        todo!() // TODO: Implement
+    }
+
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
+        let _ = len;
+        todo!() // TODO: Implement
     }
 }

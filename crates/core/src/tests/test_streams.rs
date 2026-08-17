@@ -10,4 +10,4 @@ mod test_files;
 mod test_grouping;
 
 #[cfg(test)]
-mod test_spans;
+mod test_elem_spans;

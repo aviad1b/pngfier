@@ -234,44 +234,46 @@ impl<'a, E: ConstBinParsible, S: Stream> BinaryElemSpan<'a, E, S> {
     pub fn new(stream: &'a mut S,
                byte_offset: Option<StreamPos>,
                byte_end: Option<StreamPos>) -> Self {
-        let _ = (stream, byte_offset, byte_end);
-        todo!() // TODO: Implement
+        Self {
+			base: BinaryElemSpans::new(
+				stream,
+                GenericArray::from_array([byte_offset]),
+				GenericArray::from_array([byte_end]),
+			)
+		}
     }
 }
 
 impl<'a, E: ConstBinParsible, S: Stream> Stream for BinaryElemSpan<'a, E, S> {
     fn rewind(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.base.rewind::<0>()
     }
 
     fn get_pos(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_pos::<0>()
     }
 
     fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
-        let _ = pos;
-        todo!() // TODO: Implement
+        self.base.set_pos::<0>(pos)
     }
 
     fn get_size(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        self.base.get_size::<0>()
     }
 }
 
 impl<'a, E: ConstBinParsible, S: InputBinaryStream> InputElemStream<E> for BinaryElemSpan<'a, E, S> {
     fn read_next_elem(&mut self) -> io::Result<Option<E>> {
-        todo!() // TODO: Implement
+        self.base.read_next_elem::<0>()
     }
 }
 
 impl<'a, E: ConstBinParsible, S: OutputBinaryStream> OutputElemStream<E> for BinaryElemSpan<'a, E, S> {
     fn write_next_elem(&mut self, elem: E) -> io::Result<()> {
-        let _ = elem;
-        todo!() // TODO: Implement
+        self.base.write_next_elem::<0>(elem)
     }
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.base.truncate::<0>(len)
     }
 }

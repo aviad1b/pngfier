@@ -1,6 +1,11 @@
 use std::{cmp, io, marker::PhantomData};
 
-use generic_array::{ArrayLength, GenericArray, functional::FunctionalSequence, typenum::{U1, Unsigned}};
+use generic_array::{
+    ArrayLength,
+    GenericArray,
+    functional::FunctionalSequence,
+    typenum::{U1, Unsigned}
+};
 
 use super::{
     StreamPos,

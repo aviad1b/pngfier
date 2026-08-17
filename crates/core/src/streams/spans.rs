@@ -53,7 +53,7 @@ pub trait ElemSpansConstructible<'a, S: Stream, N: ArrayLength> {
            byte_ends: GenericArray<Option<StreamPos>, N>) -> Self;
 }
 
-/// Reads a span of elements over a binary stream.
+/// Reads spans of elements over a binary stream.
 pub struct BinaryElemSpans<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> {
     stream: &'a mut S,
     byte_offsets: GenericArray<StreamPos, N>,

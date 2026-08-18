@@ -334,51 +334,62 @@ impl<'a, S: Stream, N: ArrayLength> BinarySpans<'a, S, N> {
 
 impl<'a, S: Stream, N: ArrayLength> Streams<N> for BinarySpans<'a, S, N> {
     fn rewind<const I: usize>(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.set_pos::<I>(0)
     }
 
     fn get_pos<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        Ok(self.poses[I])
     }
 
     fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()> {
-        todo!() // TODO: Implement
+        let global_pos = self.pos_local_to_global::<I>(pos);
+        self.stream.set_pos(global_pos)?;
+        self.poses[I] = pos;
+        Ok(())
     }
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        todo!() // TODO: Implement
+        let max_size = self.ends[I].map(|byte_end| byte_end - self.offsets[I] + 1);
+        let read_size = self.stream.get_size()? - self.offsets[I];
+        let actual_size = max_size.map_or(read_size, |max_size| {
+            cmp::min(read_size, max_size)
+        });
+
+        Ok(actual_size)
     }
 }
 
 impl<'a, S: InputBinaryStream, N: ArrayLength> InputBinaryStreams<N> for BinarySpans<'a, S, N> {
     fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.ensure_pos::<I>()?;
+        self.stream.read_bytes(buff)?;
+        self.update_pos::<I>()?;
+        Ok(())
     }
 
     fn obtain_bits_reader<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
-        let _ = endianness;
-        Err::<bitstream_io::BitReader<std::fs::File, bitstream_io::BigEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        self.ensure_pos::<I>()?;
+        self.stream.obtain_bits_reader(endianness)
     }
 }
 
 impl<'a, S: OutputBinaryStream, N: ArrayLength> OutputBinaryStreams<N> for BinarySpans<'a, S, N> {
     fn write_bytes<const I: usize>(&mut self, buff: &[u8]) -> io::Result<()> {
-        let _ = buff;
-        todo!() // TODO: Implement
+        self.ensure_pos::<I>()?;
+        self.stream.write_bytes(buff)?;
+        self.update_pos::<I>()?;
+        Ok(())
     }
 
     fn obtain_bits_writer<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite> {
-        let _ = endianness;
-        Err::<bitstream_io::BitWriter<std::fs::File, bitstream_io::BigEndian>, io::Error>(
-            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
-        ) // TODO: Implement
+        self.ensure_pos::<I>()?;
+        self.stream.obtain_bits_writer(endianness)
     }
 
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
-        let _ = len;
-        todo!() // TODO: Implement
+        self.ensure_pos::<I>()?;
+        self.stream.truncate(len)?;
+        self.update_pos::<I>()?;
+        Ok(())
     }
 }

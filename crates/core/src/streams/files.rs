@@ -9,7 +9,7 @@ use super::{
     traits::{
         InputBinaryStream,
         OutputBinaryStream,
-        Stream
+        Stream,
     }
 };
 

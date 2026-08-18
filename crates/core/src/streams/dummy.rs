@@ -16,7 +16,7 @@ use super::{
 /// Dummy implementation of `InputElemStream` trait, uses runtime vector.
 pub struct DummyInputElemStream<E: Copy> {
     elems: Vec<E>,
-    pos: StreamPos
+    pos: StreamPos,
 }
 
 impl<E: Copy> DummyInputElemStream<E> {
@@ -68,7 +68,7 @@ impl<E: Copy> InputElemStream<E> for DummyInputElemStream<E> {
 /// Dummy implementation of `OutputElemStream` trait, uses runtime vector.
 pub struct DummyOutputElemStream<E: Copy> {
     elems: Vec<E>,
-    pos: StreamPos
+    pos: StreamPos,
 }
 
 impl<E: Copy> DummyOutputElemStream<E> {

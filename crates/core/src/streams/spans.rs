@@ -21,7 +21,7 @@ use super::{
         OutputElemStream,
         OutputElemStreams,
         Stream,
-        Streams
+        Streams,
     },
 };
 

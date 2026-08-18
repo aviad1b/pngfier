@@ -17,3 +17,6 @@ mod test_elem_span;
 
 #[cfg(test)]
 mod test_binary_spans;
+
+#[cfg(test)]
+mod test_binary_span;

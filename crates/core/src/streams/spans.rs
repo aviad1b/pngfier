@@ -253,6 +253,7 @@ impl<'a, E: ConstBinParsible, S: OutputBinaryStream> OutputElemStream<E> for Bin
     }
 }
 
+/// Reads spans of bytes over a binary stream.
 pub struct BinarySpans<'a, S: Stream, N: ArrayLength> {
     stream: &'a mut S,
     offsets: GenericArray<StreamPos, N>,

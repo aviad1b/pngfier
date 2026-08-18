@@ -393,9 +393,10 @@ impl<'a, S: OutputBinaryStream, N: ArrayLength> OutputBinaryStreams<N> for Binar
     }
 
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
-        self.ensure_pos::<I>()?;
-        self.stream.truncate(len)?;
-        self.update_pos::<I>()?;
+        self.ends[I] = Some(self.offsets[I] + len);
+        if self.get_pos::<I>()? > len {
+            self.set_pos::<I>(len)?;
+        }
         Ok(())
     }
 }

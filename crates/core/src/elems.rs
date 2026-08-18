@@ -1,6 +1,6 @@
 use std::{collections::HashSet, hash::Hash, io};
 
-use generic_array::{ArrayLength, GenericArray};
+use generic_array::{ArrayLength, GenericArray, typenum::U256};
 
 use crate::streams::traits::ConstBinParsible;
 
@@ -12,6 +12,14 @@ pub trait Elem : Eq + Copy + ConstBinParsible {
 
     /// Converts element to an index for an array/matrix/etc.
     fn as_index(&self) -> usize;
+}
+
+impl Elem for u8 {
+    type N = U256;
+
+    fn as_index(&self) -> usize {
+        *self as usize
+    }
 }
 
 /// A slot in a matrix of index sets mapped by elements.

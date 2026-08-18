@@ -1,5 +1,6 @@
 use std::{cmp, io, marker::PhantomData};
 
+use bitstream_io::{BitRead, BitWrite, Endianness};
 use generic_array::{
     ArrayLength,
     GenericArray,
@@ -12,9 +13,11 @@ use super::{
     traits::{
         ConstBinParsible,
         InputBinaryStream,
+        InputBinaryStreams,
         InputElemStream,
         InputElemStreams,
         OutputBinaryStream,
+        OutputBinaryStreams,
         OutputElemStream,
         OutputElemStreams,
         Stream,
@@ -247,5 +250,134 @@ impl<'a, E: ConstBinParsible, S: OutputBinaryStream> OutputElemStream<E> for Bin
 
     fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
         self.base.truncate::<0>(len)
+    }
+}
+
+pub struct BinarySpans<'a, S: Stream, N: ArrayLength> {
+    stream: &'a mut S,
+    offsets: GenericArray<StreamPos, N>,
+    ends: GenericArray<Option<StreamPos>, N>, // non-inclusive
+    poses: GenericArray<StreamPos, N>,
+}
+
+impl<'a, S: Stream, N: ArrayLength> BinarySpans<'a, S, N> {
+    /// Constructs a new instance.
+    /// 
+    /// * `stream` - Base binary stream.
+    /// * `byte_offsets` - Optional starting byte offset index for each span in the set.
+    /// * `byte_ends` - Optional ending byte index for each span in the set.
+    /// Resulting spans in set will each read `stream` in range [byte_offset,byte_end).
+    /// 
+    /// Returns constructed instance.
+    /// 
+    pub fn new(stream: &'a mut S,
+               offsets: GenericArray<Option<StreamPos>, N>,
+               ends: GenericArray<Option<StreamPos>, N>) -> Self {
+        let offsets = offsets.map(|byte_offset| byte_offset.map_or(0, |x| x));
+        let poses = GenericArray::default(); // all start at local index 0
+        Self {
+            stream,
+            offsets,
+            ends,
+            poses,
+        }
+    }
+
+    /// Converts a global (stream) position to a local (span) one.
+    /// 
+    /// * `I` - Span index in set.
+    /// 
+    /// * `global_pos` - Global position to convert to a local one.
+    /// 
+    /// Returns local position (for stream indexed `I`).
+    /// 
+    fn pos_global_to_local<const I: usize>(&self, global_pos: StreamPos) -> StreamPos {
+        global_pos - self.offsets[I]
+    }
+
+    /// Converts a local (span) position to a global (stream) one.
+    /// 
+    /// * `I` - Span index in set.
+    /// 
+    /// * `local_pos` - Local position to convert to a global one.
+    /// 
+    /// Returns global position (converted from local of stream indexed `I`).
+    /// 
+    fn pos_local_to_global<const I: usize>(&self, local_pos: StreamPos) -> StreamPos {
+        local_pos + self.offsets[I]
+    }
+
+    /// Updates cached pos to match file pos
+    /// 
+    /// * `I` - Span index in set.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn update_pos<const I: usize>(&mut self) -> io::Result<()> {
+        let global_pos = self.stream.get_pos()?;
+        self.poses[I] = self.pos_global_to_local::<I>(global_pos);
+        Ok(())
+    }
+
+    /// Ensures file pos matches cached pos
+    /// 
+    /// * `I` - Span index in set.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn ensure_pos<const I: usize>(&mut self) -> io::Result<()> {
+        self.set_pos::<I>(self.poses[I])?;
+        Ok(())
+    }
+}
+
+impl<'a, S: Stream, N: ArrayLength> Streams<N> for BinarySpans<'a, S, N> {
+    fn rewind<const I: usize>(&mut self) -> io::Result<()> {
+        todo!() // TODO: Implement
+    }
+
+    fn get_pos<const I: usize>(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+
+    fn set_pos<const I: usize>(&mut self, pos: StreamPos) -> io::Result<()> {
+        todo!() // TODO: Implement
+    }
+
+    fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, S: InputBinaryStream, N: ArrayLength> InputBinaryStreams<N> for BinarySpans<'a, S, N> {
+    fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_reader<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
+        let _ = endianness;
+        Err::<bitstream_io::BitReader<std::fs::File, bitstream_io::BigEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+}
+
+impl<'a, S: OutputBinaryStream, N: ArrayLength> OutputBinaryStreams<N> for BinarySpans<'a, S, N> {
+    fn write_bytes<const I: usize>(&mut self, buff: &[u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_writer<const I: usize>(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite> {
+        let _ = endianness;
+        Err::<bitstream_io::BitWriter<std::fs::File, bitstream_io::BigEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+
+    fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
+        let _ = len;
+        todo!() // TODO: Implement
     }
 }

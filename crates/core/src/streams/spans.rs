@@ -133,7 +133,7 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> Streams<N> for BinaryEl
     }
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        let max_byte_size = self.byte_ends[I].map(|byte_end| byte_end - self.byte_offsets[I] + 1);
+        let max_byte_size = self.byte_ends[I].map(|byte_end| byte_end - self.byte_offsets[I]);
         let read_byte_size = self.stream.get_size()? - self.byte_offsets[I];
         let actual_byte_size = max_byte_size.map_or(read_byte_size, |max_byte_size| {
             cmp::min(read_byte_size, max_byte_size)

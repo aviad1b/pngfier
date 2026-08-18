@@ -186,7 +186,7 @@ macro_rules! obtain_bits_reader {
     };
 
     ($stream:expr, $endianness:expr, $i:expr) => {
-        $stream.obtain_bits_reader::<i>($endianness)
+        $stream.obtain_bits_reader::<$i>($endianness)
     };
 }
 
@@ -217,7 +217,7 @@ macro_rules! return_bits_reader {
             let mut reader = $reader; // take local ownership, discarding borrow
             reader.byte_align(); // ensure no bits are left in queue
         }
-        $parent.update::<i>() // force an internal stream update
+        $parent.update::<$i>() // force an internal stream update
     }};
 }
 

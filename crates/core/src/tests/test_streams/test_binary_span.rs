@@ -95,7 +95,7 @@ fn explicit_end_stops_before_trailing_bytes() {
 
 	// eading beyond the span's end must fail even though the
 	// underlying stream still has more bytes
-	let mut extra = [0u8; 1];
+	let mut extra = [0x00u8; 1];
 	let result = span.read_bytes(&mut extra);
 	assert!(result.is_err());
 }

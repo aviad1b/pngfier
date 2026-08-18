@@ -265,8 +265,8 @@ impl<'a, S: Stream, N: ArrayLength> BinarySpans<'a, S, N> {
     /// Constructs a new instance.
     /// 
     /// * `stream` - Base binary stream.
-    /// * `byte_offsets` - Optional starting byte offset index for each span in the set.
-    /// * `byte_ends` - Optional ending byte index for each span in the set.
+    /// * `offsets` - Optional starting byte offset index for each span in the set.
+    /// * `ends` - Optional ending byte index for each span in the set.
     /// Resulting spans in set will each read `stream` in range [byte_offset,byte_end).
     /// 
     /// Returns constructed instance.

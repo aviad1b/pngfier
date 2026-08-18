@@ -183,7 +183,7 @@ OutputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
     }
 
     fn truncate<const I: usize>(&mut self, len: StreamPos) -> io::Result<()> {
-        self.byte_ends[I] = Some(self.byte_offsets[I] + len);
+        self.byte_ends[I] = Some(self.byte_offsets[I] + len * Self::elem_size());
         if self.get_pos::<I>()? > len {
             self.set_pos::<I>(len)?;
         }

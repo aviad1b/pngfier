@@ -1,6 +1,13 @@
 use bitstream_io::{BigEndian, BitRead, BitWrite};
 use generic_array::{GenericArray, typenum::U2};
 
+use crate::{
+    obtain_bits_reader,
+    obtain_bits_writer,
+    return_bits_reader,
+    return_bits_writer,
+};
+
 use super::super::super::streams::{grouping::*, traits::*, dummy::*};
 
 //////////////////////////////////////////////////////
@@ -224,16 +231,17 @@ fn grouped_binary_streams_bits_reader_writer_roundtrip() {
 	let mut grouped = GroupedBinaryStreams::new(arr);
 
 	{
-		let mut writer = grouped.obtain_bits_writer::<0>(BigEndian).unwrap();
+		let mut writer = obtain_bits_writer!(grouped, BigEndian, 0).unwrap();
 		writer.write(4, 0b1010u8).unwrap();
 		writer.write(4, 0b0101u8).unwrap();
-		writer.byte_align().unwrap();
+		return_bits_writer!(writer, grouped, 0).unwrap();
 	}
 	grouped.rewind::<0>().unwrap();
 	{
-		let mut reader = grouped.obtain_bits_reader::<0>(BigEndian).unwrap();
+		let mut reader = obtain_bits_reader!(grouped, BigEndian, 0).unwrap();
 		let high: u8 = reader.read(4).unwrap();
 		let low: u8 = reader.read(4).unwrap();
+		return_bits_reader!(reader, grouped, 0).unwrap();
 		assert_eq!(high, 0b1010);
 		assert_eq!(low, 0b0101);
 	}

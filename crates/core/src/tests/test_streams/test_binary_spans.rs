@@ -3,6 +3,13 @@ use std::io;
 use bitstream_io::{BigEndian, BitRead, BitWrite};
 use generic_array::typenum::{U1, U2};
 
+use crate::{
+    obtain_bits_reader,
+    obtain_bits_writer,
+    return_bits_reader,
+    return_bits_writer,
+};
+
 use super::super::super::streams::{spans::*, traits::*, dummy::*};
 
 /////////////////////////////////////////////////////////////////
@@ -276,10 +283,11 @@ fn bits_reader_reads_from_span_offset_not_stream_start() {
 	let ends = opt_array::<U1>(&[None]);
 	let mut spans = BinarySpans::<_, U1>::new(&mut stream, offsets, ends);
 
-	let mut reader = spans.obtain_bits_reader::<0>(BigEndian).unwrap();
+	let mut reader = obtain_bits_reader!(spans, BigEndian, 0).unwrap();
 	let bit0: u8 = reader.read(1).unwrap();
 	let bit1: u8 = reader.read(1).unwrap();
 	let bit2: u8 = reader.read(1).unwrap();
+	return_bits_reader!(reader, spans, 0).unwrap();
 	assert_eq!((bit0, bit1, bit2), (1, 0, 1));
 }
 
@@ -291,10 +299,10 @@ fn bits_writer_writes_within_span_bounds() {
 	let mut spans = BinarySpans::<_, U1>::new(&mut stream, offsets, ends);
 
 	{
-		let mut writer = spans.obtain_bits_writer::<0>(BigEndian).unwrap();
+		let mut writer = obtain_bits_writer!(spans, BigEndian, 0).unwrap();
 		writer.write(0x04, 0b1010u8).unwrap();
 		writer.write(0x04, 0b0101u8).unwrap();
-		writer.byte_align().unwrap();
+		return_bits_writer!(writer, spans, 0).unwrap();
 	}
 
 	// the leading junk byte (span offset) must remain untouched.

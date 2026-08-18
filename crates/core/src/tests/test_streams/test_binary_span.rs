@@ -2,6 +2,13 @@ use std::io;
 
 use bitstream_io::{BigEndian, BitRead, BitWrite};
 
+use crate::{
+    obtain_bits_reader,
+    obtain_bits_writer,
+    return_bits_reader,
+    return_bits_writer,
+};
+
 use super::super::super::streams::{spans::*, traits::*, dummy::*};
 
 ////////////////////////////////////////////////////////////////////////
@@ -185,10 +192,11 @@ fn bits_reader_reads_from_span_offset_not_stream_start() {
 	let mut stream = DummyBinaryStream::new(vec![0xFF, 0b10110000]);
 	let mut span = BinarySpan::new(&mut stream, Some(1), None);
 
-	let mut reader = span.obtain_bits_reader(BigEndian).unwrap();
+	let mut reader = obtain_bits_reader!(span, BigEndian).unwrap();
 	let bit0: u8 = reader.read(1).unwrap();
 	let bit1: u8 = reader.read(1).unwrap();
 	let bit2: u8 = reader.read(1).unwrap();
+	return_bits_reader!(reader, span).unwrap();
 	assert_eq!((bit0, bit1, bit2), (1, 0, 1));
 }
 
@@ -198,10 +206,10 @@ fn bits_writer_writes_within_span_bounds() {
 	let mut span = BinarySpan::new(&mut stream, Some(1), None);
 
 	{
-		let mut writer = span.obtain_bits_writer(BigEndian).unwrap();
+		let mut writer = obtain_bits_writer!(span, BigEndian).unwrap();
 		writer.write(4, 0b1010u8).unwrap();
 		writer.write(4, 0b0101u8).unwrap();
-		writer.byte_align().unwrap();
+		return_bits_writer!(writer, span).unwrap();
 	}
 
 	// The leading junk byte (span offset) must remain untouched.

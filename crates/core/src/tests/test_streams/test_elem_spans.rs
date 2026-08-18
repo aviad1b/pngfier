@@ -221,8 +221,8 @@ fn truncate_shrinks_span_element_count() {
 #[test]
 fn truncate_on_one_span_does_not_affect_sibling_span() {
 	let mut stream = DummyBinaryStream::new(vec![
-		0x00, 0x01, 0x00, 0x02, 0, 3, // span0: 3 elems, bytes [0,6)
-		0x00, 0x09, 0x00, 0x08,       // span1: 2 elems, bytes [6,10)
+		0x00, 0x01, 0x00, 0x02, 0x00, 0x03, // span0: 3 elems, bytes [0,6)
+		0x00, 0x09, 0x00, 0x08,             // span1: 2 elems, bytes [6,10)
 	]);
 	let offsets = opt_array::<U2>(&[Some(0), Some(6)]);
 	let ends = opt_array::<U2>(&[Some(6), Some(10)]);

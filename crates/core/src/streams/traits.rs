@@ -311,7 +311,7 @@ macro_rules! obtain_bits_writer {
     };
 
     ($stream:expr, $endianness:expr, $i:expr) => {
-        $stream.obtain_bits_writer::<i>($endianness)
+        $stream.obtain_bits_writer::<$i>($endianness)
     };
 }
 
@@ -345,7 +345,7 @@ macro_rules! return_bits_writer {
             writer.byte_align() // ensure no bits are left in queue
         };
         if r1.is_err() { r1 } else {
-            $parent.update::<i>() // force an internal stream update
+            $parent.update::<$i>() // force an internal stream update
         }
     }};
 }

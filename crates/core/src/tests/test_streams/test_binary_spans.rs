@@ -270,7 +270,7 @@ fn truncate_on_one_span_does_not_affect_sibling_span() {
 
 #[test]
 fn bits_reader_reads_from_span_offset_not_stream_start() {
-	// leading junk byte, then 0b10110000 at the span's start.
+	// leading junk byte, then 0b10110000 at the span's start
 	let mut stream = DummyBinaryStream::new(vec![0xFF, 0b10110000]);
 	let offsets = opt_array::<U1>(&[Some(1)]);
 	let ends = opt_array::<U1>(&[None]);

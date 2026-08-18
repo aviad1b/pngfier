@@ -400,3 +400,76 @@ impl<'a, S: OutputBinaryStream, N: ArrayLength> OutputBinaryStreams<N> for Binar
         Ok(())
     }
 }
+
+/// Reads a span of bytes over a binary stream.
+pub struct BinarySpan<'a, S: Stream> {
+	base: BinarySpans<'a, S, U1>,
+}
+
+impl<'a, S: Stream> BinarySpan<'a, S> {
+    /// Constructs a new instance.
+    /// 
+    /// * `stream` - Base binary stream.
+    /// * `offset` - Optional starting byte offset index.
+    /// * `end` - Optional ending byte index.
+    /// Resulting span will read `stream` in range [byte_offset,byte_end).
+    /// 
+    /// Returns constructed instance.
+    /// 
+    pub fn new(stream: &'a mut S, offset: Option<StreamPos>, end: Option<StreamPos>) -> Self {
+        let _ = (stream, offset, end);
+        todo!() // TODO: Implement
+    }
+}
+
+impl <'a, S: Stream> Stream for BinarySpan<'a, S> {
+    fn rewind(&mut self) -> io::Result<()> {
+        todo!() // TODO: Implement
+    }
+
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+
+    fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
+        let _ = pos;
+        todo!() // TODO: Implement
+    }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        todo!() // TODO: Implement
+    }
+}
+
+impl<'a, S: InputBinaryStream> InputBinaryStream for BinarySpan<'a, S> {
+    fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
+        let _ = endianness;
+        Err::<bitstream_io::BitReader<std::fs::File, bitstream_io::BigEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+}
+
+impl<'a, S: OutputBinaryStream> OutputBinaryStream for BinarySpan<'a, S> {
+    fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
+        let _ = buff;
+        todo!() // TODO: Implement
+    }
+
+    fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl BitWrite> {
+        let _ = endianness;
+        Err::<bitstream_io::BitWriter<std::fs::File, bitstream_io::BigEndian>, io::Error>(
+            io::Error::new(io::ErrorKind::NotFound, "To be implemented")
+        ) // TODO: Implement
+    }
+
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
+        let _ = len;
+        todo!() // TODO: Implement
+    }
+}

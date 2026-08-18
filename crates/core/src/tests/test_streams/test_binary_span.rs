@@ -1,7 +1,6 @@
 use std::io;
 
 use bitstream_io::{BigEndian, BitRead, BitWrite};
-use generic_array::typenum::{U1, U2};
 
 use super::super::super::streams::{spans::*, traits::*, dummy::*};
 

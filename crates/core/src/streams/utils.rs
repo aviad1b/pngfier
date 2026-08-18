@@ -3,6 +3,16 @@ use std::io;
 use super::StreamPos;
 
 /// Utility function for `InputElemStream::lookup` and `InputElemStreams::lookup`.
+/// 
+/// * `E` - Element type. Must satisfy `Eq`.
+/// 
+/// * `stream_start` - Index whithin stream where lookup is starting.
+/// * `read_next` - A function which reads the next element from the stream.
+/// * `data` - Data to look for.
+/// 
+/// Returns position of `data`'s first occurrence in stream, or `None` if wasn't found.
+/// Returns error if occurred.
+/// 
 pub fn lookup<E: Eq>(stream_start: StreamPos,
                      mut read_next: impl FnMut() -> io::Result<Option<E>>,
                      data: &[E]) -> io::Result<Option<StreamPos>> {

@@ -2,12 +2,12 @@ use std::io::{self, Cursor, Read, Write};
 
 use bitstream_io::{BitRead, BitReader, BitWrite, BitWriter, Endianness};
 
-use crate::streams::traits::{InputBinaryStream, OutputBinaryStream};
-
 use super::{
     StreamPos,
     traits::{
+        InputBinaryStream,
         InputElemStream,
+        OutputBinaryStream,
         OutputElemStream,
         Stream,
     },

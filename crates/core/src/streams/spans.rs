@@ -349,7 +349,7 @@ impl<'a, S: Stream, N: ArrayLength> Streams<N> for BinarySpans<'a, S, N> {
     }
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
-        let max_size = self.ends[I].map(|byte_end| byte_end - self.offsets[I] + 1);
+        let max_size = self.ends[I].map(|byte_end| byte_end - self.offsets[I]);
         let read_size = self.stream.get_size()? - self.offsets[I];
         let actual_size = max_size.map_or(read_size, |max_size| {
             cmp::min(read_size, max_size)

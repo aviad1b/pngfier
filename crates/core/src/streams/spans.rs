@@ -362,6 +362,12 @@ impl<'a, S: Stream, N: ArrayLength> Streams<N> for BinarySpans<'a, S, N> {
 impl<'a, S: InputBinaryStream, N: ArrayLength> InputBinaryStreams<N> for BinarySpans<'a, S, N> {
     fn read_bytes<const I: usize>(&mut self, buff: &mut [u8]) -> io::Result<()> {
         self.ensure_pos::<I>()?;
+
+        let bytes_left = self.get_size::<I>()? - self.get_pos::<I>()?;
+        if bytes_left < buff.len() as StreamPos {
+            return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Reached end of span early"));
+        }
+
         self.stream.read_bytes(buff)?;
         self.update_pos::<I>()?;
         Ok(())

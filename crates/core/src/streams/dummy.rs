@@ -14,6 +14,9 @@ use super::{
 };
 
 /// Dummy implementation of `InputElemStream` trait, uses runtime vector.
+/// 
+/// * `E` - Element type. Must satisfy `Copy`.
+/// 
 pub struct DummyInputElemStream<E: Copy> {
     elems: Vec<E>,
     pos: StreamPos,
@@ -66,6 +69,9 @@ impl<E: Copy> InputElemStream<E> for DummyInputElemStream<E> {
 }
 
 /// Dummy implementation of `OutputElemStream` trait, uses runtime vector.
+/// 
+/// * `E` - Element type. Must satisfy `Copy`.
+/// 
 pub struct DummyOutputElemStream<E: Copy> {
     elems: Vec<E>,
     pos: StreamPos,

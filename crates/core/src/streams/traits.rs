@@ -351,6 +351,9 @@ macro_rules! return_bits_writer {
 }
 
 /// Abstraction over a cursor-based stream of input made of elements.
+/// 
+/// * `E` - Element type.
+/// 
 pub trait InputElemStream<E> : Stream {
     /// Reads next element from stream.
     /// 
@@ -382,6 +385,7 @@ pub trait InputElemStream<E> : Stream {
 
 /// Abstraction over an indexed set of cursor-based stream of input made of elements.
 /// 
+/// * `E` - Element type.
 /// * `N` - Amount of streams in set.
 /// 
 pub trait InputElemStreams<E, N: ArrayLength> : Streams<N> {
@@ -418,6 +422,9 @@ pub trait InputElemStreams<E, N: ArrayLength> : Streams<N> {
 }
 
 /// Abstraction over a cursor-based stream of output made of elements.
+/// 
+/// * `E` - Element type.
+/// 
 pub trait OutputElemStream<E> : Stream {
     /// Writes element stream.
     /// 
@@ -441,6 +448,7 @@ pub trait OutputElemStream<E> : Stream {
 
 /// Abstraction over an indexed set of cursor-based stream of output made of elements.
 /// 
+/// * `E` - Element type.
 /// * `N` - Amount of streams in set.
 /// 
 pub trait OutputElemStreams<E, N: ArrayLength> : Streams<N> {

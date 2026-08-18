@@ -31,6 +31,11 @@ pub fn opt_array<N: ArrayLength>(vals: &[Option<StreamPos>]) -> GenericArray<Opt
 }
 
 /// Reads spans of elements over a binary stream.
+/// 
+/// * `E` - Element type. Must satisfy `ConstBinParsible`.
+/// * `S` - Underlying stream type.
+/// * `N` - Amount of spans in set.
+/// 
 pub struct BinaryElemSpans<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> {
     stream: &'a mut S,
     byte_offsets: GenericArray<StreamPos, N>,
@@ -192,6 +197,10 @@ OutputElemStreams<E, N> for BinaryElemSpans<'a, E, S, N> {
 }
 
 /// Reads a span of elements over a binary stream.
+/// 
+/// * `E` - Element type. Must satisfy `ConstBinParsible`.
+/// * `S` - Underlying stream type.
+/// 
 pub struct BinaryElemSpan<'a, E: ConstBinParsible, S: Stream> {
     base: BinaryElemSpans<'a, E, S, U1>,
 }
@@ -254,6 +263,10 @@ impl<'a, E: ConstBinParsible, S: OutputBinaryStream> OutputElemStream<E> for Bin
 }
 
 /// Reads spans of bytes over a binary stream.
+/// 
+/// * `S` - Underlying stream type.
+/// * `N` - Amount of spans in set.
+/// 
 pub struct BinarySpans<'a, S: Stream, N: ArrayLength> {
     stream: &'a mut S,
     offsets: GenericArray<StreamPos, N>,
@@ -402,6 +415,9 @@ impl<'a, S: OutputBinaryStream, N: ArrayLength> OutputBinaryStreams<N> for Binar
 }
 
 /// Reads a span of bytes over a binary stream.
+/// 
+/// * `S` - Underlying stream type.
+/// 
 pub struct BinarySpan<'a, S: Stream> {
 	base: BinarySpans<'a, S, U1>,
 }

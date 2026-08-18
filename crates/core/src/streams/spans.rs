@@ -139,7 +139,11 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> Streams<N> for BinaryEl
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
         let max_byte_size = self.byte_ends[I].map(|byte_end| byte_end - self.byte_offsets[I]);
+        assert!(max_byte_size.map_or(true, |x| x >= 0), "Internal error: Negative byte count in get_size");
+
         let read_byte_size = self.stream.get_size()? - self.byte_offsets[I];
+        assert!(read_byte_size >= 0, "Internal error: Negative byte count in get_size");
+
         let actual_byte_size = max_byte_size.map_or(read_byte_size, |max_byte_size| {
             cmp::min(read_byte_size, max_byte_size)
         });
@@ -363,7 +367,11 @@ impl<'a, S: Stream, N: ArrayLength> Streams<N> for BinarySpans<'a, S, N> {
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
         let max_size = self.ends[I].map(|byte_end| byte_end - self.offsets[I]);
+        assert!(max_size.map_or(true, |x| x >= 0), "Internal error: Negative byte count in get_size");
+        
         let read_size = self.stream.get_size()? - self.offsets[I];
+        assert!(read_size >= 0, "Internal error: Negative byte count in get_size");
+
         let actual_size = max_size.map_or(read_size, |max_size| {
             cmp::min(read_size, max_size)
         });
@@ -377,6 +385,8 @@ impl<'a, S: InputBinaryStream, N: ArrayLength> InputBinaryStreams<N> for BinaryS
         self.ensure_pos::<I>()?;
 
         let bytes_left = self.get_size::<I>()? - self.get_pos::<I>()?;
+        assert!(bytes_left >= 0, "Internal error: Negative byte count in read_bytes");
+
         if bytes_left < buff.len() as StreamPos {
             return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Reached end of span early"));
         }

@@ -1,6 +1,6 @@
 use std::{collections::HashSet, hash::Hash, io, marker::PhantomData};
 
-use generic_array::{ArrayLength, GenericArray, typenum::{U256, Unsigned}};
+use generic_array::{ArrayLength, typenum::{U256, Unsigned}};
 
 use crate::streams::traits::ConstBinParsible;
 

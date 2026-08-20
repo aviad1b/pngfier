@@ -1,6 +1,6 @@
 use std::{collections::HashSet, hash::Hash, io, marker::PhantomData};
 
-use generic_array::{ArrayLength, GenericArray, typenum::U256};
+use generic_array::{ArrayLength, GenericArray, typenum::{U256, Unsigned}};
 
 use crate::streams::traits::ConstBinParsible;
 
@@ -160,7 +160,14 @@ pub struct RuntimeElemIndexesMatrix<E: Elem, I: Eq + Copy + Hash> {
 impl<E: Elem, I: Eq + Copy + Hash> RuntimeElemIndexesMatrix<E, I> {
     /// Constructs a new instance.
     pub fn new() -> Self {
-        todo!() // TODO: Implement
+        Self {
+            matrix: (0..E::N::to_usize()).map(|_|
+                    (0..E::N::to_usize()).map(|_|
+                        RuntimeElemIndexesMatrixSlot::new()
+                    ).collect()
+                ).collect(),
+            phantom: PhantomData,
+        }
     }
 }
 

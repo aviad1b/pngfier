@@ -105,48 +105,45 @@ impl<I: Eq + Copy + Hash> RuntimeElemIndexesMatrixSlot<I> {
 
 impl<I: Eq + Copy + Hash> ElemIndexesMatrixSlot<I> for RuntimeElemIndexesMatrixSlot<I> {
     fn iter<'a>(&'a self) -> io::Result<impl Iterator<Item = &'a I>> where I: 'a {
-        Ok(self.indexes.iter()) // TODO: Implement
+        Ok(self.indexes.iter())
     }
 
     fn contains(&self, index: &I) -> io::Result<bool> {
-        let _ = index;
-        todo!() // TODO: Implement
+        Ok(self.indexes.contains(index))
     }
 }
 
 impl<I: Eq + Copy + Hash> ElemIndexesMatrixSlotMut<I> for RuntimeElemIndexesMatrixSlot<I> {
     fn insert(&mut self, index: I) -> io::Result<()> {
-        let _ = index;
-        todo!() // TODO: Implement
+        self.indexes.insert(index);
+        Ok(())
     }
 }
 
 impl<'s, I: Eq + Copy + Hash> ElemIndexesMatrixSlot<I> for &'s RuntimeElemIndexesMatrixSlot<I> {
     fn iter<'a>(&'a self) -> io::Result<impl Iterator<Item = &'a I>> where I: 'a {
-        Ok(self.indexes.iter()) // TODO: Implement
+        Ok(self.indexes.iter())
     }
 
     fn contains(&self, index: &I) -> io::Result<bool> {
-        let _ = index;
-        todo!() // TODO: Implement
+        Ok(self.indexes.contains(index))
     }
 }
 
 impl<'s, I: Eq + Copy + Hash> ElemIndexesMatrixSlot<I> for &'s mut RuntimeElemIndexesMatrixSlot<I> {
     fn iter<'a>(&'a self) -> io::Result<impl Iterator<Item = &'a I>> where I: 'a {
-        Ok(self.indexes.iter()) // TODO: Implement
+        Ok(self.indexes.iter())
     }
 
     fn contains(&self, index: &I) -> io::Result<bool> {
-        let _ = index;
-        todo!() // TODO: Implement
+        Ok(self.indexes.contains(index))
     }
 }
 
 impl<'s, I: Eq + Copy + Hash> ElemIndexesMatrixSlotMut<I> for &'s mut RuntimeElemIndexesMatrixSlot<I> {
     fn insert(&mut self, index: I) -> io::Result<()> {
-        let _ = index;
-        todo!() // TODO: Implement
+        self.indexes.insert(index);
+        Ok(())
     }
 }
 

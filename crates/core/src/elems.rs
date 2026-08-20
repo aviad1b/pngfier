@@ -99,7 +99,7 @@ pub struct RuntimeElemIndexesMatrixSlot<I: Eq + Copy + Hash> {
 impl<I: Eq + Copy + Hash> RuntimeElemIndexesMatrixSlot<I> {
     /// Constructs a new instance.
     pub fn new() -> Self {
-        todo!() // TODO: Implement
+        Self { indexes: HashSet::new() }
     }
 }
 

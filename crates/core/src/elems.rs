@@ -1,4 +1,4 @@
-use std::{collections::HashSet, hash::Hash, io};
+use std::{collections::HashSet, hash::Hash, io, marker::PhantomData};
 
 use generic_array::{ArrayLength, GenericArray, typenum::U256};
 
@@ -156,7 +156,8 @@ impl<'s, I: Eq + Copy + Hash> ElemIndexesMatrixSlotMut<I> for &'s mut RuntimeEle
 /// * `I` - Type of index in set. Must implement `Eq`, `Copy` and `Hash`.
 /// 
 pub struct RuntimeElemIndexesMatrix<E: Elem, I: Eq + Copy + Hash> {
-    matrix: GenericArray<GenericArray<RuntimeElemIndexesMatrixSlot<I>, E::N>, E::N>,
+    matrix: Vec<Vec<RuntimeElemIndexesMatrixSlot<I>>>,
+    phantom: PhantomData<E>,
 }
 
 impl<E: Elem, I: Eq + Copy + Hash> RuntimeElemIndexesMatrix<E, I> {

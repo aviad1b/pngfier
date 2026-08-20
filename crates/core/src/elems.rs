@@ -176,12 +176,10 @@ impl<E: Elem, I: Eq + Copy + Hash> ElemIndexesMatrix<E, I> for RuntimeElemIndexe
     type SlotMut<'a> = &'a mut RuntimeElemIndexesMatrixSlot<I> where Self: 'a;
 
     fn at(&self, i: E, j: E) -> io::Result<Self::Slot<'_>> {
-        let _ = (i, j);
-        todo!() // TODO: Implement
+        Ok(&self.matrix[i.as_index()][j.as_index()])
     }
 
     fn at_mut(&mut self, i: E, j: E) -> io::Result<Self::SlotMut<'_>> {
-        let _ = (i, j);
-        todo!() // TODO: Implement
+        Ok(&mut self.matrix[i.as_index()][j.as_index()])
     }
 }

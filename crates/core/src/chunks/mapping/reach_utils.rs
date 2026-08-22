@@ -1,8 +1,8 @@
 use std::io;
 
 use crate::{
-    elems::{Elem, ElemIndexesMatrix, ElemIndexesMatrixSlotMut},
-    streams::traits::InputElemStream,
+    elems::{Elem, ElemIndexesMatrix, ElemIndexesMatrixSlot, ElemIndexesMatrixSlotMut},
+    streams::{StreamPos, traits::InputElemStream},
 };
 
 use super::super::{ChunkIndex, ChunkSize};
@@ -81,8 +81,30 @@ where
     DataStream: InputElemStream<E>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
-    let _ = (data, img_matrix, data_start);
-    todo!() // TODO: Implement
+    // start at `data_start` in data
+	data.set_pos(data_start as StreamPos)?;
+
+	// read `prev` from first data elem if exists
+    let prev = match data.read_next_elem()? {
+        Some(first) => first,
+        None => return Ok(vec![]),
+    };
+	
+	// read `curr` from second data elem if exists
+    let curr = match data.read_next_elem()? {
+        Some(second) => second,
+        None => return Ok(vec![]),
+    };
+
+	// each place where `curr` comes after `prev` starts a possible path
+	Ok(img_matrix.at(prev, curr)?
+		.iter()?
+		.map(|&index| Path {
+			len: 2, // at least 2 elems in path, `first` and `second`
+			src_start: index,
+		})
+		.collect()
+	)
 }
 
 /// Given a `data_start` index and a mutual paths vector reference,

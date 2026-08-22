@@ -98,8 +98,18 @@ where
     pub fn new(image: &'a mut ImageStream,
                data: &'b mut DataStream,
                img_matrix: &'c mut M) -> io::Result<Self> {
-        let _ = (image, data, img_matrix);
-        todo!() // TODO: Implement
+        let mut res = Self{
+            reach: Vec::new(),
+            image,
+            data,
+            img_matrix,
+            phantom: PhantomData,
+        };
+
+        res.init_img_matrix()?;
+        res.init_reach()?;
+
+        Ok(res)
     }
 
     /// Initializes internal matrix such that every slot i,j contains all indexes 

@@ -9,7 +9,7 @@ use super::super::{ChunkIndex, ChunkSize};
 
 // To temporarily store paths of chunks that exist in both image and data
 // `src_start` is starting index at image.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Path {
     pub len: ChunkSize,
     pub src_start: ChunkIndex,

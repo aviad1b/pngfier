@@ -207,7 +207,7 @@ where
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
     fn len(&self) -> io::Result<ChunkIndex> {
-        todo!() // TODO: Implement
+        Ok(self.reach.len() as ChunkIndex)
     }
 
     fn get(&self, index: ChunkIndex) -> io::Result<MatchInfo> {

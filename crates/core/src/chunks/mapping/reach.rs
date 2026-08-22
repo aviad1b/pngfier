@@ -25,9 +25,11 @@ pub struct MatchInfo {
 pub trait ReachMapper<E: Elem> {
     /// Gets amount of indexes mapped.
     /// 
-    /// NOTE: Returns as `ChunkIndex` for convenience of comparison.
+    /// Returns indexes count, or error if occurred.
     /// 
-    fn len(&self) -> ChunkIndex;
+    /// NOTE: Returns length as `ChunkIndex` for convenience of comparison.
+    /// 
+    fn len(&self) -> io::Result<ChunkIndex>;
 
     /// Gets best match found starting exactly at data-position `index`.
     /// 
@@ -35,7 +37,9 @@ pub trait ReachMapper<E: Elem> {
     /// 
     /// Returns best match for `index`, as stated above.
     /// If nothing matches there, returns MatchInfo { reach: index, src_start: index } (no progress).
-    fn get(&self, index: ChunkIndex) -> MatchInfo;
+    /// Returns error if occurred.
+    /// 
+    fn get(&self, index: ChunkIndex) -> io::Result<MatchInfo>;
 
     /// Gets literal elements from input data.
     /// 
@@ -165,11 +169,11 @@ where
     DataStream: InputElemStream<E>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
-    fn len(&self) -> ChunkIndex {
+    fn len(&self) -> io::Result<ChunkIndex> {
         todo!() // TODO: Implement
     }
 
-    fn get(&self, index: ChunkIndex) -> MatchInfo {
+    fn get(&self, index: ChunkIndex) -> io::Result<MatchInfo> {
         let _ = index;
         todo!() // TODO: Implement
     }

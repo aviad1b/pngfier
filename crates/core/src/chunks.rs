@@ -10,6 +10,7 @@ pub type ChunkSize = i64;
 /// 
 /// * `E` - Element type.
 /// 
+#[derive(Debug, PartialEq, Eq)]
 pub enum ChunkInfo<E: Elem> {
     /// A chunk that references data from the image.
     Reference { index: ChunkIndex, size: ChunkSize },

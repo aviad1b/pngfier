@@ -39,11 +39,10 @@ where
 	image.rewind()?;
 
 	// read `prev` from first image elem if exists
-	let mut prev = if let Some(first) = image.read_next_elem()? {
-		first
-	} else {
-		return Ok(())
-	};
+    let mut prev = match image.read_next_elem()? {
+        Some(first) => first,
+        None => return Ok(()),
+    };
 	
 	// read `curr` from second image elem, loop while has curr
 	let mut curr_opt = image.read_next_elem()?;

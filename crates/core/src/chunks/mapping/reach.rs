@@ -128,7 +128,16 @@ where
     /// Returns error if occurred.
     /// 
     fn init_reach(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        self.data.rewind()?;
+        self.image.rewind()?;
+
+        let data_size = self.data.get_size()?;
+        self.reach.resize(data_size as usize, MatchInfo { reach: 0, src_start: -1 });
+        for data_start in 0..data_size {
+            self.init_reach_for(data_start)?;
+        }
+
+        Ok(())
     }
 
     /// Initializes reach for a specific `data_start`` index.
@@ -139,8 +148,26 @@ where
     /// Returns error if occurred.
     /// 
     fn init_reach_for(&mut self, data_start: ChunkIndex) -> io::Result<()> {
-        let _ = data_start;
-        todo!() // TODO: Implement
+        let paths = self.get_path_starts_vec(data_start)?;
+
+        // for each path start, walk through entire path for as long as exists in both data and image
+        let longest_path = self.walk_paths(data_start, paths)?;
+
+        self.reach[data_start as usize] = match longest_path {
+            // reach is based on the longest path found
+            Some(longest_path) => MatchInfo {
+                reach: data_start + longest_path.len,
+                src_start: longest_path.src_start,
+            },
+
+            // no path was found
+            None => MatchInfo {
+                reach: data_start,
+                src_start: -1, // unread value (negative - always lower than other `src_start`s)
+            }
+        };
+
+        Ok(())
     }
 
     /// For a given `data_start` index, gets vector of all possible starts to paths mutual for data and image.

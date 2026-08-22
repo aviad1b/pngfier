@@ -1,6 +1,9 @@
 use std::io;
 
-use crate::{elems::{Elem, ElemIndexesMatrix}, streams::traits::InputElemStream};
+use crate::{
+    elems::{Elem, ElemIndexesMatrix, ElemIndexesMatrixSlotMut},
+    streams::traits::InputElemStream,
+};
 
 use super::super::{ChunkIndex, ChunkSize};
 
@@ -31,8 +34,29 @@ where
     ImageStream: InputElemStream<E>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
-    let _ = (image, img_matrix);
-    todo!() // TODO: Implement
+    let mut i: ChunkIndex = 0;
+
+	image.rewind()?;
+
+	// read `prev` from first image elem if exists
+	let mut prev = if let Some(first) = image.read_next_elem()? {
+		first
+	} else {
+		return Ok(())
+	};
+	
+	// read `curr` from second image elem, loop while has curr
+	let mut curr_opt = image.read_next_elem()?;
+	while let Some(curr) = curr_opt {
+		// `curr` comes after `prev` in index `i`
+		img_matrix.at_mut(prev, curr)?.insert(i)?;
+		
+		prev = curr;
+		curr_opt = image.read_next_elem()?;
+		i += 1;
+	}
+
+	Ok(())
 }
 
 /// For a given `data_start` index, gets vector of all possible starts to paths mutual for data and image.

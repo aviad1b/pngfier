@@ -4,6 +4,6 @@ use super::super::{ChunkIndex, ChunkSize};
 // `src_start` is starting index at image.
 #[derive(Clone, Copy)]
 pub struct Path {
-    len: ChunkSize,
-    src_start: ChunkIndex,
+    pub len: ChunkSize,
+    pub src_start: ChunkIndex,
 }

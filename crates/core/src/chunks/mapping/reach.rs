@@ -9,7 +9,7 @@ use super::{reach_utils::{self, Path}, super::{ChunkIndex, ChunkSize}};
 
 /// For a match starting at some position `data_start` in the data stream:
 /// `image[src_start + t] == data[data_start + t]` for all `t` in `0..(reach - data_start)`.
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MatchInfo {
     /// Furthest position in `data` this match covers
     pub reach: ChunkIndex,

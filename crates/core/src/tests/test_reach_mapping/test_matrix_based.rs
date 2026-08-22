@@ -19,6 +19,10 @@ where
     HashSet::from_iter(paths.map(|path| path.src_start))
 }
 
+fn paths_from_starts(src_starts: Vec<ChunkIndex>) -> Vec<Path> {
+    src_starts.iter().map(|src_start| Path { src_start: *src_start, len: 2 }).collect()
+}
+
 #[test]
 fn test_init_img_matrix() {
     let mut image = DummyInputElemStream::new(b"ABCDABEFABCD".to_vec());
@@ -123,4 +127,76 @@ fn test_get_path_starts_vec() {
 
     let paths = get_path_starts_vec(&mut data, &img_matrix, 14).unwrap();
     assert_eq!(paths_src_starts(paths.iter()), HashSet::from_iter(vec![]));
+}
+
+#[test]
+fn test_walk_paths() {
+    let mut image = DummyInputElemStream::new(b"ABCDABEFABCD".to_vec());
+    let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
+    init_img_matrix(&mut image, &mut img_matrix).unwrap();
+
+    let mut data = DummyInputElemStream::new(b"ABEFABCDZABCDDA".to_vec());
+    
+    let path = walk_paths(&mut data, &img_matrix, 0, paths_from_starts(vec![0, 4, 8])).unwrap();
+    assert_eq!(path, Some(Path { src_start: 4, len: 8 }));
+
+    let path = walk_paths(&mut data, &img_matrix, 1, paths_from_starts(vec![5])).unwrap();
+    assert_eq!(path, Some(Path { src_start: 5, len: 7 }));
+
+    let path = walk_paths(&mut data, &img_matrix, 2, paths_from_starts(vec![6])).unwrap();
+    assert_eq!(path, Some(Path { src_start: 6, len: 6 }));
+
+    let path = walk_paths(&mut data, &img_matrix, 3, paths_from_starts(vec![7])).unwrap();
+    assert_eq!(path, Some(Path { src_start: 7, len: 5 }));
+
+    let path = walk_paths(&mut data, &img_matrix, 4, paths_from_starts(vec![0, 4, 8])).unwrap();
+    assert!(
+        path == Some(Path { src_start: 0, len: 4 }) || path == Some(Path { src_start: 8, len: 4 }),
+        "Unexpected path: {:?}", path
+    );
+
+    let path = walk_paths(&mut data, &img_matrix, 5, paths_from_starts(vec![1, 9])).unwrap();
+    assert!(
+        path == Some(Path { src_start: 1, len: 3 }) || path == Some(Path { src_start: 9, len: 3 }),
+        "Unexpected path: {:?}", path
+    );
+
+    let path = walk_paths(&mut data, &img_matrix, 6, paths_from_starts(vec![2, 10])).unwrap();
+    assert!(
+        path == Some(Path { src_start: 2, len: 2 }) || path == Some(Path { src_start: 10, len: 2 }),
+        "Unexpected path: {:?}", path
+    );
+
+    let path = walk_paths(&mut data, &img_matrix, 7, paths_from_starts(vec![])).unwrap();
+    assert_eq!(path, None);
+
+    let path = walk_paths(&mut data, &img_matrix, 8, paths_from_starts(vec![])).unwrap();
+    assert_eq!(path, None);
+
+    let path = walk_paths(&mut data, &img_matrix, 9, paths_from_starts(vec![0, 4, 8])).unwrap();
+    assert!(
+        path == Some(Path { src_start: 0, len: 4 }) || path == Some(Path { src_start: 8, len: 4 }),
+        "Unexpected path: {:?}", path
+    );
+
+    let path = walk_paths(&mut data, &img_matrix, 10, paths_from_starts(vec![1, 9])).unwrap();
+    assert!(
+        path == Some(Path { src_start: 1, len: 3 }) || path == Some(Path { src_start: 9, len: 3 }),
+        "Unexpected path: {:?}", path
+    );
+
+    let path = walk_paths(&mut data, &img_matrix, 11, paths_from_starts(vec![2, 10])).unwrap();
+    assert!(
+        path == Some(Path { src_start: 2, len: 2 }) || path == Some(Path { src_start: 10, len: 2 }),
+        "Unexpected path: {:?}", path
+    );
+
+    let path = walk_paths(&mut data, &img_matrix, 12, paths_from_starts(vec![])).unwrap();
+    assert_eq!(path, None);
+
+    let path = walk_paths(&mut data, &img_matrix, 13, paths_from_starts(vec![3])).unwrap();
+    assert_eq!(path, Some(Path { src_start: 3, len: 2 }));
+
+    let path = walk_paths(&mut data, &img_matrix, 14, paths_from_starts(vec![])).unwrap();
+    assert_eq!(path, None);
 }

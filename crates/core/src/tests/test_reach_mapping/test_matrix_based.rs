@@ -200,3 +200,105 @@ fn test_walk_paths() {
     let path = walk_paths(&mut data, &img_matrix, 14, paths_from_starts(vec![])).unwrap();
     assert_eq!(path, None);
 }
+
+#[test]
+fn reach_mapping_roundtrip() {
+    let mut image = DummyInputElemStream::new(b"ABCDABEFABCD".to_vec());
+    let mut data = DummyInputElemStream::new(b"ABEFABCDZABCDDA".to_vec());
+    let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
+
+    let reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
+
+    // 	match ABEFABCD, only one candidate
+    let info = reach.get(0).unwrap();
+    assert_eq!(info.src_start, 4);
+    assert_eq!(info.reach, 8);
+
+    // same match as previous, one position later
+    let info = reach.get(1).unwrap();
+    assert_eq!(info.src_start, 5);
+    assert_eq!(info.reach, 8);
+
+    // same match as previous, one position later
+    let info = reach.get(2).unwrap();
+    assert_eq!(info.src_start, 6);
+    assert_eq!(info.reach, 8);
+
+    // same match as previous, one position later. length 2 (no walk)
+    let info = reach.get(3).unwrap();
+    assert_eq!(info.src_start, 7);
+    assert_eq!(info.reach, 8);
+
+    // match ABCD, two potential candidates (tie)
+    let info = reach.get(4).unwrap();
+    assert!(
+        info.src_start == 0 || info.src_start == 8,
+        "Unexpected src_start: {} (expected 0 or 8)", info.src_start
+    );
+    assert_eq!(info.reach, 8);
+
+    // same match as previous, one position later
+    let info = reach.get(5).unwrap();
+    assert!(
+        info.src_start == 1 || info.src_start == 9,
+        "Unexpected src_start: {} (expected 1 or 9)", info.src_start
+    );
+    assert_eq!(info.reach, 8);
+
+    // same match as previous, one position later. length 2 (no walk)
+    let info = reach.get(6).unwrap();
+    assert!(
+        info.src_start == 2 || info.src_start == 10,
+        "Unexpected src_start: {} (expected 2 or 10)", info.src_start
+    );
+    assert_eq!(info.reach, 8);
+
+    // no match
+    let info = reach.get(7).unwrap();
+    assert!(info.src_start < 0); // no src_start index is applicable
+    assert_eq!(info.reach, 7);
+
+    // no match
+    let info = reach.get(8).unwrap();
+    assert!(info.src_start < 0); // no src_start index is applicable
+    assert_eq!(info.reach, 8);
+
+    // match ABCD, two potential candidates (tie)
+    let info = reach.get(9).unwrap();
+    assert!(
+        info.src_start == 0 || info.src_start == 8,
+        "Unexpected src_start: {} (expected 0 or 8)", info.src_start
+    );
+    assert_eq!(info.reach, 13);
+
+    // same match as previous, one position later
+    let info = reach.get(10).unwrap();
+    assert!(
+        info.src_start == 1 || info.src_start == 9,
+        "Unexpected src_start: {} (expected 1 or 9)", info.src_start
+    );
+    assert_eq!(info.reach, 13);
+
+    // same match as previous, one position later. length 2 (no walk)
+    let info = reach.get(11).unwrap();
+    assert!(
+        info.src_start == 2 || info.src_start == 10,
+        "Unexpected src_start: {} (expected 2 or 10)", info.src_start
+    );
+    assert_eq!(info.reach, 13);
+
+    // no match
+    let info = reach.get(12).unwrap();
+    assert!(info.src_start < 0); // no src_start index is applicable
+    assert_eq!(info.reach, 12);
+
+    // match DA, length 2 (no walk) right before end-of-stream
+    let info = reach.get(13).unwrap();
+    assert_eq!(info.src_start, 3);
+    assert_eq!(info.reach, 15);
+
+    // no match (end-of-stream)
+    let info = reach.get(14).unwrap();
+    assert!(info.src_start < 0); // no src_start index is applicable
+    assert_eq!(info.reach, 14);
+}

@@ -194,7 +194,7 @@ where
     /// Returns the longest path (or `None` if no paths were provided/found).
     /// Returns error if occurred.
     /// 
-    /// Note: Takes ownership over `paths`.
+    /// NOTE: Takes ownership over `paths`.
     /// 
     fn walk_paths(&mut self, data_start: ChunkIndex, paths: Vec<Path>) -> io::Result<Option<Path>> {
         reach_utils::walk_paths(self.data, self.img_matrix, data_start, paths)

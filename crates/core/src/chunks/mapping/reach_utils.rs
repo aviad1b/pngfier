@@ -120,7 +120,7 @@ where
 /// Returns the longest path (or `None` if no paths were provided/found).
 /// Returns error if occurred.
 /// 
-/// Note: Takes ownership over `paths`.
+/// NOTE: Takes ownership over `paths`.
 /// 
 pub fn walk_paths<E, DataStream, M>(data: &mut DataStream,
                                     img_matrix: &M,

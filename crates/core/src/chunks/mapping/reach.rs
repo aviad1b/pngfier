@@ -104,7 +104,7 @@ where
     /// Returns error if occurred.
     /// 
     fn init_img_matrix(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        reach_utils::init_img_matrix(self.image, self.img_matrix)
     }
 
     /// Initializes reach vector based on internal matrix.
@@ -138,8 +138,7 @@ where
     /// Returns error if occurred.
     /// 
     fn get_path_starts_vec(&mut self, data_start: ChunkIndex) -> io::Result<Vec<Path>> {
-        let _ = data_start;
-        todo!() // TODO: Implement
+        reach_utils::get_path_starts_vec(self.data, self.img_matrix, data_start)
     }
 
     /// Given a `data_start` index and a mutual paths vector reference,
@@ -154,8 +153,7 @@ where
     /// Note: Takes ownership over `paths`.
     /// 
     fn walk_paths(&mut self, data_start: ChunkIndex, paths: Vec<Path>) -> io::Result<Option<Path>> {
-        let _ = (data_start, paths);
-        todo!() // TODO: Implement
+        reach_utils::walk_paths(self.data, self.img_matrix, data_start, paths)
     }
 }
 

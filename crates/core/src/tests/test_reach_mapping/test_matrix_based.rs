@@ -322,6 +322,6 @@ fn get_elems_works_for_entire_range() {
 
     let mut reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
 
-    let elems = reach.get_elems(0, 14).unwrap();
+    let elems = reach.get_elems(0, 15).unwrap();
     assert_eq!(elems, b"ABEFABCDZABCDDA".to_vec());
 }

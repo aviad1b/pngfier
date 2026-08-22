@@ -150,7 +150,7 @@ impl<'a, E: Elem, Reach: ReachMapper<E>> ChunkMapper<'a, E, Reach> {
         let elems = self.reach.get_elems(literal_start, *cur_end - literal_start)?;
         chunks.push(ChunkInfo::Literal(elems));
 
-        // farthest/i bookkeeping needs re-syncing to the new cur_end here —
+        // farthest/i bookkeeping needs re-syncing to the new cur_end here
         // e.g. reset farthest to {reach: cur_end, src_start: cur_end} and
         // continue the outer scan from i = cur_end
         *farthest = MatchInfo { reach: *cur_end, src_start: *cur_end };

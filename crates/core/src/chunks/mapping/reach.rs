@@ -211,8 +211,7 @@ where
     }
 
     fn get(&self, index: ChunkIndex) -> io::Result<MatchInfo> {
-        let _ = index;
-        todo!() // TODO: Implement
+        Ok(self.reach[index as usize])
     }
 
     fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> io::Result<Vec<E>> {

@@ -1,6 +1,10 @@
 use std::{collections::HashSet, hash::Hash};
 
-use crate::{chunks::ChunkIndex, elems::{ElemIndexesMatrix, ElemIndexesMatrixSlot, RuntimeElemIndexesMatrix}, streams::dummy::DummyInputElemStream};
+use crate::{
+    chunks::ChunkIndex,
+    elems::{ElemIndexesMatrix, ElemIndexesMatrixSlot, RuntimeElemIndexesMatrix},
+    streams::dummy::DummyInputElemStream,
+};
 
 use super::super::super::chunks::mapping::{reach::*, reach_utils::*};
 

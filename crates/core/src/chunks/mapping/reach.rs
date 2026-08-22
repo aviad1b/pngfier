@@ -2,7 +2,7 @@ use std::{io, marker::PhantomData};
 
 use crate::{
     elems::{Elem, ElemIndexesMatrix},
-    streams::{StreamPos, traits::InputElemStream}
+    streams::{StreamPos, traits::InputElemStream},
 };
 
 use super::{reach_utils::{self, Path}, super::{ChunkIndex, ChunkSize}};

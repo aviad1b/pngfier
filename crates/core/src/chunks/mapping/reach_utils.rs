@@ -131,7 +131,7 @@ where
     DataStream: InputElemStream<E>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
-    let mut best: Option<Path> = None;
+    let mut best: Option<Path> = paths.first().copied();
 
 	// start at element `data_start+1` in data (assumes first elem was read when path was created)
 	data.set_pos((data_start + 1) as StreamPos)?;

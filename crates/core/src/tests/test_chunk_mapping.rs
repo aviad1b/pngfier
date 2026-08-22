@@ -191,7 +191,10 @@ fn single_final_byte_with_no_pair_is_literal() {
 	let data = b"BA"; // trailing 'A' has no `curr` to pair with
 	let chunks = run_mapper(image, data, None, None);
 	assert_eq!(total_covered(&chunks), 2);
-	assert_eq!(chunks.last().unwrap(), &ChunkInfo::Literal(vec![b'A']));
+    match chunks.last().unwrap() {
+        ChunkInfo::Literal(elems) => assert_eq!(*elems.last().unwrap(), b'A'),
+        _ => panic!("Expected last element being 'A'")
+    };
 }
 
 //////////////////////////////////////////////////////

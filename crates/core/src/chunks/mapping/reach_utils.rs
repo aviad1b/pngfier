@@ -125,12 +125,54 @@ where
 pub fn walk_paths<E, DataStream, M>(data: &mut DataStream,
                                     img_matrix: &M,
                                     data_start: ChunkIndex,
-                                    paths: Vec<Path>) -> io::Result<Option<Path>>
+                                    mut paths: Vec<Path>) -> io::Result<Option<Path>>
 where
     E: Elem,
     DataStream: InputElemStream<E>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
-    let _ = (data, img_matrix, data_start, paths);
-    todo!() // TODO: Implement
+    let mut best: Option<Path> = None;
+
+	// start at element `data_start+1` in data (assumes first elem was read when path was created)
+	data.set_pos((data_start + 1) as StreamPos)?;
+
+	// read `prev` from first data elem if exists,
+	// read `curr_opt` from second data elem
+	let mut prev = match data.read_next_elem()? { Some(elem) => elem, None => return Ok(best) };
+	let mut curr_opt = data.read_next_elem()?;
+
+	// while curr exists and there's still some path that has just been walked through
+	while let Some(curr) = curr_opt && !paths.is_empty() {
+		let bigram_indexes = img_matrix.at(prev, curr)?;
+		let mut error = Ok(());
+		paths.retain_mut(|path| {
+			// skip if had error
+			if !error.is_ok() { return true; }
+
+			// check if curr comes after prev in image (at last know path elem)
+			let found = match bigram_indexes.contains(&(path.src_start + path.len - 1)) {
+				Ok(found) => found,
+				Err(err) => { error = Err(err); return true; },
+			};
+
+			if found {
+				path.len += 1;
+
+				// if longer than current best, update best
+				if best.as_ref().is_none_or(|best| path.len > best.len) {
+					best = Some(*path);
+				}
+
+				true // path is still relevant
+			} else {
+				false // path no longer relevant (can't keep walking through)
+			}
+		});
+		error?; // propogate error if had any
+
+		prev = curr;
+		curr_opt = data.read_next_elem()?;
+	}
+
+	Ok(best)
 }

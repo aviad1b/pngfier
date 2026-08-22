@@ -49,17 +49,17 @@ fn test_init_img_matrix() {
     assert_eq!(slot_to_set(img_matrix.at(b'F', b'E').unwrap()), HashSet::new());
     assert_eq!(slot_to_set(img_matrix.at(b'F', b'F').unwrap()), HashSet::new());
     
-    assert_eq!(slot_to_set(img_matrix.at(b'A', b'B').unwrap()), HashSet::from_iter(vec![1, 5, 9]));
+    assert_eq!(slot_to_set(img_matrix.at(b'A', b'B').unwrap()), HashSet::from_iter(vec![0, 4, 8]));
     
-    assert_eq!(slot_to_set(img_matrix.at(b'B', b'C').unwrap()), HashSet::from_iter(vec![2, 10]));
+    assert_eq!(slot_to_set(img_matrix.at(b'B', b'C').unwrap()), HashSet::from_iter(vec![1, 9]));
     
-    assert_eq!(slot_to_set(img_matrix.at(b'B', b'E').unwrap()), HashSet::from_iter(vec![6]));
+    assert_eq!(slot_to_set(img_matrix.at(b'B', b'E').unwrap()), HashSet::from_iter(vec![5]));
     
-    assert_eq!(slot_to_set(img_matrix.at(b'C', b'D').unwrap()), HashSet::from_iter(vec![3, 11]));
+    assert_eq!(slot_to_set(img_matrix.at(b'C', b'D').unwrap()), HashSet::from_iter(vec![2, 10]));
     
-    assert_eq!(slot_to_set(img_matrix.at(b'D', b'A').unwrap()), HashSet::from_iter(vec![4]));
+    assert_eq!(slot_to_set(img_matrix.at(b'D', b'A').unwrap()), HashSet::from_iter(vec![3]));
     
-    assert_eq!(slot_to_set(img_matrix.at(b'E', b'F').unwrap()), HashSet::from_iter(vec![7]));
+    assert_eq!(slot_to_set(img_matrix.at(b'E', b'F').unwrap()), HashSet::from_iter(vec![6]));
     
-    assert_eq!(slot_to_set(img_matrix.at(b'F', b'A').unwrap()), HashSet::from_iter(vec![8]));
+    assert_eq!(slot_to_set(img_matrix.at(b'F', b'A').unwrap()), HashSet::from_iter(vec![7]));
 }

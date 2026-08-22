@@ -1,4 +1,7 @@
-use crate::{elems::{Elem, RuntimeElemIndexesMatrix}, streams::dummy::DummyInputElemStream};
+use crate::{
+    elems::{Elem, RuntimeElemIndexesMatrix},
+    streams::dummy::DummyInputElemStream,
+};
 
 use super::super::chunks::{ChunkInfo, ChunkSize, mapping::{self::*, reach::*}};
 

@@ -17,3 +17,5 @@ pub enum ChunkInfo<E: Elem> {
     /// A chunk that is provided as a direct sequence of literals.
     Literal(Vec<E>),
 }
+
+pub mod mapping;

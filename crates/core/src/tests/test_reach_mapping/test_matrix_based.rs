@@ -313,3 +313,15 @@ fn reach_mapping_gives_correct_length() {
 
     assert_eq!(reach.len().unwrap(), 15);
 }
+
+#[test]
+fn get_elems_works_for_entire_range() {
+    let mut image = DummyInputElemStream::new(b"ABCDABEFABCD".to_vec());
+    let mut data = DummyInputElemStream::new(b"ABEFABCDZABCDDA".to_vec());
+    let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
+
+    let mut reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
+
+    let elems = reach.get_elems(0, 14).unwrap();
+    assert_eq!(elems, b"ABEFABCDZABCDDA".to_vec());
+}

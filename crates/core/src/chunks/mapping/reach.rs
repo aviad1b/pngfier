@@ -2,15 +2,7 @@ use std::{io, marker::PhantomData};
 
 use crate::{elems::{Elem, ElemIndexesMatrix}, streams::traits::InputElemStream};
 
-use super::super::{ChunkIndex, ChunkSize};
-
-// To temporarily store paths of chunks that exist in both image and data
-// `src_start` is starting index at image.
-#[derive(Clone, Copy)]
-struct Path {
-    len: ChunkSize,
-    src_start: ChunkIndex,
-}
+use super::{reach_utils::{self, Path}, super::{ChunkIndex, ChunkSize}};
 
 /// For a match starting at some position `data_start` in the data stream:
 /// `image[src_start + t] == data[data_start + t]` for all `t` in `0..(reach - data_start)`.

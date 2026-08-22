@@ -302,3 +302,14 @@ fn reach_mapping_roundtrip() {
     assert!(info.src_start < 0); // no src_start index is applicable
     assert_eq!(info.reach, 14);
 }
+
+#[test]
+fn reach_mapping_gives_correct_length() {
+    let mut image = DummyInputElemStream::new(b"ABCDABEFABCD".to_vec());
+    let mut data = DummyInputElemStream::new(b"ABEFABCDZABCDDA".to_vec());
+    let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
+
+    let reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
+
+    assert_eq!(reach.len().unwrap(), 15);
+}

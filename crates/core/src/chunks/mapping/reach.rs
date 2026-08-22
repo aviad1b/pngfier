@@ -1,6 +1,9 @@
 use std::{io, marker::PhantomData};
 
-use crate::{elems::{Elem, ElemIndexesMatrix}, streams::traits::InputElemStream};
+use crate::{
+    elems::{Elem, ElemIndexesMatrix},
+    streams::{StreamPos, traits::InputElemStream}
+};
 
 use super::{reach_utils::{self, Path}, super::{ChunkIndex, ChunkSize}};
 
@@ -215,7 +218,11 @@ where
     }
 
     fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> io::Result<Vec<E>> {
-        let _ = (start, count);
-        todo!() // TODO: Implement
+        self.data.set_pos(start as StreamPos)?;
+        (0..count).map(|_| {
+            self.data.read_next_elem()?.ok_or_else(|| {
+                io::Error::new(io::ErrorKind::UnexpectedEof, "ReachMapper::get_elems: ran out of data")
+            })
+        }).collect()
     }
 }

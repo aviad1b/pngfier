@@ -125,9 +125,8 @@ where
     /// 
     /// Returns constructed instance.
     /// 
-    pub fn new(widths: ChunkInfoWidths, input: &'a mut In, output: &'b mut Out) -> Self {
-        let _ = (widths, input, output);
-        todo!() // TODO: Implement
+    pub fn new(widths: ChunkInfoWidths, input: &'b mut In, output: &'c mut Out) -> Self {
+        Self { widths, input, output, cached_literals: vec![], phantom: PhantomData }
     }
 
     /// Writes chunks into pngfied data (using streams provided at construction).
@@ -135,6 +134,35 @@ where
     /// Returns error if occurred.
     /// 
     pub fn write(&mut self) -> io::Result<()> {
-        todo!() // TODO: Implement
+        let input = &mut *self.input;
+        for chunk in input {
+            // if current chunk is literal, cache to write later
+            if let ChunkInfo::Literal(values) = chunk {
+                self.cached_literals.extend(values);
+            } else { // if current chunk is not literal
+                // write all cached literals as one chunk
+                Self::flush_cached_literals(self.output, &self.widths, &mut self.cached_literals)?;
+                
+                // write current chunk itself (only passing tailer stream to write_chunk_info)
+                let mut output = UngroupedBinaryStream::<'_, TAILER_IDX, _, _>::new(self.output);
+                utils::write_chunk_info(&mut output, &self.widths, &chunk)?;
+            }
+        }
+        Self::flush_cached_literals(self.output, &self.widths, &mut self.cached_literals)?;
+        Ok(())
+    }
+
+    /// Flushes vector of cached literals as one literal chunk.
+    fn flush_cached_literals(output: &mut Out,
+                             widths: &ChunkInfoWidths,
+                             cached_literals: &mut Vec<E>) -> io::Result<()> {
+        if !cached_literals.is_empty() {
+            let cached_literals = std::mem::take(cached_literals);
+
+            // only passing tailer stream to write_chunk_info
+            let mut output = UngroupedBinaryStream::<'_, TAILER_IDX, _, _>::new(output);
+            utils::write_chunk_info(&mut output, widths, &ChunkInfo::Literal(cached_literals))?;
+        }
+        Ok(())
     }
 }

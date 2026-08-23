@@ -1,6 +1,6 @@
 use generic_array::{GenericArray, typenum::U2};
 
-use crate::streams::{dummy::{DummyBinaryStream, DummyOutputElemStream}, grouping::GroupedBinaryStreams};
+use crate::streams::{dummy::{DummyBinaryStream, DummyOutputElemStream}, grouping::GroupedBinaryStreams, traits::Stream};
 
 use super::super::chunks::{ChunkInfo, storage::*};
 
@@ -39,6 +39,8 @@ fn chunks_storage_round_trip() {
 
     let mut output = DummyOutputElemStream::new(Vec::<u8>::new());
     {
+        img_stream.rewind().unwrap();
+        key_stream.rewind().unwrap();
         let mut streams = GroupedBinaryStreams::<'_, U2, _>::new(
             GenericArray::from_array([&mut img_stream, &mut key_stream])
         );

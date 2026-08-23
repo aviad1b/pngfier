@@ -28,12 +28,13 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    if let ImgSrc::Query(_) = img_src {
-        bail!("Query-based compiling is not supported yet.");
-    }
+    let path = match img_src {
+        ImgSrc::Query(_) => bail!("Query-based compiling is not supported yet."),
+        ImgSrc::Path(path) => path,
+    };
     println!(
-        "'compile' command invoked with input: {:?}, img-src: {:?}, key-file: {:?}.",
-        input, img_src, key_file
+        "'compile' command invoked with input: {:?}, path: {:?}, key-file: {:?}.",
+        input, path, key_file
     );
     Ok(())
 }

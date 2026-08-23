@@ -57,6 +57,15 @@ where
         Self { widths, input, output, phantom: PhantomData }
     }
 
+    /// Reads all chunks from input and writes it to output (using streams provided at construction).
+    /// 
+    /// Returns error if occurred.
+    /// 
+    pub fn extract_all(&mut self) -> io::Result<()> {
+        while let Some(_) = self.extract_next()? { }
+        Ok(())
+    }
+
     /// Reads next chunk from input and writes it to output (using streams provided at construction).
     /// 
     /// Returns `None` if reached end of chunks (no chunks are left).

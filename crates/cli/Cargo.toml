@@ -4,6 +4,7 @@ version = "1.0.0"
 edition = "2024"
 
 [dependencies]
+generic-array = "1.4.4"
 pngfier-core = { path = "../core" }
 anyhow = "1.0.104"
 clap = { version = "4.6.6", features = ["derive"] }

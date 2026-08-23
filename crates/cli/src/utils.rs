@@ -1,4 +1,4 @@
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{io, sync::atomic::{AtomicU64, Ordering}};
 
 /// Output file with automatically generated unique path.
 pub struct OutputFile {
@@ -10,16 +10,16 @@ impl OutputFile {
     /// 
     /// Returns constructed instance.
     /// 
-    pub fn new() -> Self {
+    pub fn new() -> io::Result<Self> {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
         let id = COUNTER.fetch_add(1, Ordering::SeqCst);
-        let mut path = std::env::temp_dir();
+        let mut path = std::env::current_dir()?;
         path.push(format!(
             "pngfier_output_{}_{}",
             std::process::id(),
             id
         ));
-        Self { path }
+        Ok(Self { path })
     }
 
     /// Gets file's path as a string slice.

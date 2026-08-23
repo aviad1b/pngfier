@@ -38,10 +38,8 @@ pub enum Command {
 /// Represents image source (search query / direct path).
 #[derive(Debug)]
 pub enum ImgSrc {
-    // TODO: Remove these allows once real implementation is added.
-    #[allow(dead_code)]
+    #[allow(dead_code)] // TODO: Remove this allow once query feature is added.
     Query(String),
-    #[allow(dead_code)]
     Path(String),
 }
 

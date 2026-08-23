@@ -8,20 +8,14 @@ pub struct TempFile {
 
 impl TempFile {
     /// Constructs a new `TempFile` instance.
-    /// 
-    /// * `name` - Base name to base file path off.
-    /// 
-    /// Returns constructed instance.
-    /// 
-    pub fn new(name: &str) -> Self {
+    pub fn new() -> Self {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
         let id = COUNTER.fetch_add(1, Ordering::SeqCst);
         let mut path = std::env::temp_dir();
         path.push(format!(
-            "pngfier_temp_{}_{}_{}",
+            "pngfier_temp_{}_{}",
             std::process::id(),
-            id,
-            name
+            id
         ));
         Self { path }
     }
@@ -29,11 +23,6 @@ impl TempFile {
     /// Gets file's path as a string slice.
     pub fn path_str(&self) -> &str {
         self.path.to_str().unwrap()
-    }
-
-    /// Writes initial data into temp file for test to read.
-    pub fn write_initial(&self, data: &[u8]) {
-        std::fs::write(&self.path, data).unwrap();
     }
 }
 

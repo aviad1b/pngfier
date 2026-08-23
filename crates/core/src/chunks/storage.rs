@@ -9,6 +9,8 @@ use crate::{
 
 use super::ChunkInfo;
 
+mod utils;
+
 /// Holds bit widths of chunk info header fields (in key).
 #[derive(Clone, Copy)]
 pub struct ChunkInfoWidths {

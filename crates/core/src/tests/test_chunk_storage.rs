@@ -49,5 +49,8 @@ fn chunks_storage_round_trip() {
         reader.extract_all().unwrap();
     }
 
-    assert_eq!(output.get_all(), expected);
+    assert_eq!(
+        output.get_all(), expected,
+        "Bad output. Key: {:?}", key_stream.get_all()
+    );
 }

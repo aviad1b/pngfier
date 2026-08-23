@@ -97,24 +97,24 @@ where
 /// * `In` - An iterator type of chunks to write.
 /// * `Out` - A set type of two binary output streams (image and tailer/key).
 /// 
-pub struct ChunksWriter<'a, 'b, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
+pub struct ChunksWriter<'a, 'b, 'c, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
 where
-    E: Elem,
-    In: Iterator<Item = ChunkInfo<E>>,
+    E: Elem + 'a,
+    In: Iterator<Item = &'a ChunkInfo<E>>,
     Out: OutputBinaryStreams<U2>,
 {
     widths: ChunkInfoWidths,
-    input: &'a mut In,
-    output: &'b mut Out,
+    input: &'b mut In,
+    output: &'c mut Out,
     cached_literals: Vec<E>,
     phantom: PhantomData<E>,
 }
 
-impl<'a, 'b, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
-ChunksWriter<'a, 'b, IMG_IDX, TAILER_IDX, E, In, Out>
+impl<'a, 'b, 'c, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
+ChunksWriter<'a, 'b, 'c, IMG_IDX, TAILER_IDX, E, In, Out>
 where
-    E: Elem,
-    In: Iterator<Item = ChunkInfo<E>>,
+    E: Elem + 'a,
+    In: Iterator<Item = &'a ChunkInfo<E>>,
     Out: OutputBinaryStreams<U2>,
 {
     /// Constructs a new instance.

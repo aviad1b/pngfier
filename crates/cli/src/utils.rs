@@ -8,13 +8,19 @@ pub struct TempFile {
 
 impl TempFile {
     /// Constructs a new `TempFile` instance.
-    pub fn new() -> Self {
+    /// 
+    /// * `name` - Base name to base file path off.
+    /// 
+    /// Returns constructed instance.
+    /// 
+    pub fn new(name: &str) -> Self {
         static COUNTER: AtomicU64 = AtomicU64::new(0);
         let id = COUNTER.fetch_add(1, Ordering::SeqCst);
         let mut path = std::env::temp_dir();
         path.push(format!(
-            "pngfier_temp_{}_{}",
+            "pngfier_{}_{}_{}",
             std::process::id(),
+            name,
             id
         ));
         Self { path }

@@ -1,6 +1,10 @@
 use generic_array::{GenericArray, typenum::U2};
 
-use crate::streams::{dummy::{DummyBinaryStream, DummyOutputElemStream}, grouping::GroupedBinaryStreams, traits::Stream};
+use crate::streams::{
+    dummy::{DummyBinaryStream, DummyOutputElemStream},
+    grouping::GroupedBinaryStreams,
+    traits::Stream,
+};
 
 use super::super::chunks::{ChunkInfo, storage::*};
 

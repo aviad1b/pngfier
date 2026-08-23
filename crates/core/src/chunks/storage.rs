@@ -3,7 +3,12 @@ use std::{io, marker::PhantomData};
 use generic_array::typenum::U2;
 
 use crate::{
-    elems::Elem, streams::{grouping::UngroupedBinaryStream, spans::BinaryElemSpan, traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream}},
+    elems::Elem,
+    streams::{
+        grouping::UngroupedBinaryStream,
+        spans::BinaryElemSpan,
+        traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream},
+    },
 };
 
 use super::ChunkInfo;

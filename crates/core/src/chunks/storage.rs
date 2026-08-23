@@ -3,8 +3,7 @@ use std::{io, marker::PhantomData};
 use generic_array::typenum::U2;
 
 use crate::{
-    elems::Elem,
-    streams::{
+    chunks::ChunkSize, elems::Elem, streams::{
         grouping::UngroupedBinaryStream,
         spans::BinaryElemSpan,
         traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream},
@@ -21,6 +20,14 @@ pub struct ChunkInfoWidths {
     pub is_literal: usize,
     pub size: usize,
     pub index: usize,
+}
+
+impl ChunkInfoWidths {
+    /// Gets total size of all fields in bytes.
+    pub fn total_size_bytes(&self) -> ChunkSize {
+        ((self.is_literal as u64) + (self.size as u64) + (self.index as u64))
+            .div_ceil(16) as ChunkSize
+    }
 }
 
 /// Reads chunks from pngfied data.

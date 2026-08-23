@@ -20,3 +20,5 @@ pub enum ChunkInfo<E: Elem> {
 }
 
 pub mod mapping;
+
+pub mod storage;

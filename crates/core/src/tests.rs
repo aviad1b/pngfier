@@ -9,3 +9,6 @@ mod test_reach_mapping;
 
 #[cfg(test)]
 mod test_chunk_mapping;
+
+#[cfg(test)]
+mod test_chunk_storage;

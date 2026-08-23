@@ -21,12 +21,12 @@ pub struct ChunkInfoWidths {
 /// Reads chunks from pngfied data.
 /// 
 /// * `IMG_IDX` - Index of image stream in input set.
-/// * `TAILER_IDX` - Index of tailed (key) stream in input set.
+/// * `KEY_IDX` - Index of key stream in input set.
 /// * `E` - Element type.
-/// * `In` - A set type of two binary input streams (image and tailer/key).
+/// * `In` - A set type of two binary input streams (image and key).
 /// * `Out` - A type of stream to output read chunks into.
 /// 
-pub struct ChunksReader<'a, 'b, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
+pub struct ChunksReader<'a, 'b, const IMG_IDX: usize, const KEY_IDX: usize, E, In, Out>
 where
     E: Elem,
     In: InputBinaryStreams<U2>,
@@ -38,8 +38,8 @@ where
     phantom: PhantomData<E>,
 }
 
-impl<'a, 'b, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
-ChunksReader<'a, 'b, IMG_IDX, TAILER_IDX, E, In, Out>
+impl<'a, 'b, const IMG_IDX: usize, const KEY_IDX: usize, E, In, Out>
+ChunksReader<'a, 'b, IMG_IDX, KEY_IDX, E, In, Out>
 where
     E: Elem,
     In: InputBinaryStreams<U2>,
@@ -48,7 +48,7 @@ where
     /// Constructs a new instance.
     /// 
     /// * `widths` - Expected width of header fields (for each chunk in key).
-    /// * `input` - A set of two binary input streams (image and tailer/key).
+    /// * `input` - A set of two binary input streams (image and key).
     /// * `output` - A stream to output read chunks into.
     /// 
     /// Returns constructed instance.
@@ -92,8 +92,8 @@ where
     /// Returns error if occurred.
     /// 
     fn read_next_chunk_info(&mut self) -> io::Result<Option<ChunkInfo<E>>> {
-        // only passing tailer stream to read_chunk_info
-        let mut input = UngroupedBinaryStream::<'_, TAILER_IDX, _, _>::new(self.input);
+        // only passing key stream to read_chunk_info
+        let mut input = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.input);
         utils::read_chunk_info(&mut input, &self.widths)
     }
 }
@@ -101,12 +101,12 @@ where
 /// Writes chunks into pngfied data.
 /// 
 /// * `IMG_IDX` - Index of image stream in output set.
-/// * `TAILER_IDX` - Index of tailed (key) stream in output set.
+/// * `KEY_IDX` - Index of key stream in output set.
 /// * `E` - Element type.
 /// * `In` - An iterator type of chunks to write.
-/// * `Out` - A set type of two binary output streams (image and tailer/key).
+/// * `Out` - A set type of two binary output streams (image and key).
 /// 
-pub struct ChunksWriter<'a, 'b, 'c, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
+pub struct ChunksWriter<'a, 'b, 'c, const IMG_IDX: usize, const KEY_IDX: usize, E, In, Out>
 where
     E: Elem + 'a,
     In: Iterator<Item = &'a ChunkInfo<E>>,
@@ -119,8 +119,8 @@ where
     phantom: PhantomData<E>,
 }
 
-impl<'a, 'b, 'c, const IMG_IDX: usize, const TAILER_IDX: usize, E, In, Out>
-ChunksWriter<'a, 'b, 'c, IMG_IDX, TAILER_IDX, E, In, Out>
+impl<'a, 'b, 'c, const IMG_IDX: usize, const KEY_IDX: usize, E, In, Out>
+ChunksWriter<'a, 'b, 'c, IMG_IDX, KEY_IDX, E, In, Out>
 where
     E: Elem + 'a,
     In: Iterator<Item = &'a ChunkInfo<E>>,
@@ -130,7 +130,7 @@ where
     /// 
     /// * `widths` - Expected width of header fields (for each chunk in key).
     /// * `input` - An iterator of chunks to write.
-    /// * `output` - A set of two binary output streams (image and tailer/key).
+    /// * `output` - A set of two binary output streams (image and key).
     /// 
     /// Returns constructed instance.
     /// 
@@ -152,8 +152,8 @@ where
                 // write all cached literals as one chunk
                 Self::flush_cached_literals(self.output, &self.widths, &mut self.cached_literals)?;
                 
-                // write current chunk itself (only passing tailer stream to write_chunk_info)
-                let mut output = UngroupedBinaryStream::<'_, TAILER_IDX, _, _>::new(self.output);
+                // write current chunk itself (only passing key stream to write_chunk_info)
+                let mut output = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.output);
                 utils::write_chunk_info(&mut output, &self.widths, &chunk)?;
             }
         }
@@ -168,8 +168,8 @@ where
         if !cached_literals.is_empty() {
             let cached_literals = std::mem::take(cached_literals);
 
-            // only passing tailer stream to write_chunk_info
-            let mut output = UngroupedBinaryStream::<'_, TAILER_IDX, _, _>::new(output);
+            // only passing key stream to write_chunk_info
+            let mut output = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(output);
             utils::write_chunk_info(&mut output, widths, &ChunkInfo::Literal(cached_literals))?;
         }
         Ok(())

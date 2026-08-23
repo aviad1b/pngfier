@@ -3,8 +3,7 @@ use std::{io, marker::PhantomData};
 use generic_array::typenum::U2;
 
 use crate::{
-    elems::Elem,
-    streams::traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream},
+    elems::Elem, streams::{grouping::UngroupedBinaryStream, spans::BinaryElemSpan, traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream}},
 };
 
 use super::ChunkInfo;
@@ -55,8 +54,7 @@ where
     /// Returns constructed instance.
     /// 
     pub fn new(widths: ChunkInfoWidths, input: &'a mut In, output: &'b mut Out) -> Self {
-        let _ = (widths, input, output);
-        todo!() // TODO: Implement
+        Self { widths, input, output, phantom: PhantomData }
     }
 
     /// Reads next chunk from input and writes it to output (using streams provided at construction).
@@ -65,7 +63,18 @@ where
     /// Returns error if occurred.
     /// 
     pub fn extract_next(&mut self) -> io::Result<Option<()>> {
-        todo!() // TODO: Implement
+        match self.read_next_chunk_info()? {
+            None => return Ok(None), // nothing more to read
+            Some(ChunkInfo::Literal(elems)) =>
+                utils::extract_literal(self.output, &elems)?,
+            Some(ChunkInfo::Reference { index, size }) => {
+                // only passing elements span of image stream to extract_reference
+                let mut input = UngroupedBinaryStream::<'_, IMG_IDX, _, _>::new(self.input);
+                let mut input = BinaryElemSpan::new(&mut input, None, None);
+                utils::extract_reference(&mut input, self.output, index, size)?
+            },
+        }
+        Ok(Some(()))
     }
 
     /// Reads information (header) of next chunk from key.
@@ -74,7 +83,9 @@ where
     /// Returns error if occurred.
     /// 
     fn read_next_chunk_info(&mut self) -> io::Result<Option<ChunkInfo<E>>> {
-        todo!() // TODO: Implement
+        // only passing tailer stream to read_chunk_info
+        let mut input = UngroupedBinaryStream::<'_, TAILER_IDX, _, _>::new(self.input);
+        utils::read_chunk_info(&mut input, &self.widths)
     }
 }
 

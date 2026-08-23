@@ -25,7 +25,7 @@ fn chunks_storage_round_trip() {
     let mut key_stream = DummyBinaryStream::new(vec![]);
     let mut img_stream = DummyBinaryStream::new(img);
     let mut streams = GroupedBinaryStreams::<'_, U2, _>::new(
-        GenericArray::from_array([&mut key_stream, &mut img_stream])
+        GenericArray::from_array([&mut img_stream, &mut key_stream])
     );
 
     {

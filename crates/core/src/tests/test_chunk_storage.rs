@@ -24,11 +24,12 @@ fn chunks_storage_round_trip() {
     let widths = ChunkInfoWidths { is_literal: 1, size: 15, index: 16 };
     let mut img_stream = DummyBinaryStream::new(img);
     let mut key_stream = DummyBinaryStream::new(vec![]);
-    let mut streams = GroupedBinaryStreams::<'_, U2, _>::new(
-        GenericArray::from_array([&mut img_stream, &mut key_stream])
-    );
 
     {
+        let mut streams = GroupedBinaryStreams::<'_, U2, _>::new(
+            GenericArray::from_array([&mut img_stream, &mut key_stream])
+        );
+
         let chunks = &mut chunks.iter();
         let mut writer = ChunksWriter::<'_, '_, '_, 0, 1, _, _, _>::new(
             widths, chunks, &mut streams
@@ -38,6 +39,10 @@ fn chunks_storage_round_trip() {
 
     let mut output = DummyOutputElemStream::new(Vec::<u8>::new());
     {
+        let mut streams = GroupedBinaryStreams::<'_, U2, _>::new(
+            GenericArray::from_array([&mut img_stream, &mut key_stream])
+        );
+
         let mut reader = ChunksReader::<'_, '_, 0, 1, _, _, _>::new(
             widths, &mut streams, &mut output
         );

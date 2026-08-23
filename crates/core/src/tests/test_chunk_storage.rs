@@ -41,7 +41,7 @@ fn chunks_storage_round_trip() {
         let mut reader = ChunksReader::<'_, '_, 0, 1, _, _, _>::new(
             widths, &mut streams, &mut output
         );
-        while let Some(_) = reader.extract_next().unwrap() { }
+        reader.extract_all().unwrap();
     }
 
     assert_eq!(output.get_all(), expected);

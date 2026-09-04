@@ -27,6 +27,8 @@ struct Cli {
 }
 
 /// Widths for chunks I/O.
+/// Reference chunk is saved as: false(1), size(15), index(16)
+/// Literal chunk is saved as: true(1), size(15), elems...
 const WIDTHS: ChunkInfoWidths = ChunkInfoWidths {
     is_literal: 1,
     size: 15,

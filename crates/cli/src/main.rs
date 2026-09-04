@@ -85,8 +85,7 @@ fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> R
     let mut reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix)
         .context("Failed to construct reach mapper")?;
 
-    // cap minimum reference chunk size by size of header
-    // TODO: This is probably unoptimal, revise later when the headspace is clearer.
+    // cap minimum reference chunk size by size of fields sum (reference chunk size)
     let chunks = ChunkMapper::new(&mut reach)
         .map_chunks(Some(WIDTHS.total_size_bytes()), None)
         .context("Failed to map chunks")?;

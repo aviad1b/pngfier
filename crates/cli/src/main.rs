@@ -56,7 +56,6 @@ fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> R
         ImgSrc::Path(path) => path,
     };
 
-    // copy input image into output file
     let out_img_file = OutputFile::new()
         .context("Failed to create output file")?;
     let mut out_img_stream = OutputBinaryFileStream::new(out_img_file.path_str())

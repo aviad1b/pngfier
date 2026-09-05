@@ -3,7 +3,9 @@ use std::{io, marker::PhantomData};
 use generic_array::typenum::U2;
 
 use crate::{
-    chunks::ChunkSize, elems::Elem, streams::{
+    chunks::ChunkSize,
+    elems::Elem,
+    streams::{
         grouping::UngroupedBinaryStream,
         spans::BinaryElemSpan,
         traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream},

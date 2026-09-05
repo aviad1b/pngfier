@@ -29,7 +29,7 @@ struct Cli {
 const WIDTHS: ChunkInfoWidths = ChunkInfoWidths {
     is_literal: 1,
     size: 15,
-    index: 16,
+    index: 32,
 };
 
 fn main() -> Result<()> {

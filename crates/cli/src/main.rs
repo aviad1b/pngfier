@@ -4,9 +4,11 @@ use clap::Parser;
 use generic_array::GenericArray;
 use pngfier_core::{
     chunks::{
+        ChunkSize,
         mapping::{ChunkMapper, reach::MatrixBasedReachMapper},
         storage::{ChunkInfoWidths, ChunksReader, ChunksWriter},
-    }, elems::RuntimeElemIndexesMatrix, streams::{
+    },
+    elems::RuntimeElemIndexesMatrix, streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
         grouping::GroupedBinaryStreams, spans::BinaryElemSpan,
     },
@@ -81,8 +83,9 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
         .context("Failed to construct reach mapper")?;
 
     // cap minimum reference chunk size by size of fields sum (reference chunk size)
+    // cap maximum reference chunk size by maximum representable chunk index
     let chunks = ChunkMapper::new(&mut reach)
-        .map_chunks(Some(WIDTHS.total_size_bytes()), None)
+        .map_chunks(Some(WIDTHS.total_size_bytes()), Some(WIDTHS.max_index() as ChunkSize))
         .context("Failed to map chunks")?;
     let chunks = &mut chunks.iter();
     let mut writer = ChunksWriter::<'_, '_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(

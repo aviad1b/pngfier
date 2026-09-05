@@ -4,7 +4,8 @@ use clap::Parser;
 use generic_array::GenericArray;
 use pngfier_core::{
     chunks::{
-        mapping::{ChunkMapper, reach::MatrixBasedReachMapper}, storage::{ChunkInfoWidths, ChunksReader, ChunksWriter},
+        mapping::{ChunkMapper, reach::MatrixBasedReachMapper},
+        storage::{ChunkInfoWidths, ChunksReader, ChunksWriter},
     }, elems::RuntimeElemIndexesMatrix, streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
         grouping::GroupedBinaryStreams, spans::BinaryElemSpan,

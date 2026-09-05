@@ -1,8 +1,8 @@
 use anyhow::{Result, bail};
 use clap::Subcommand;
 
-// pngfier compile <input> <img-query>|<img-path> [<key-file>]
-// pngfier extract <image> <output> [<key-file>]
+// pngfier compile <in-file> {--img-query <img-query> | --img-path <img-path>} [--key-file <key-file>]
+// pngfier extract <in-image> <out-file> [<key-file>]
 
 #[derive(Subcommand)]
 pub enum Command {

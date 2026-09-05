@@ -3,7 +3,7 @@ use std::{io, marker::PhantomData};
 use generic_array::typenum::U2;
 
 use crate::{
-    chunks::ChunkSize, elems::Elem, streams::{
+    chunks::{ChunkIndex, ChunkSize}, elems::Elem, streams::{
         grouping::UngroupedBinaryStream,
         spans::BinaryElemSpan,
         traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream},
@@ -27,6 +27,11 @@ impl ChunkInfoWidths {
     pub fn total_size_bytes(&self) -> ChunkSize {
         ((self.is_literal as u64) + (self.size as u64) + (self.index as u64))
             .div_ceil(16) as ChunkSize
+    }
+
+    /// Gets maximum possible chunk index.
+    pub fn max_index(&self) -> ChunkIndex {
+        (1 as ChunkIndex) << self.index
     }
 }
 

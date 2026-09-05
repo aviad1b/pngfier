@@ -1,14 +1,17 @@
 use anyhow::{Result, bail};
 use clap::Subcommand;
 
-// pngfier compile <input> <img-query>|<img-path> [<key-file>]
-// pngfier extract <image> <output> [<key-file>]
+// pngfier compile <out-img> <in-file> {--img-query <img-query> | --img-path <img-path>} [--key-file <key-file>]
+// pngfier extract <in-img> <out-file> [<key-file>]
 
 #[derive(Subcommand)]
 pub enum Command {
     Compile {
+        /// Path to store output image to.
+        out_img: String,
+
         /// Input file to compile into a PNG.
-        input: String,
+        in_file: String,
 
         /// Query of image to generate.
         #[arg(short = 'q', long)]
@@ -24,10 +27,10 @@ pub enum Command {
     },
     Extract {
         /// Path to compiled image to extract data from.
-        img_path: String,
+        in_img: String,
 
         /// File path to store extracted data to.
-        output: String,
+        out_file: String,
 
         /// Optional path to read key from (instead of assuming PNG riding).
         #[arg(long)]
@@ -38,10 +41,8 @@ pub enum Command {
 /// Represents image source (search query / direct path).
 #[derive(Debug)]
 pub enum ImgSrc {
-    // TODO: Remove these allows once real implementation is added.
-    #[allow(dead_code)]
+    #[allow(dead_code)] // TODO: Remove this allow once query feature is added.
     Query(String),
-    #[allow(dead_code)]
     Path(String),
 }
 

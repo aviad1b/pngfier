@@ -2,13 +2,13 @@ use anyhow::{Result, bail};
 use clap::Subcommand;
 
 // pngfier compile <in-file> {--img-query <img-query> | --img-path <img-path>} [--key-file <key-file>]
-// pngfier extract <in-image> <out-file> [<key-file>]
+// pngfier extract <in-img> <out-file> [<key-file>]
 
 #[derive(Subcommand)]
 pub enum Command {
     Compile {
         /// Input file to compile into a PNG.
-        input: String,
+        in_file: String,
 
         /// Query of image to generate.
         #[arg(short = 'q', long)]
@@ -24,10 +24,10 @@ pub enum Command {
     },
     Extract {
         /// Path to compiled image to extract data from.
-        img_path: String,
+        in_img: String,
 
         /// File path to store extracted data to.
-        output: String,
+        out_file: String,
 
         /// Optional path to read key from (instead of assuming PNG riding).
         #[arg(long)]

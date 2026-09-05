@@ -35,19 +35,19 @@ const WIDTHS: ChunkInfoWidths = ChunkInfoWidths {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Command::Compile { input, img_query, img_path, key_file } =>
-            handle_compile(input, ImgSrc::from_args(img_query, img_path)?, key_file),
-        Command::Extract { img_path, output, key_file } =>
-            handle_extract(img_path, output, key_file),
+        Command::Compile { in_file, img_query, img_path, key_file } =>
+            handle_compile(in_file, ImgSrc::from_args(img_query, img_path)?, key_file),
+        Command::Extract { in_img, out_file, key_file } =>
+            handle_extract(in_img, out_file, key_file),
     }
 }
 
 /// Handles 'compile' command.
-/// * `input` - Input file to compile into a PNG.
+/// * `in_file` - Input file to compile into a PNG.
 /// * `img_src` - Image source path (of image to override).
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
-fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
+fn handle_compile(in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
     let input_image_path = match img_src {
         ImgSrc::Query(_) => bail!("Query-based compiling is not supported yet."),
         ImgSrc::Path(path) => path,
@@ -73,7 +73,7 @@ fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> R
         .context("Failed to write to output")?;
     let mut image = BinaryElemSpan::<'_, u8, _>::new(&mut image, None, None);
 
-    let mut data = InputBinaryFileStream::new(&input)
+    let mut data = InputBinaryFileStream::new(&in_file)
         .context("Failed to read from input data")?;
     let mut data = BinaryElemSpan::new(&mut data, None, None);
 
@@ -98,12 +98,12 @@ fn handle_compile(input: String, img_src: ImgSrc, key_file: Option<String>) -> R
 }
 
 /// Handles 'extract' command.
-/// * `img_path` - Path to compiled image to extract data from.
-/// * `output` - File path to store extracted data to.
+/// * `in_img` - Path to compiled image to extract data from.
+/// * `out_file` - File path to store extracted data to.
 /// * `key_file` - Optional path to read key from (instead of assuming PNG riding).
 /// Returns error if occured.
-fn handle_extract(img_path: String, output: String, key_file: Option<String>) -> Result<()> {
-    let mut in_img_stream = InputBinaryFileStream::new(&img_path)
+fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) -> Result<()> {
+    let mut in_img_stream = InputBinaryFileStream::new(&in_img)
         .context("Failed to read from output file")?;
     let mut in_key_stream = match key_file {
         None => bail!("Key file is mandatory for now."),
@@ -117,7 +117,7 @@ fn handle_extract(img_path: String, output: String, key_file: Option<String>) ->
         GenericArray::from_array([&mut in_img_stream, &mut in_key_stream])
     );
 
-    let mut out_chunks = OutputBinaryFileStream::new(&output)
+    let mut out_chunks = OutputBinaryFileStream::new(&out_file)
         .context("Failed to write to output file")?;
     let mut out_chunks = BinaryElemSpan::<'_, u8, _>::new(&mut out_chunks, None, None);
 

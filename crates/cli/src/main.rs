@@ -56,6 +56,8 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
         ImgSrc::Path(path) => path,
     };
 
+    std::fs::copy(&input_image_path, &out_img)
+        .context("Failed to copy source to output")?;
     let mut out_img_stream = OutputBinaryFileStream::new(&out_img)
         .context("Failed to write to output file")?;
     let mut out_key_stream = match key_file {

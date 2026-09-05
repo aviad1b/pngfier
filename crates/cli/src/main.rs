@@ -11,7 +11,7 @@ use pngfier_core::{
     },
 };
 
-use crate::{commands::{Command, ImgSrc}, utils::OutputFile};
+use crate::commands::{Command, ImgSrc};
 
 mod commands;
 mod utils;
@@ -49,16 +49,12 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    let _ = out_img;
-
     let input_image_path = match img_src {
         ImgSrc::Query(_) => bail!("Query-based compiling is not supported yet."),
         ImgSrc::Path(path) => path,
     };
 
-    let out_img_file = OutputFile::new()
-        .context("Failed to create output file")?;
-    let mut out_img_stream = OutputBinaryFileStream::new(out_img_file.path_str())
+    let mut out_img_stream = OutputBinaryFileStream::new(&out_img)
         .context("Failed to write to output file")?;
     let mut out_key_stream = match key_file {
         None => bail!("Key file is mandatory for now."),
@@ -95,7 +91,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
 
     writer.write().context("Failed to write chunks into output")?;
 
-    println!("Output saved at {}", out_img_file.path_str());
+    println!("Output saved at {}", &out_img);
 
     Ok(())
 }

@@ -90,7 +90,7 @@ where
     /// Returns `None` if reached end of chunks (no chunks are left).
     /// Returns error if occurred.
     /// 
-    pub fn extract_next(&mut self) -> io::Result<Option<()>> {
+    fn extract_next(&mut self) -> io::Result<Option<()>> {
         match self.read_next_chunk_info()? {
             None => return Ok(None), // nothing more to read
             Some(ChunkInfo::Literal(elems)) =>

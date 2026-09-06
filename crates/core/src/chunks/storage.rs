@@ -3,12 +3,8 @@ use std::{io, marker::PhantomData};
 use generic_array::typenum::U2;
 
 use crate::{
-    chunks::ChunkSize,
-    elems::Elem,
-    streams::{
-        grouping::UngroupedBinaryStream,
-        spans::BinaryElemSpan,
-        traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream},
+    chunks::ChunkSize, elems::Elem, streams::{
+        grouping::UngroupedBinaryStream, spans::BinaryElemSpan, traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream, Stream},
     },
 };
 
@@ -102,7 +98,8 @@ where
             Some(ChunkInfo::Reference { index, size }) => {
                 // only passing elements span of image stream to extract_reference
                 let mut input = UngroupedBinaryStream::<'_, IMG_IDX, _, _>::new(self.input);
-                let mut input = BinaryElemSpan::new(&mut input, None, None);
+                let pos = input.get_pos()?;
+                let mut input = BinaryElemSpan::new(&mut input, Some(pos), None);
                 utils::extract_reference(&mut input, self.output, index, size)?
             },
         }

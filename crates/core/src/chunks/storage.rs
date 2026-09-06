@@ -19,9 +19,9 @@ mod utils;
 /// Holds bit widths of chunk info header fields (in key).
 #[derive(Clone, Copy)]
 pub struct ChunkInfoWidths {
-    pub is_literal: usize,
-    pub size: usize,
-    pub index: usize,
+    pub is_literal: u8,
+    pub size: u8,
+    pub index: u8,
 }
 
 impl ChunkInfoWidths {

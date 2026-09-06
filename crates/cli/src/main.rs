@@ -17,6 +17,7 @@ use pngfier_core::{
 use crate::commands::{Command, ImgSrc};
 
 mod commands;
+mod files;
 
 /// Main CLI parser.
 #[derive(Parser)]

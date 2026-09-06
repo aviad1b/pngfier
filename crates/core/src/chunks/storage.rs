@@ -51,7 +51,6 @@ where
     In: InputBinaryStreams<U2>,
     Out: OutputElemStream<E>,
 {
-    widths: ChunkInfoWidths,
     input: &'a mut In,
     output: &'b mut Out,
     phantom: PhantomData<E>,
@@ -66,14 +65,13 @@ where
 {
     /// Constructs a new instance.
     /// 
-    /// * `widths` - Expected width of header fields (for each chunk in key).
     /// * `input` - A set of two binary input streams (image and key).
     /// * `output` - A stream to output read chunks into.
     /// 
     /// Returns constructed instance.
     /// 
-    pub fn new(widths: ChunkInfoWidths, input: &'a mut In, output: &'b mut Out) -> Self {
-        Self { widths, input, output, phantom: PhantomData }
+    pub fn new(input: &'a mut In, output: &'b mut Out) -> Self {
+        Self { input, output, phantom: PhantomData }
     }
 
     /// Reads all chunks from input and writes it to output (using streams provided at construction).
@@ -81,17 +79,23 @@ where
     /// Returns error if occurred.
     /// 
     pub fn extract_all(&mut self) -> io::Result<()> {
-        while let Some(_) = self.extract_next()? { }
+        let widths = {
+            let mut input = UngroupedBinaryStream::<'_, IMG_IDX, _, _>::new(self.input);
+            utils::read_widths(&mut input)
+        }?;
+        while let Some(_) = self.extract_next(&widths)? { }
         Ok(())
     }
 
     /// Reads next chunk from input and writes it to output (using streams provided at construction).
     /// 
+    /// * `widths` - Expected width of header fields (for each chunk in key).
+    /// 
     /// Returns `None` if reached end of chunks (no chunks are left).
     /// Returns error if occurred.
     /// 
-    fn extract_next(&mut self) -> io::Result<Option<()>> {
-        match self.read_next_chunk_info()? {
+    fn extract_next(&mut self, widths: &ChunkInfoWidths) -> io::Result<Option<()>> {
+        match self.read_next_chunk_info(widths)? {
             None => return Ok(None), // nothing more to read
             Some(ChunkInfo::Literal(elems)) =>
                 utils::extract_literal(self.output, &elems)?,
@@ -107,13 +111,15 @@ where
 
     /// Reads information (header) of next chunk from key.
     /// 
+    /// * `widths` - Expected width of header fields (for each chunk in key).
+    /// 
     /// Returns read chunk info, or `None` if no chunks are left.
     /// Returns error if occurred.
     /// 
-    fn read_next_chunk_info(&mut self) -> io::Result<Option<ChunkInfo<E>>> {
+    fn read_next_chunk_info(&mut self, widths: &ChunkInfoWidths) -> io::Result<Option<ChunkInfo<E>>> {
         // only passing key stream to read_chunk_info
         let mut input = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.input);
-        utils::read_chunk_info(&mut input, &self.widths)
+        utils::read_chunk_info(&mut input, widths)
     }
 }
 
@@ -162,6 +168,12 @@ where
     /// Returns error if occurred.
     /// 
     pub fn write(&mut self) -> io::Result<()> {
+        // write widths
+        {
+            let mut output = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.output);
+            utils::write_widths(&mut output, &self.widths)?;
+        }
+
         let input = &mut *self.input;
         for chunk in input {
             // if current chunk is literal, cache to write later

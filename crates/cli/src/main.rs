@@ -126,7 +126,7 @@ fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) ->
     let mut out_chunks = BinaryElemSpan::<'_, u8, _>::new(&mut out_chunks, None, None);
 
     let mut reader = ChunksReader::<'_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(
-        WIDTHS, &mut input, &mut out_chunks
+        &mut input, &mut out_chunks
     );
 
     reader.extract_all().context("Failed to extract chunks")?;

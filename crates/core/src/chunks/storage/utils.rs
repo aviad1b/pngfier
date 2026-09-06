@@ -24,6 +24,21 @@ use crate::{
     },
 };
 
+pub fn read_widths<S: InputBinaryStream>(input: &mut S) -> io::Result<ChunkInfoWidths> {
+    let mut res = ChunkInfoWidths { is_literal: 0, size: 0, index: 0 };
+    input.read_bytes(std::slice::from_mut(&mut res.is_literal))?;
+    input.read_bytes(std::slice::from_mut(&mut res.size))?;
+    input.read_bytes(std::slice::from_mut(&mut res.index))?;
+    Ok(res)
+}
+
+pub fn write_widths<S: OutputBinaryStream>(output: &mut S, widths: &ChunkInfoWidths) -> io::Result<()> {
+    output.write_bytes(std::slice::from_ref(&widths.is_literal))?;
+    output.write_bytes(std::slice::from_ref(&widths.size))?;
+    output.write_bytes(std::slice::from_ref(&widths.index))?;
+    Ok(())
+}
+
 /// Reads a chunk (info) from key.
 /// 
 /// * `E` - Element type.

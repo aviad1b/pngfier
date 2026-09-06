@@ -76,7 +76,7 @@ where
     /// 
     pub fn extract_all(&mut self) -> io::Result<()> {
         let widths = {
-            let mut input = UngroupedBinaryStream::<'_, IMG_IDX, _, _>::new(self.input);
+            let mut input = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.input);
             utils::read_widths(&mut input)
         }?;
         while let Some(_) = self.extract_next(&widths)? { }

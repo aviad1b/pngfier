@@ -75,12 +75,18 @@ where
     /// Returns error if occurred.
     /// 
     pub fn extract_all(&mut self) -> io::Result<()> {
-        let widths = {
-            let mut input = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.input);
-            utils::read_widths(&mut input)
-        }?;
+        let widths = self.read_widths()?;
         while let Some(_) = self.extract_next(&widths)? { }
         Ok(())
+    }
+
+    /// Reads widths from key.
+    /// 
+    /// Returns read widths, or error if occurred.
+    /// 
+    fn read_widths(&mut self) -> io::Result<ChunkInfoWidths> {
+        let mut input = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.input);
+        utils::read_widths(&mut input)
     }
 
     /// Reads next chunk from input and writes it to output (using streams provided at construction).
@@ -165,11 +171,7 @@ where
     /// Returns error if occurred.
     /// 
     pub fn write(&mut self) -> io::Result<()> {
-        // write widths
-        {
-            let mut output = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.output);
-            utils::write_widths(&mut output, &self.widths)?;
-        }
+        self.write_widths()?;
 
         let input = &mut *self.input;
         for chunk in input {
@@ -187,6 +189,15 @@ where
         }
         Self::flush_cached_literals(self.output, &self.widths, &mut self.cached_literals)?;
         Ok(())
+    }
+
+    /// Writes widths field to key.
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn write_widths(&mut self) -> io::Result<()> {
+        let mut output = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.output);
+        utils::write_widths(&mut output, &self.widths)
     }
 
     /// Flushes vector of cached literals as one literal chunk.

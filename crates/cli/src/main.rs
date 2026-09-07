@@ -1,15 +1,7 @@
-use anyhow::{Context, Result, bail};
+use anyhow::{Result, bail};
 use clap::Parser;
 
-use generic_array::GenericArray;
-use pngfier_core::{
-    chunks::storage::{ChunkInfoWidths, ChunksReader},
-    streams::{
-        files::{InputBinaryFileStream, OutputBinaryFileStream},
-        grouping::GroupedBinaryStreams,
-        spans::BinaryElemSpan,
-    },
-};
+use pngfier_core::chunks::storage::ChunkInfoWidths;
 
 use crate::commands::{Command, ImgSrc};
 
@@ -76,29 +68,15 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
 /// * `key_file` - Optional path to read key from (instead of assuming PNG riding).
 /// Returns error if occured.
 fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) -> Result<()> {
-    let mut in_img_stream = InputBinaryFileStream::new(&in_img)
-        .context("Failed to read from output file")?;
-    let mut in_key_stream = match key_file {
+    let in_key_path = match key_file {
+        Some(x) => x,
         None => bail!("Key file is mandatory for now."),
-        Some(key_file_path) => InputBinaryFileStream::new(&key_file_path)
-            .context("Failed to read from key file")?
     };
 
-    const IMG_IDX: usize = 0;
-    const KEY_IDX: usize = 1;
-    let mut input = GroupedBinaryStreams::new(
-        GenericArray::from_array([&mut in_img_stream, &mut in_key_stream])
-    );
-
-    let mut out_chunks = OutputBinaryFileStream::new(&out_file)
-        .context("Failed to write to output file")?;
-    let mut out_chunks = BinaryElemSpan::<'_, u8, _>::new(&mut out_chunks, None, None);
-
-    let mut reader = ChunksReader::<'_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(
-        &mut input, &mut out_chunks
-    );
-
-    reader.extract_all().context("Failed to extract chunks")?;
+    configs::extract::extract_with_key(
+        |streams| callbacks::extract(streams),
+        &in_img, &in_key_path, &out_file
+    )?;
 
     Ok(())
 }

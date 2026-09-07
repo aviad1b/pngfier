@@ -4,16 +4,21 @@ use generic_array::GenericArray;
 use pngfier_core::{
     chunks::{
         mapping::{ChunkMapper, reach::MatrixBasedReachMapper},
-        storage::{ChunkInfoWidths, ChunksWriter},
+        storage::{ChunkInfoWidths, ChunksReader, ChunksWriter},
     },
     elems::RuntimeElemIndexesMatrix,
     streams::{
         grouping::GroupedBinaryStreams,
-        traits::{InputElemStream, OutputBinaryStream},
+        traits::{
+            InputBinaryStream,
+            InputElemStream,
+            OutputBinaryStream,
+            OutputElemStream,
+        },
     },
 };
 
-use crate::configs::compile::CompileStreams;
+use crate::configs::{compile::CompileStreams, extract::ExtractStreams};
 
 /// Callback function which performs compile operation.
 /// 
@@ -53,6 +58,32 @@ where
 
         writer.write().context("Failed to write chunks into output")?;
     }
+
+    Ok(())
+}
+
+/// Callback function which performs extract operation.
+/// 
+/// * `streams` - Input & output streams to perform extract operation on.
+/// 
+/// Returns error if occurred.
+/// 
+pub fn extract<In, Out>(streams: &mut ExtractStreams<u8, In, Out>) -> Result<()>
+where
+    In: InputBinaryStream,
+    Out: OutputElemStream<u8>,
+{
+    const IMG_IDX: usize = 0;
+    const KEY_IDX: usize = 1;
+    let mut input = GroupedBinaryStreams::new(
+        GenericArray::from_array([&mut streams.in_img, &mut streams.in_key])
+    );
+
+    let mut reader = ChunksReader::<'_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(
+        &mut input, &mut streams.out_data
+    );
+
+    reader.extract_all().context("Failed to extract chunks")?;
 
     Ok(())
 }

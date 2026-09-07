@@ -10,6 +10,9 @@ mod commands;
 mod streams;
 mod configs;
 
+/// Element type used in I/O operation.
+type E = u8;
+
 /// Widths for chunks I/O.
 /// Reference chunk is saved as: false(1), size(15), index(16)
 /// Literal chunk is saved as: true(1), size(15), elems...
@@ -43,7 +46,7 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    configs::apply_compile::<u8>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
+    configs::apply_compile::<E>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
 
     println!("Output saved at {}", &out_img);
 
@@ -56,7 +59,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
 /// * `key_file` - Optional path to read key from (instead of assuming PNG riding).
 /// Returns error if occured.
 fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) -> Result<()> {
-    configs::apply_extract::<u8>(&in_img, &out_file, &key_file)?;
+    configs::apply_extract::<E>(&in_img, &out_file, &key_file)?;
 
     println!("Output saved at {}", &out_file);
 

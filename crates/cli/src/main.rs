@@ -55,15 +55,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
 /// * `key_file` - Optional path to read key from (instead of assuming PNG riding).
 /// Returns error if occured.
 fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) -> Result<()> {
-    let in_key_path = match key_file {
-        Some(x) => x,
-        None => bail!("Key file is mandatory for now."),
-    };
-
-    configs::extract::with_key(
-        |streams| callbacks::extract::<u8, _, _>(streams),
-        &in_img, &in_key_path, &out_file
-    )?;
+    configs::extract::apply::<u8>(&in_img, &out_file, &key_file)?;
 
     println!("Output saved at {}", &out_file);
 

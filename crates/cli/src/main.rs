@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::Result;
 use clap::Parser;
 
 use pngfier_core::chunks::storage::ChunkInfoWidths;

@@ -78,5 +78,7 @@ fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) ->
         &in_img, &in_key_path, &out_file
     )?;
 
+    println!("Output saved at {}", &out_file);
+
     Ok(())
 }

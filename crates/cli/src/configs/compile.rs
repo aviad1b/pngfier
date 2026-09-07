@@ -5,7 +5,8 @@ use pngfier_core::{
     elems::Elem,
     streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
-        spans::BinaryElemSpan, traits::{InputElemStream, OutputBinaryStream},
+        spans::BinaryElemSpan,
+        traits::{InputElemStream, OutputBinaryStream},
     },
 };
 

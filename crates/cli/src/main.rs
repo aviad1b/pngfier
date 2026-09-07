@@ -42,7 +42,7 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    configs::compile::apply::<u8>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
+    configs::apply_compile::<u8>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
 
     println!("Output saved at {}", &out_img);
 
@@ -55,7 +55,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
 /// * `key_file` - Optional path to read key from (instead of assuming PNG riding).
 /// Returns error if occured.
 fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) -> Result<()> {
-    configs::extract::apply::<u8>(&in_img, &out_file, &key_file)?;
+    configs::apply_extract::<u8>(&in_img, &out_file, &key_file)?;
 
     println!("Output saved at {}", &out_file);
 

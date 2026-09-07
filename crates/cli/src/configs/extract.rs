@@ -1,15 +1,14 @@
 use std::marker::PhantomData;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use pngfier_core::{
-    elems::Elem, streams::{
+    elems::Elem,
+    streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
         spans::BinaryElemSpan,
         traits::{InputBinaryStream, OutputElemStream},
     },
 };
-
-use crate::callbacks;
 
 /// Holds input & output streams for extract operation.
 /// 
@@ -51,16 +50,6 @@ where
     /// 
     fn new(in_img: In, in_key: In, out_data: Out) -> Self {
         Self { out_data, in_img, in_key, phantom: PhantomData }
-    }
-}
-
-pub fn apply<E: Elem>(in_img: &String, out_file: &String, key_file: &Option<String>) -> Result<()> {
-    match key_file {
-        Some(in_key_path) => with_key(
-            |streams| callbacks::extract::<E, _, _>(streams),
-            in_img, in_key_path, out_file
-        ),
-        None => bail!("Key file is mandatory for now."),
     }
 }
 

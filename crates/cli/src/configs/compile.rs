@@ -1,61 +1,13 @@
-use std::marker::PhantomData;
-
 use anyhow::{Context, Result};
 use pngfier_core::{
     elems::Elem,
     streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
         spans::BinaryElemSpan,
-        traits::{InputElemStream, OutputBinaryStream},
     },
 };
 
-/// Holds input & output streams for compile operation.
-/// 
-/// * `E` - Element type (for input/output).
-/// * `In` - Input stream type (elements stream).
-/// * `Out` - Output stream type (binary stream).
-/// 
-pub struct CompileStreams<E, In, Out>
-where
-    E: Elem,
-    In: InputElemStream<E>,
-    Out: OutputBinaryStream,
-{
-    /// Input image stream (of image to ride).
-    pub in_img: In,
-
-    /// Input data stream (of data to compile).
-    pub in_data: In,
-
-    /// Output image stream (for result image).
-    pub out_img: Out,
-
-    /// Output key stream (for result key).
-    pub out_key: Out,
-
-    phantom: PhantomData<E>,
-}
-
-impl<E, In, Out> CompileStreams<E, In, Out>
-where
-    E: Elem,
-    In: InputElemStream<E>,
-    Out: OutputBinaryStream,
-{
-    /// Constructs a new instance.
-    /// 
-    /// * `in_img` - Input image stream (of image to ride).
-    /// * `in_data` - Input data stream (of data to compile).
-    /// * `out_img` - Output image stream (for result image).
-    /// * `out_key` - Output key stream (for result key).
-    /// 
-    /// Returns constructed instance.
-    /// 
-    fn new(in_img: In, in_data: In, out_img: Out, out_key: Out) -> Self {
-        Self { in_img, in_data, out_img, out_key, phantom: PhantomData }
-    }
-}
+use crate::configs::streams::CompileStreams;
 
 /// Generates configuration for compile operation with source image path and output key path, 
 /// then performs compile operation via a given callback.

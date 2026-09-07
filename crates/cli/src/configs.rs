@@ -4,8 +4,8 @@ use pngfier_core::{chunks::storage::ChunkInfoWidths, elems::Elem};
 use crate::{callbacks, commands::ImgSrc};
 
 pub mod streams;
-pub mod compile;
-pub mod extract;
+mod compile;
+mod extract;
 
 pub fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
                               out_img: &String, in_file: &String,

@@ -36,8 +36,7 @@ where
     phantom: PhantomData<E>,
 }
 
-impl<E, In, Out>
-CompileStreams<E, In, Out>
+impl<E, In, Out> CompileStreams<E, In, Out>
 where
     E: Elem,
     In: InputElemStream<E>,

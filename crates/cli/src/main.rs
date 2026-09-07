@@ -53,7 +53,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
     };
 
     configs::compile::path_with_key(
-        |streams| callbacks::compile(&WIDTHS, streams),
+        |streams| callbacks::compile::<u8, _, _>(&WIDTHS, streams),
         &in_img_path, &in_file, &out_img, &out_key_path
     )?;
 
@@ -74,7 +74,7 @@ fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) ->
     };
 
     configs::extract::with_key(
-        |streams| callbacks::extract(streams),
+        |streams| callbacks::extract::<u8, _, _>(streams),
         &in_img, &in_key_path, &out_file
     )?;
 

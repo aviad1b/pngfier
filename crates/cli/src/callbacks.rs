@@ -5,9 +5,7 @@ use pngfier_core::{
     chunks::{
         mapping::{ChunkMapper, reach::MatrixBasedReachMapper},
         storage::{ChunkInfoWidths, ChunksReader, ChunksWriter},
-    },
-    elems::RuntimeElemIndexesMatrix,
-    streams::{
+    }, elems::{Elem, RuntimeElemIndexesMatrix}, streams::{
         grouping::GroupedBinaryStreams,
         traits::{
             InputBinaryStream,
@@ -27,9 +25,10 @@ use crate::configs::{compile::CompileStreams, extract::ExtractStreams};
 /// 
 /// Returns error if occurred.
 /// 
-pub fn compile<In, Out>(widths: &ChunkInfoWidths, streams: &mut [CompileStreams<u8, In, Out>]) -> Result<()>
+pub fn compile<E, In, Out>(widths: &ChunkInfoWidths, streams: &mut [CompileStreams<E, In, Out>]) -> Result<()>
 where
-    In: InputElemStream<u8>,
+    E: Elem,
+    In: InputElemStream<E>,
     Out: OutputBinaryStream,
 {
     // cap minimum reference chunk size by size of fields sum (reference chunk size)
@@ -68,10 +67,11 @@ where
 /// 
 /// Returns error if occurred.
 /// 
-pub fn extract<In, Out>(streams: &mut ExtractStreams<u8, In, Out>) -> Result<()>
+pub fn extract<E, In, Out>(streams: &mut ExtractStreams<E, In, Out>) -> Result<()>
 where
+    E: Elem,
     In: InputBinaryStream,
-    Out: OutputElemStream<u8>,
+    Out: OutputElemStream<E>,
 {
     const IMG_IDX: usize = 0;
     const KEY_IDX: usize = 1;

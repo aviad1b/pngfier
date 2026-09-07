@@ -68,9 +68,9 @@ where
 /// 
 /// Returns error if occurred.
 /// 
-pub fn compile_path_with_key<E, Callback>(mut callback: Callback,
-                                          in_img_path: &str, in_data_path: &str,
-                                          out_img_path: &str, out_key_path: &str) -> Result<()>
+pub fn path_with_key<E, Callback>(mut callback: Callback,
+                                  in_img_path: &str, in_data_path: &str,
+                                  out_img_path: &str, out_key_path: &str) -> Result<()>
 where
     E: Elem,
     Callback: for <'a> FnMut(&mut [CompileStreams<E,

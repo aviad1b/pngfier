@@ -62,9 +62,9 @@ where
 /// 
 /// Returns error if occurred.
 /// 
-pub fn extract_with_key<E, Callback>(mut callback: Callback,
-                                     in_img_path: &str, in_key_path: &str,
-                                     out_data_path: &str) -> Result<()>
+pub fn with_key<E, Callback>(mut callback: Callback,
+                             in_img_path: &str, in_key_path: &str,
+                             out_data_path: &str) -> Result<()>
 where
     E: Elem,
     Callback: for <'a> FnMut(&mut ExtractStreams<E,

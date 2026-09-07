@@ -52,7 +52,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
         None => bail!("Key file is mandatory for now."),
     };
 
-    configs::compile::compile_path_with_key(
+    configs::compile::path_with_key(
         |streams| callbacks::compile(&WIDTHS, streams),
         &in_img_path, &in_file, &out_img, &out_key_path
     )?;
@@ -73,7 +73,7 @@ fn handle_extract(in_img: String, out_file: String, key_file: Option<String>) ->
         None => bail!("Key file is mandatory for now."),
     };
 
-    configs::extract::extract_with_key(
+    configs::extract::with_key(
         |streams| callbacks::extract(streams),
         &in_img, &in_key_path, &out_file
     )?;

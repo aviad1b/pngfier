@@ -13,7 +13,7 @@ use pngfier_core::{
     },
 };
 
-use crate::configs::CompileStreams;
+use crate::configs::compile::CompileStreams;
 
 /// Callback function which performs compile operation.
 /// 

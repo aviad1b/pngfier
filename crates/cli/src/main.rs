@@ -60,7 +60,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
         None => bail!("Key file is mandatory for now."),
     };
 
-    configs::compile_path_with_key(
+    configs::compile::compile_path_with_key(
         |streams| callbacks::compile(&WIDTHS, streams),
         &in_img_path, &in_file, &out_img, &out_key_path
     )?;

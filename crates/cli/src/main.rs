@@ -42,20 +42,7 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    let in_img_path = match img_src {
-        ImgSrc::Query(_) => bail!("Query-based compiling is not supported yet."),
-        ImgSrc::Path(path) => path,
-    };
-
-    let out_key_path = match key_file {
-        Some(x) => x,
-        None => bail!("Key file is mandatory for now."),
-    };
-
-    configs::compile::path_with_key(
-        |streams| callbacks::compile::<u8, _, _>(&WIDTHS, streams),
-        &in_img_path, &in_file, &out_img, &out_key_path
-    )?;
+    configs::compile::apply::<u8>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
 
     println!("Output saved at {}", &out_img);
 

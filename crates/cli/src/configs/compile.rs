@@ -1,14 +1,15 @@
 use std::marker::PhantomData;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use pngfier_core::{
-    elems::Elem,
-    streams::{
+    chunks::storage::ChunkInfoWidths, elems::Elem, streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
         spans::BinaryElemSpan,
         traits::{InputElemStream, OutputBinaryStream},
     },
 };
+
+use crate::{callbacks, commands::ImgSrc};
 
 /// Holds input & output streams for compile operation.
 /// 
@@ -54,6 +55,20 @@ where
     /// 
     fn new(in_img: In, in_data: In, out_img: Out, out_key: Out) -> Self {
         Self { in_img, in_data, out_img, out_key, phantom: PhantomData }
+    }
+}
+
+pub fn apply<E: Elem>(widths: &ChunkInfoWidths,
+                      out_img: &String, in_file: &String,
+                      img_src: &ImgSrc, key_file: &Option<String>) -> Result<()> {
+    match (img_src, key_file) {
+        (ImgSrc::Query(_), None) => bail!("Query-based compiling is not supported yet."),
+        (ImgSrc::Query(_), Some(_)) => bail!("Query-based compiling is not supported yet."),
+        (ImgSrc::Path(_), None) => bail!("Key file is mandatory for now."),
+        (ImgSrc::Path(in_img_path), Some(out_key_path)) => path_with_key(
+            |streams| callbacks::compile::<E, _, _>(widths, streams),
+            &in_img_path, &in_file, &out_img, &out_key_path
+        ),
     }
 }
 

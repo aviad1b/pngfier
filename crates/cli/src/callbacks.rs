@@ -6,7 +6,8 @@ use pngfier_core::{
         mapping::{ChunkMapper, reach::MatrixBasedReachMapper},
         storage::{ChunkInfoWidths, ChunksWriter},
     },
-    elems::RuntimeElemIndexesMatrix, streams::{
+    elems::RuntimeElemIndexesMatrix,
+    streams::{
         grouping::GroupedBinaryStreams,
         traits::{InputElemStream, OutputBinaryStream},
     },

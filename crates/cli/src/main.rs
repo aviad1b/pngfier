@@ -7,6 +7,7 @@ use crate::commands::{Command, ImgSrc};
 
 mod callbacks;
 mod commands;
+mod streams;
 mod configs;
 
 /// Main CLI parser.

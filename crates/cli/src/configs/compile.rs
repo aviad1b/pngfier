@@ -7,7 +7,7 @@ use pngfier_core::{
     },
 };
 
-use crate::configs::streams::CompileStreams;
+use crate::streams::CompileStreams;
 
 /// Generates configuration for compile operation with source image path and output key path, 
 /// then performs compile operation via a given callback.

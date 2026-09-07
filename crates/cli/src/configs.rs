@@ -3,7 +3,6 @@ use pngfier_core::{chunks::storage::ChunkInfoWidths, elems::Elem};
 
 use crate::{callbacks, commands::ImgSrc};
 
-pub mod streams;
 mod compile;
 mod extract;
 

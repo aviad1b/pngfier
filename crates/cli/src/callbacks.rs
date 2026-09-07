@@ -16,7 +16,7 @@ use pngfier_core::{
     },
 };
 
-use crate::configs::streams::{CompileStreams, ExtractStreams};
+use crate::streams::{CompileStreams, ExtractStreams};
 
 /// Callback function which performs compile operation.
 /// 

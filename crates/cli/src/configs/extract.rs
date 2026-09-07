@@ -7,7 +7,7 @@ use pngfier_core::{
     },
 };
 
-use crate::configs::streams::ExtractStreams;
+use crate::streams::ExtractStreams;
 
 /// Generates configuration for extract operation with input key path, 
 /// then performs compile operation via a given callback.

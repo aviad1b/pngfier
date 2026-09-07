@@ -10,13 +10,16 @@ use pngfier_core::{
     elems::RuntimeElemIndexesMatrix,
     streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
-        grouping::GroupedBinaryStreams, spans::BinaryElemSpan,
+        grouping::GroupedBinaryStreams,
+        spans::BinaryElemSpan,
+        traits::{InputElemStream, OutputBinaryStream},
     },
 };
 
-use crate::commands::{Command, ImgSrc};
+use crate::{commands::{Command, ImgSrc}, configs::CompileStreams};
 
 mod commands;
+mod configs;
 
 /// Main CLI parser.
 #[derive(Parser)]
@@ -51,52 +54,63 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    let input_image_path = match img_src {
+    let in_img_path = match img_src {
         ImgSrc::Query(_) => bail!("Query-based compiling is not supported yet."),
         ImgSrc::Path(path) => path,
     };
 
-    std::fs::copy(&input_image_path, &out_img)
-        .context("Failed to copy source to output")?;
-    let mut out_img_stream = OutputBinaryFileStream::new(&out_img)
-        .context("Failed to write to output file")?;
-    let mut out_key_stream = match key_file {
+    let out_key_path = match key_file {
+        Some(x) => x,
         None => bail!("Key file is mandatory for now."),
-        Some(key_file_path) => OutputBinaryFileStream::new(&key_file_path)
-            .context("Failed to write to key file")?
     };
 
-    const IMG_IDX: usize = 0;
-    const KEY_IDX: usize = 1;
-    let mut output = GroupedBinaryStreams::new(
-        GenericArray::from_array([&mut out_img_stream, &mut out_key_stream])
-    );
-
-    let mut image = InputBinaryFileStream::new(&input_image_path)
-        .context("Failed to write to output")?;
-    let mut image = BinaryElemSpan::<'_, u8, _>::new(&mut image, None, None);
-
-    let mut data = InputBinaryFileStream::new(&in_file)
-        .context("Failed to read from input data")?;
-    let mut data = BinaryElemSpan::new(&mut data, None, None);
-
-    let mut img_matrix = RuntimeElemIndexesMatrix::new();
-    let mut reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix)
-        .context("Failed to construct reach mapper")?;
-
-    // cap minimum reference chunk size by size of fields sum (reference chunk size)
-    // cap maximum reference chunk size by maximum representable chunk size
-    let chunks = ChunkMapper::new(&mut reach)
-        .map_chunks(Some(WIDTHS.total_size_bytes()), Some(WIDTHS.max_size()))
-        .context("Failed to map chunks")?;
-    let chunks = &mut chunks.iter();
-    let mut writer = ChunksWriter::<'_, '_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(
-        WIDTHS, chunks, &mut output
-    );
-
-    writer.write().context("Failed to write chunks into output")?;
+    configs::compile_path_with_key(
+        |streams| compile_callback(streams),
+        &in_img_path, &in_file, &out_img, &out_key_path
+    )?;
 
     println!("Output saved at {}", &out_img);
+
+    Ok(())
+}
+
+/// Callback function which performs compile operation.
+/// 
+/// * `streams` - Input & output streams to perform compile operation on.
+/// 
+/// Returns error if occurred.
+/// 
+fn compile_callback<In, Out>(streams: &mut [CompileStreams<u8, In, Out>]) -> Result<()>
+where
+    In: InputElemStream<u8>,
+    Out: OutputBinaryStream,
+{
+    // cap minimum reference chunk size by size of fields sum (reference chunk size)
+    // cap maximum reference chunk size by maximum representable chunk size
+    let min_cap = WIDTHS.total_size_bytes();
+    let max_cap = WIDTHS.max_size();
+
+    for streams in streams {
+        const IMG_IDX: usize = 0;
+        const KEY_IDX: usize = 1;
+        let mut output = GroupedBinaryStreams::new(
+            GenericArray::from_array([&mut streams.out_img, &mut streams.out_key])
+        );
+
+        let mut img_matrix = RuntimeElemIndexesMatrix::new();
+        let mut reach = MatrixBasedReachMapper::new(&mut streams.in_img, &mut streams.in_data, &mut img_matrix)
+            .context("Failed to construct reach mapper")?;
+
+        let chunks = ChunkMapper::new(&mut reach)
+            .map_chunks(Some(min_cap), Some(max_cap))
+            .context("Failed to map chunks")?;
+        let chunks = &mut chunks.iter();
+        let mut writer = ChunksWriter::<'_, '_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(
+            WIDTHS, chunks, &mut output
+        );
+
+        writer.write().context("Failed to write chunks into output")?;
+    }
 
     Ok(())
 }

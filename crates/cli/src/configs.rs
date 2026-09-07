@@ -6,6 +6,16 @@ use crate::{callbacks, commands::ImgSrc};
 mod compile;
 mod extract;
 
+/// Runs compile operation (selecting configuration based on params).
+/// 
+/// * `widths` - Field widths used in key storage.
+/// * `out_img` - Path to store output image to.
+/// * `in_file` - Input file to compile into a PNG.
+/// * `img_src` - Image source path (of image to override).
+/// * `key_file` - Optional path to store key to (instead of using PNG riding).
+/// 
+/// Returns error if occurred.
+/// 
 pub fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
                               out_img: &String, in_file: &String,
                               img_src: &ImgSrc, key_file: &Option<String>) -> Result<()> {
@@ -20,6 +30,14 @@ pub fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
     }
 }
 
+/// Runs extract operation (selecting configuration based on params).
+/// 
+/// * `in_img` - Path to compiled image to extract data from.
+/// * `out_file` - File path to store extracted data to.
+/// * `key_file` - Optional path to read key from (instead of assuming PNG riding).
+/// 
+/// Returns error if occurred.
+/// 
 pub fn apply_extract<E: Elem>(in_img: &String, out_file: &String, key_file: &Option<String>) -> Result<()> {
     match key_file {
         Some(in_key_path) => extract::with_key(

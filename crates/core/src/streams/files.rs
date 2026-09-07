@@ -106,7 +106,35 @@ impl Stream for InputBinaryFileStream {
     }
 }
 
+impl Stream for &mut InputBinaryFileStream {
+    fn rewind(&mut self) -> io::Result<()> {
+        self.base.rewind()
+    }
+
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        self.base.get_pos()
+    }
+
+    fn set_pos(&mut self, pos: super::StreamPos) -> io::Result<()> {
+        self.base.set_pos(pos)
+    }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        self.base.get_size()
+    }
+}
+
 impl InputBinaryStream for InputBinaryFileStream {
+    fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
+        self.base.file.read_exact(buff)
+    }
+
+    fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
+        Ok(BitReader::endian(&mut self.base.file, endianness))
+    }
+}
+
+impl InputBinaryStream for &mut InputBinaryFileStream {
     fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
         self.base.file.read_exact(buff)
     }
@@ -153,7 +181,44 @@ impl Stream for OutputBinaryFileStream {
     }
 }
 
+impl Stream for &mut OutputBinaryFileStream {
+    fn rewind(&mut self) -> io::Result<()> {
+        self.base.rewind()
+    }
+
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        self.base.get_pos()
+    }
+
+    fn set_pos(&mut self, pos: StreamPos) -> io::Result<()> {
+        self.base.set_pos(pos)
+    }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        self.base.get_size()
+    }
+}
+
 impl OutputBinaryStream for OutputBinaryFileStream {
+    fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
+        self.base.file.write_all(buff)?;
+        Ok(())
+    }
+
+    fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl bitstream_io::BitWrite> {
+        Ok(BitWriter::endian(&self.base.file, endianness))
+    }
+
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
+        self.base.file.set_len(len as u64)?;
+        if self.get_pos()? > len {
+            self.set_pos(len)?;
+        }
+        Ok(())
+    }
+}
+
+impl OutputBinaryStream for &mut OutputBinaryFileStream {
     fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
         self.base.file.write_all(buff)?;
         Ok(())
@@ -209,6 +274,24 @@ impl Stream for TwoWayBinaryFileStream {
     }
 }
 
+impl Stream for &mut TwoWayBinaryFileStream {
+    fn rewind(&mut self) -> io::Result<()> {
+        self.base.rewind()
+    }
+
+    fn get_pos(&mut self) -> io::Result<StreamPos> {
+        self.base.get_pos()
+    }
+
+    fn set_pos(&mut self, pos: super::StreamPos) -> io::Result<()> {
+        self.base.set_pos(pos)
+    }
+
+    fn get_size(&mut self) -> io::Result<StreamPos> {
+        self.base.get_size()
+    }
+}
+
 impl InputBinaryStream for TwoWayBinaryFileStream {
     fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
         self.base.file.read_exact(buff)
@@ -219,7 +302,35 @@ impl InputBinaryStream for TwoWayBinaryFileStream {
     }
 }
 
+impl InputBinaryStream for &mut TwoWayBinaryFileStream {
+    fn read_bytes(&mut self, buff: &mut [u8]) -> io::Result<()> {
+        self.base.file.read_exact(buff)
+    }
+
+    fn obtain_bits_reader(&mut self, endianness: impl Endianness) -> io::Result<impl BitRead> {
+        Ok(BitReader::endian(&self.base.file, endianness))
+    }
+}
+
 impl OutputBinaryStream for TwoWayBinaryFileStream {
+    fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
+        self.base.file.write_all(buff)
+    }
+
+    fn obtain_bits_writer(&mut self, endianness: impl Endianness) -> io::Result<impl bitstream_io::BitWrite> {
+        Ok(BitWriter::endian(&self.base.file, endianness))
+    }
+
+    fn truncate(&mut self, len: StreamPos) -> io::Result<()> {
+        self.base.file.set_len(len as u64)?;
+        if self.get_pos()? > len {
+            self.set_pos(len)?;
+        }
+        Ok(())
+    }
+}
+
+impl OutputBinaryStream for &mut TwoWayBinaryFileStream {
     fn write_bytes(&mut self, buff: &[u8]) -> io::Result<()> {
         self.base.file.write_all(buff)
     }

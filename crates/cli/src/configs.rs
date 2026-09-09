@@ -14,11 +14,11 @@ mod extract;
 /// * `img_src` - Image source path (of image to override).
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// 
-/// Returns error if occurred.
+/// Returns space overhead (fraction), or error if occurred.
 /// 
 pub fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
                               out_img: &String, in_file: &String,
-                              img_src: &ImgSrc, key_file: &Option<String>) -> Result<()> {
+                              img_src: &ImgSrc, key_file: &Option<String>) -> Result<f64> {
     match (img_src, key_file) {
         (ImgSrc::Query(_), None) => bail!("Query-based compiling is not supported yet."),
         (ImgSrc::Query(_), Some(_)) => bail!("Query-based compiling is not supported yet."),

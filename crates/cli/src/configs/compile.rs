@@ -12,22 +12,22 @@ use crate::streams::CompileStreams;
 /// Generates configuration for compile operation with source image path and output key path, 
 /// then performs compile operation via a given callback.
 /// 
-/// * `callback` - Callback function which performs compile operation on streams.
+/// * `callback` - Callback function which performs compile operation on streams (returns space overhead).
 /// * `in_img_path` - Path to input image file.
 /// * `in_data_path` - Path to input data file.
 /// * `out_img_path` - Path to output image file.
 /// * `out_key_path` - Path to output key file.
 /// 
-/// Returns error if occurred.
+/// Returns space overhead (fraction), or error if occurred.
 /// 
 pub fn path_with_key<E, Callback>(mut callback: Callback,
                                   in_img_path: &str, in_data_path: &str,
-                                  out_img_path: &str, out_key_path: &str) -> Result<()>
+                                  out_img_path: &str, out_key_path: &str) -> Result<f64>
 where
     E: Elem,
-    Callback: for <'a> FnMut(&mut [CompileStreams<E,
-                                                  BinaryElemSpan::<'a, E, InputBinaryFileStream>,
-                                                  OutputBinaryFileStream>]) -> Result<()>,
+    Callback: for <'a> FnMut(&mut CompileStreams<E,
+                                                 BinaryElemSpan::<'a, E, InputBinaryFileStream>,
+                                                 OutputBinaryFileStream>) -> Result<f64>,
 {
     // output image is identical to input one in this config
     std::fs::copy(in_img_path, out_img_path)
@@ -47,5 +47,5 @@ where
         .context("Failed to read from input data")?;
     let in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
 
-    callback(&mut [CompileStreams::new(in_img, in_data, out_img, out_key)])
+    callback(&mut CompileStreams::new(in_img, in_data, out_img, out_key))
 }

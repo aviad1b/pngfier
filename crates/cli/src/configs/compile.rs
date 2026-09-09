@@ -25,9 +25,9 @@ pub fn path_with_key<E, Callback>(mut callback: Callback,
                                   out_img_path: &str, out_key_path: &str) -> Result<()>
 where
     E: Elem,
-    Callback: for <'a> FnMut(&mut [CompileStreams<E,
-                                                  BinaryElemSpan::<'a, E, InputBinaryFileStream>,
-                                                  OutputBinaryFileStream>]) -> Result<()>,
+    Callback: for <'a> FnMut(&mut CompileStreams<E,
+                                                 BinaryElemSpan::<'a, E, InputBinaryFileStream>,
+                                                 OutputBinaryFileStream>) -> Result<()>,
 {
     // output image is identical to input one in this config
     std::fs::copy(in_img_path, out_img_path)
@@ -47,5 +47,5 @@ where
         .context("Failed to read from input data")?;
     let in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
 
-    callback(&mut [CompileStreams::new(in_img, in_data, out_img, out_key)])
+    callback(&mut CompileStreams::new(in_img, in_data, out_img, out_key))
 }

@@ -24,7 +24,7 @@ pub fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
         (ImgSrc::Query(_), Some(_)) => bail!("Query-based compiling is not supported yet."),
         (ImgSrc::Path(_), None) => bail!("Key file is mandatory for now."),
         (ImgSrc::Path(in_img_path), Some(out_key_path)) => compile::path_with_key(
-            |streams| callbacks::compile::<E, _, _>(widths, streams).map(|_| ()),
+            |streams| callbacks::compile::<E, _, _>(widths, streams),
             in_img_path, in_file, out_img, out_key_path
         ),
     }

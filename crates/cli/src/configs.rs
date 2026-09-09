@@ -27,7 +27,8 @@ pub fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
             |streams| callbacks::compile::<E, _, _>(widths, streams),
             in_img_path, in_file, out_img, out_key_path
         ),
-    }
+    }?;
+    Ok(())
 }
 
 /// Runs extract operation (selecting configuration based on params).

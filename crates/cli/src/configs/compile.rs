@@ -18,11 +18,11 @@ use crate::streams::CompileStreams;
 /// * `out_img_path` - Path to output image file.
 /// * `out_key_path` - Path to output key file.
 /// 
-/// Returns error if occurred.
+/// Returns space overhead (fraction), or error if occurred.
 /// 
 pub fn path_with_key<E, Callback>(mut callback: Callback,
                                   in_img_path: &str, in_data_path: &str,
-                                  out_img_path: &str, out_key_path: &str) -> Result<()>
+                                  out_img_path: &str, out_key_path: &str) -> Result<f64>
 where
     E: Elem,
     Callback: for <'a> FnMut(&mut CompileStreams<E,
@@ -47,6 +47,5 @@ where
         .context("Failed to read from input data")?;
     let in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
 
-    callback(&mut CompileStreams::new(in_img, in_data, out_img, out_key))?;
-    Ok(())
+    callback(&mut CompileStreams::new(in_img, in_data, out_img, out_key))
 }

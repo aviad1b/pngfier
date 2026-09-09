@@ -46,9 +46,11 @@ fn main() -> Result<()> {
 /// * `key_file` - Optional path to store key to (instead of using PNG riding).
 /// Returns error if occured.
 fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    configs::apply_compile::<E>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
+    let overhead = configs::apply_compile::<E>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
 
     println!("Output saved at {}", &out_img);
+    println!();
+    println!("Space overhead: {:.2}%", overhead * 100_f64);
 
     Ok(())
 }

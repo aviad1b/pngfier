@@ -59,7 +59,7 @@ where
     // overhead is defined as (dst_size-src_size)/src_size
     let src_size = streams.in_data.get_size()? + streams.in_img.get_size()?;
     let dst_size = streams.out_img.get_size()? + streams.out_key.get_size()?;
-    Ok((dst_size - src_size) as f64 / src_size as f64)
+    Ok((dst_size - src_size) as f64 / dst_size as f64)
 }
 
 /// Callback function which performs extract operation.

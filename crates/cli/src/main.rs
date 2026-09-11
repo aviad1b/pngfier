@@ -50,7 +50,7 @@ fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: O
 
     println!("Output saved at {}", &out_img);
     println!();
-    println!("Space overhead: {:.2}%", overhead * 100_f64);
+    println!("Space overhead: {:.6}%", overhead * 100_f64);
 
     Ok(())
 }

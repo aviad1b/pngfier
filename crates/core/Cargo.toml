@@ -1,0 +1,8 @@
+[package]
+name = "pngfier-core"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+generic-array = "1.4.4"
+bitstream-io = "2"

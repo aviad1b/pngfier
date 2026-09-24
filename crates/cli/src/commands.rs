@@ -4,6 +4,9 @@ use clap::Subcommand;
 // pngfier compile <out-img> <in-file> {--img-query <img-query> | --img-path <img-path>} [--key-file <key-file>]
 // pngfier extract <in-img> <out-file> [<key-file>]
 
+/// Represents a CLI command.
+/// `Compile` for "compile" command (see above).
+/// `Extract` for "extract" command (see above).
 #[derive(Subcommand)]
 pub enum Command {
     Compile {

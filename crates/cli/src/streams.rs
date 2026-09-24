@@ -6,8 +6,8 @@ use pngfier_core::{
         InputBinaryStream,
         InputElemStream,
         OutputBinaryStream,
-        OutputElemStream
-    }
+        OutputElemStream,
+    },
 };
 
 /// Holds input & output streams for compile operation.

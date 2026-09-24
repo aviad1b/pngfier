@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 generic-array.workspace = true
+anyhow.workspace = true
 bitstream-io.workspace = true

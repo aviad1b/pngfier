@@ -1,4 +1,6 @@
-use std::{collections::HashSet, hash::Hash, io, marker::PhantomData};
+use anyhow::Result;
+
+use std::{collections::HashSet, hash::Hash, marker::PhantomData};
 
 use generic_array::{ArrayLength, typenum::{U256, Unsigned}};
 
@@ -31,7 +33,7 @@ pub trait ElemIndexesMatrixSlot<I: Eq + Copy> {
     /// 
     /// Returns iterator, or error if occurred.
     /// 
-    fn iter<'a>(&'a self) -> io::Result<impl Iterator<Item = &'a I>> where I: 'a;
+    fn iter<'a>(&'a self) -> Result<impl Iterator<Item = &'a I>> where I: 'a;
 
     /// Checks if the slot's set contains a given index.
     /// 
@@ -39,7 +41,7 @@ pub trait ElemIndexesMatrixSlot<I: Eq + Copy> {
     /// 
     /// Returns `true`/`false` depending on `index`'s existance, or error if occurred.
     /// 
-    fn contains(&self, index: &I) -> io::Result<bool>;
+    fn contains(&self, index: &I) -> Result<bool>;
 }
 
 /// A mutable slot in a matrix of index sets mapped by elements.
@@ -53,7 +55,7 @@ pub trait ElemIndexesMatrixSlotMut<I: Eq + Copy> : ElemIndexesMatrixSlot<I> {
     /// 
     /// Returns error if occurred.
     /// 
-    fn insert(&mut self, index: I) -> io::Result<()>;
+    fn insert(&mut self, index: I) -> Result<()>;
 }
 
 /// A matrix of index sets mapped by elements.
@@ -75,7 +77,7 @@ pub trait ElemIndexesMatrix<E: Elem, I: Eq + Copy> {
     /// 
     /// Returns slot mapped by `i` and `j`, or error if occurred.
     /// 
-    fn at(&self, i: E, j: E) -> io::Result<Self::Slot<'_>>;
+    fn at(&self, i: E, j: E) -> Result<Self::Slot<'_>>;
 
     /// Gets mutable slot of indexes set mapped by two given elements (row & column).
     /// 
@@ -84,7 +86,7 @@ pub trait ElemIndexesMatrix<E: Elem, I: Eq + Copy> {
     /// 
     /// Returns slot mapped by `i` and `j`.
     /// 
-    fn at_mut(&mut self, i: E, j: E) -> io::Result<Self::SlotMut<'_>>;
+    fn at_mut(&mut self, i: E, j: E) -> Result<Self::SlotMut<'_>>;
 }
 
 /// Implementation of `ElemIndexesMatrixSlot` and `ElemIndexesMatrixSlotMut` that is 
@@ -104,44 +106,44 @@ impl<I: Eq + Copy + Hash> RuntimeElemIndexesMatrixSlot<I> {
 }
 
 impl<I: Eq + Copy + Hash> ElemIndexesMatrixSlot<I> for RuntimeElemIndexesMatrixSlot<I> {
-    fn iter<'a>(&'a self) -> io::Result<impl Iterator<Item = &'a I>> where I: 'a {
+    fn iter<'a>(&'a self) -> Result<impl Iterator<Item = &'a I>> where I: 'a {
         Ok(self.indexes.iter())
     }
 
-    fn contains(&self, index: &I) -> io::Result<bool> {
+    fn contains(&self, index: &I) -> Result<bool> {
         Ok(self.indexes.contains(index))
     }
 }
 
 impl<I: Eq + Copy + Hash> ElemIndexesMatrixSlotMut<I> for RuntimeElemIndexesMatrixSlot<I> {
-    fn insert(&mut self, index: I) -> io::Result<()> {
+    fn insert(&mut self, index: I) -> Result<()> {
         self.indexes.insert(index);
         Ok(())
     }
 }
 
 impl<'s, I: Eq + Copy + Hash> ElemIndexesMatrixSlot<I> for &'s RuntimeElemIndexesMatrixSlot<I> {
-    fn iter<'a>(&'a self) -> io::Result<impl Iterator<Item = &'a I>> where I: 'a {
+    fn iter<'a>(&'a self) -> Result<impl Iterator<Item = &'a I>> where I: 'a {
         Ok(self.indexes.iter())
     }
 
-    fn contains(&self, index: &I) -> io::Result<bool> {
+    fn contains(&self, index: &I) -> Result<bool> {
         Ok(self.indexes.contains(index))
     }
 }
 
 impl<'s, I: Eq + Copy + Hash> ElemIndexesMatrixSlot<I> for &'s mut RuntimeElemIndexesMatrixSlot<I> {
-    fn iter<'a>(&'a self) -> io::Result<impl Iterator<Item = &'a I>> where I: 'a {
+    fn iter<'a>(&'a self) -> Result<impl Iterator<Item = &'a I>> where I: 'a {
         Ok(self.indexes.iter())
     }
 
-    fn contains(&self, index: &I) -> io::Result<bool> {
+    fn contains(&self, index: &I) -> Result<bool> {
         Ok(self.indexes.contains(index))
     }
 }
 
 impl<'s, I: Eq + Copy + Hash> ElemIndexesMatrixSlotMut<I> for &'s mut RuntimeElemIndexesMatrixSlot<I> {
-    fn insert(&mut self, index: I) -> io::Result<()> {
+    fn insert(&mut self, index: I) -> Result<()> {
         self.indexes.insert(index);
         Ok(())
     }
@@ -175,11 +177,11 @@ impl<E: Elem, I: Eq + Copy + Hash> ElemIndexesMatrix<E, I> for RuntimeElemIndexe
     type Slot<'a> = &'a RuntimeElemIndexesMatrixSlot<I> where Self: 'a;
     type SlotMut<'a> = &'a mut RuntimeElemIndexesMatrixSlot<I> where Self: 'a;
 
-    fn at(&self, i: E, j: E) -> io::Result<Self::Slot<'_>> {
+    fn at(&self, i: E, j: E) -> Result<Self::Slot<'_>> {
         Ok(&self.matrix[i.as_index()][j.as_index()])
     }
 
-    fn at_mut(&mut self, i: E, j: E) -> io::Result<Self::SlotMut<'_>> {
+    fn at_mut(&mut self, i: E, j: E) -> Result<Self::SlotMut<'_>> {
         Ok(&mut self.matrix[i.as_index()][j.as_index()])
     }
 }

@@ -1,4 +1,6 @@
-use std::{io, marker::PhantomData};
+use anyhow::{Context, Result};
+
+use std::marker::PhantomData;
 
 use crate::{
     elems::{Elem, ElemIndexesMatrix},
@@ -32,7 +34,7 @@ pub trait ReachMapper<E: Elem> {
     /// 
     /// NOTE: Returns length as `ChunkIndex` for convenience of comparison.
     /// 
-    fn len(&self) -> io::Result<ChunkIndex>;
+    fn len(&self) -> Result<ChunkIndex>;
 
     /// Gets best match found starting exactly at data-position `index`.
     /// 
@@ -42,7 +44,7 @@ pub trait ReachMapper<E: Elem> {
     /// If nothing matches there, returns MatchInfo { reach: index, src_start: index } (no progress).
     /// Returns error if occurred.
     /// 
-    fn get(&self, index: ChunkIndex) -> io::Result<MatchInfo>;
+    fn get(&self, index: ChunkIndex) -> Result<MatchInfo>;
 
     /// Gets literal elements from input data.
     /// 
@@ -53,7 +55,7 @@ pub trait ReachMapper<E: Elem> {
     /// 
     /// NOTE: This method it `mut` as it may need to read from an internal file (and move its cursor).
     /// 
-    fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> io::Result<Vec<E>>;
+    fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> Result<Vec<E>>;
 }
 
 /// `ReachMapper` implementation that is based on a matrix of index sets, mapped by elements.
@@ -100,7 +102,7 @@ where
     /// 
     pub fn new(image: &'a mut ImageStream,
                data: &'b mut DataStream,
-               img_matrix: &'c mut M) -> io::Result<Self> {
+               img_matrix: &'c mut M) -> Result<Self> {
         let mut res = Self{
             reach: Vec::new(),
             image,
@@ -120,8 +122,9 @@ where
     /// 
     /// Returns error if occurred.
     /// 
-    fn init_img_matrix(&mut self) -> io::Result<()> {
+    fn init_img_matrix(&mut self) -> Result<()> {
         reach_utils::init_img_matrix(self.image, self.img_matrix)
+            .context("Failed to initialize image matrix")
     }
 
     /// Initializes reach vector based on internal matrix.
@@ -130,7 +133,7 @@ where
     /// 
     /// Returns error if occurred.
     /// 
-    fn init_reach(&mut self) -> io::Result<()> {
+    fn init_reach(&mut self) -> Result<()> {
         self.data.rewind()?;
         self.image.rewind()?;
 
@@ -150,7 +153,7 @@ where
     /// 
     /// Returns error if occurred.
     /// 
-    fn init_reach_for(&mut self, data_start: ChunkIndex) -> io::Result<()> {
+    fn init_reach_for(&mut self, data_start: ChunkIndex) -> Result<()> {
         let paths = self.get_path_starts_vec(data_start)?;
 
         // for each path start, walk through entire path for as long as exists in both data and image
@@ -181,8 +184,9 @@ where
     /// Returns vector of `Path`s, each of length two.
     /// Returns error if occurred.
     /// 
-    fn get_path_starts_vec(&mut self, data_start: ChunkIndex) -> io::Result<Vec<Path>> {
+    fn get_path_starts_vec(&mut self, data_start: ChunkIndex) -> Result<Vec<Path>> {
         reach_utils::get_path_starts_vec(self.data, self.img_matrix, data_start)
+            .context("Failed to get vector of path starts")
     }
 
     /// Given a `data_start` index and a mutual paths vector reference,
@@ -196,8 +200,9 @@ where
     /// 
     /// NOTE: Takes ownership over `paths`.
     /// 
-    fn walk_paths(&mut self, data_start: ChunkIndex, paths: Vec<Path>) -> io::Result<Option<Path>> {
+    fn walk_paths(&mut self, data_start: ChunkIndex, paths: Vec<Path>) -> Result<Option<Path>> {
         reach_utils::walk_paths(self.data, self.img_matrix, data_start, paths)
+            .context("Failed to walk paths")
     }
 }
 
@@ -209,20 +214,19 @@ where
     DataStream: InputElemStream<E>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
-    fn len(&self) -> io::Result<ChunkIndex> {
+    fn len(&self) -> Result<ChunkIndex> {
         Ok(self.reach.len() as ChunkIndex)
     }
 
-    fn get(&self, index: ChunkIndex) -> io::Result<MatchInfo> {
+    fn get(&self, index: ChunkIndex) -> Result<MatchInfo> {
         Ok(self.reach[index as usize])
     }
 
-    fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> io::Result<Vec<E>> {
+    fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> Result<Vec<E>> {
         self.data.set_pos(start as StreamPos)?;
         (0..count).map(|_| {
-            self.data.read_next_elem()?.ok_or_else(|| {
-                io::Error::new(io::ErrorKind::UnexpectedEof, "ReachMapper::get_elems: ran out of data")
-            })
+            self.data.read_next_elem()?
+                .context("ReachMapper::get_elems: ran out of data")
         }).collect()
     }
 }

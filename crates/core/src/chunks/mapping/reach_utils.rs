@@ -1,4 +1,4 @@
-use std::io;
+use anyhow::Result;
 
 use crate::{
     elems::{Elem, ElemIndexesMatrix, ElemIndexesMatrixSlot, ElemIndexesMatrixSlotMut},
@@ -28,7 +28,7 @@ pub struct Path {
 /// Returns error if occurred.
 /// 
 pub fn init_img_matrix<E, ImageStream, M>(image: &mut ImageStream,
-                                          img_matrix: &mut M) -> io::Result<()>
+                                          img_matrix: &mut M) -> Result<()>
 where
     E: Elem,
     ImageStream: InputElemStream<E>,
@@ -74,7 +74,7 @@ where
 /// 
 pub fn get_path_starts_vec<E, DataStream, M>(data: &mut DataStream,
                                              img_matrix: &M,
-                                             data_start: ChunkIndex) -> io::Result<Vec<Path>>
+                                             data_start: ChunkIndex) -> Result<Vec<Path>>
 where
     E: Elem,
     DataStream: InputElemStream<E>,
@@ -125,7 +125,7 @@ where
 pub fn walk_paths<E, DataStream, M>(data: &mut DataStream,
                                     img_matrix: &M,
                                     data_start: ChunkIndex,
-                                    mut paths: Vec<Path>) -> io::Result<Option<Path>>
+                                    mut paths: Vec<Path>) -> Result<Option<Path>>
 where
     E: Elem,
     DataStream: InputElemStream<E>,

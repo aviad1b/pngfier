@@ -107,21 +107,11 @@ impl<'a, E: Elem, Reach: ReachMapper<E>> ChunkMapper<'a, E, Reach> {
         let index = farthest.src_start + offset;
         let size = farthest.reach - *cur_end;
 
-        // if greater than min cap, use reference chunk(s)
         if min_cap.is_none_or(|min_cap| min_cap < size) {
-            // split into pieces no larger than max_cap, if was given
-            let mut remaining = size;
-            let mut piece_index = index;
-            while remaining > 0 {
-                let piece_size = max_cap.map_or(remaining, |cap| remaining.min(cap));
-                chunks.push(ChunkInfo::Reference { index: piece_index, size: piece_size });
-                piece_index += piece_size;
-                remaining -= piece_size;
-            }
-            *cur_end = farthest.reach;
-        
-        // if not greater than min cap, use literal chunk instead
+            // if greater than min cap, use reference chunk(s)
+            self.map_ref_above_min_cap(max_cap, chunks, cur_end, farthest, index, size);
         } else {
+            // if not greater than min cap, use literal chunk instead
             let elem = self.reach.get_elems(*cur_end, 1)?;
             chunks.push(ChunkInfo::Literal(elem));
             *cur_end += 1;
@@ -129,6 +119,34 @@ impl<'a, E: Elem, Reach: ReachMapper<E>> ChunkMapper<'a, E, Reach> {
         }
 
         Ok(())
+    }
+
+    /// Utility of `map_reference_chunk`, maps a reference chunk assuming its length is above the min cap.
+    /// 
+    /// * `max_cap` - Optional upper bound for length of a reference chunk (non-inclusive).
+    /// * `chunks` - Borrowed vector of mapped chunks.
+    /// * `cur_end` - End index of currently computed chunk in input data.
+    /// * `farthest` - Farthest reach match found so far.
+    /// * `index` - Chunk start index.
+    /// * `size` - Chunk size.
+    /// 
+    /// Appends reference chunk into `chunks` (if relevant).
+    /// 
+    /// Returns error if occurred.
+    /// 
+    fn map_ref_above_min_cap(&mut self, max_cap: Option<ChunkSize>, chunks: &mut Vec<ChunkInfo<E>>,
+                             cur_end: &mut ChunkIndex, farthest: &mut MatchInfo,
+                             index: ChunkIndex, size: ChunkSize) {
+        // split into pieces no larger than max_cap, if was given
+        let mut remaining = size;
+        let mut piece_index = index;
+        while remaining > 0 {
+            let piece_size = max_cap.map_or(remaining, |cap| remaining.min(cap));
+            chunks.push(ChunkInfo::Reference { index: piece_index, size: piece_size });
+            piece_index += piece_size;
+            remaining -= piece_size;
+        }
+        *cur_end = farthest.reach;
     }
 
     /// Utility of `map_chunks`, maps a reference chunk (if does not exceed bounds).

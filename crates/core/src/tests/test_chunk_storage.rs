@@ -50,7 +50,7 @@ fn chunks_storage_round_trip() {
         );
 
         let mut reader = ChunksReader::<'_, '_, 0, 1, _, _, _>::new(
-            widths, &mut streams, &mut output
+            &mut streams, &mut output
         );
         reader.extract_all().unwrap();
     }

@@ -26,7 +26,7 @@ use super::{
 };
 
 /// Makes a generic array of stream pos options from a slice of such.
-pub fn opt_array<N: ArrayLength>(vals: &[Option<StreamPos>]) -> GenericArray<Option<StreamPos>, N> {
+pub fn opt_arr<N: ArrayLength>(vals: &[Option<StreamPos>]) -> GenericArray<Option<StreamPos>, N> {
 	GenericArray::from_iter(vals.iter().copied())
 }
 
@@ -225,8 +225,8 @@ impl<'a, E: ConstBinParsible, S: Stream> BinaryElemSpan<'a, E, S> {
         Self {
 			base: BinaryElemSpans::new(
 				stream,
-                GenericArray::from_array([byte_offset]),
-				GenericArray::from_array([byte_end]),
+                opt_arr(&[byte_offset]),
+				opt_arr(&[byte_end]),
 			)
 		}
     }
@@ -446,8 +446,8 @@ impl<'a, S: Stream> BinarySpan<'a, S> {
         Self {
             base: BinarySpans::new(
                 stream,
-                GenericArray::from_array([offset]),
-                GenericArray::from_array([end]),
+                opt_arr(&[offset]),
+                opt_arr(&[end]),
             )
         }
     }

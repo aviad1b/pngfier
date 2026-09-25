@@ -1,3 +1,4 @@
+use anyhow::{Context, Result, bail};
 use std::io;
 use bitstream_io::{BigEndian, BitRead, BitWrite};
 
@@ -24,18 +25,37 @@ use crate::{
     },
 };
 
-pub fn read_widths<S: InputBinaryStream>(input: &mut S) -> io::Result<ChunkInfoWidths> {
+/// Reads header field widths from given input stream.
+/// 
+/// * `input` - Input stream to read widths from.
+/// 
+/// Returns read field widths, or error if occurred.
+/// 
+pub fn read_widths<S: InputBinaryStream>(input: &mut S) -> Result<ChunkInfoWidths> {
     let mut res = ChunkInfoWidths { is_literal: 0, size: 0, index: 0 };
-    input.read_bytes(std::slice::from_mut(&mut res.is_literal))?;
-    input.read_bytes(std::slice::from_mut(&mut res.size))?;
-    input.read_bytes(std::slice::from_mut(&mut res.index))?;
+    input.read_bytes(std::slice::from_mut(&mut res.is_literal))
+        .context("Failed to read \"is_literal\" width field")?;
+    input.read_bytes(std::slice::from_mut(&mut res.size))
+        .context("Failed to read \"size\" width field")?;
+    input.read_bytes(std::slice::from_mut(&mut res.index))
+        .context("Failed to read \"index\" width field")?;
     Ok(res)
 }
 
-pub fn write_widths<S: OutputBinaryStream>(output: &mut S, widths: &ChunkInfoWidths) -> io::Result<()> {
-    output.write_bytes(std::slice::from_ref(&widths.is_literal))?;
-    output.write_bytes(std::slice::from_ref(&widths.size))?;
-    output.write_bytes(std::slice::from_ref(&widths.index))?;
+/// Writes header field widths to given output stream.
+/// 
+/// * `output` - Output stream to write widths to.
+/// * `widths` - Field widths to write.
+/// 
+/// Returns error if occurred.
+/// 
+pub fn write_widths<S: OutputBinaryStream>(output: &mut S, widths: &ChunkInfoWidths) -> Result<()> {
+    output.write_bytes(std::slice::from_ref(&widths.is_literal))
+        .context("Failed to write \"is_literal\" width field")?;
+    output.write_bytes(std::slice::from_ref(&widths.size))
+        .context("Failed to write \"size\" width field")?;
+    output.write_bytes(std::slice::from_ref(&widths.index))
+        .context("Failed to write \"index\" width field")?;
     Ok(())
 }
 
@@ -50,7 +70,7 @@ pub fn write_widths<S: OutputBinaryStream>(output: &mut S, widths: &ChunkInfoWid
 /// Returns read chunk info, or `None` if reached end of key (nothing to read).
 /// Returns error if occurred.
 /// 
-pub fn read_chunk_info<E, S>(input: &mut S, widths: &ChunkInfoWidths) -> io::Result<Option<ChunkInfo<E>>>
+pub fn read_chunk_info<E, S>(input: &mut S, widths: &ChunkInfoWidths) -> Result<Option<ChunkInfo<E>>>
 where
     E: Elem,
     S: InputBinaryStream,
@@ -90,15 +110,19 @@ where
 /// 
 /// Returns error if occurred.
 /// 
-pub fn write_chunk_info<E, S>(output: &mut S, widths: &ChunkInfoWidths, chunk: &ChunkInfo<E>) -> io::Result<()>
+pub fn write_chunk_info<E, S>(output: &mut S, widths: &ChunkInfoWidths, chunk: &ChunkInfo<E>) -> Result<()>
 where
     E: Elem,
     S: OutputBinaryStream,
 {
     let header = match chunk {
+        // for reference chunk, header is is_literal=false, size=chunk_size
         ChunkInfo::Reference { size, .. } => (false, *size),
+
+        // for literal chunk, header is is_literal=true, size=values_len
         ChunkInfo::Literal(values) => (true, values.len() as ChunkSize)
     };
+
     let mut bits = obtain_bits_writer!(output, BigEndian)?;
     write_header(&mut bits, widths, header)?;
     match chunk {
@@ -129,21 +153,22 @@ where
 /// NOTE: "size" serves as literal size for literal chunks, and reference size for reference chunks.
 /// 
 pub fn read_header(bits: &mut impl BitRead,
-                   widths: &ChunkInfoWidths) -> io::Result<Option<(bool, ChunkSize)>> {
+                   widths: &ChunkInfoWidths) -> Result<Option<(bool, ChunkSize)>> {
     // try reading is_literal, 
     // if reached EOF it means file ended before header so we return None
     let read_is_literal = bits.read::<u8>(widths.is_literal as u32);
     let is_literal = match read_is_literal {
+        Ok(is_literal) => 0 != is_literal,
         Err(err) => match err.kind() {
             io::ErrorKind::UnexpectedEof => return Ok(None),
-            _ => return Err(err),
+            _ => return Err(err).context("Failed to read \"is_literal\" field"),
         },
-        Ok(is_literal) => 0 != is_literal,
     };
 
     // try reading size, 
     // if reached end-of-stream it mean file ended mid header so we propogate the error
-    let size = bits.read::<ChunkSize>(widths.size as u32)?;
+    let size = bits.read::<ChunkSize>(widths.size as u32)
+        .context("Failed to read \"size\" field")?;
 
     Ok(Some((is_literal, size)))
 }
@@ -160,10 +185,12 @@ pub fn read_header(bits: &mut impl BitRead,
 /// 
 pub fn write_header(bits: &mut impl BitWrite,
                     widths: &ChunkInfoWidths,
-                    header: (bool, ChunkSize)) -> io::Result<()> {
+                    header: (bool, ChunkSize)) -> Result<()> {
     let (is_literal, size) = header;
-    bits.write(widths.is_literal as u32, if is_literal { 1 } else { 0 })?;
-    bits.write(widths.size as u32, size)?;
+    bits.write(widths.is_literal as u32, if is_literal { 1 } else { 0 })
+        .context("Failed to write \"is_literal\" field")?;
+    bits.write(widths.size as u32, size)
+        .context("Failed to write \"size\" field")?;
     Ok(())
 }
 
@@ -179,7 +206,7 @@ pub fn write_header(bits: &mut impl BitWrite,
 /// Assumes there is data to read.
 /// Returns read chunk info, or error if occurred.
 /// 
-pub fn read_literal_chunk_info<E, S>(input: &mut S, size: ChunkSize) -> io::Result<ChunkInfo<E>>
+pub fn read_literal_chunk_info<E, S>(input: &mut S, size: ChunkSize) -> Result<ChunkInfo<E>>
 where
     E: Elem,
     S: InputBinaryStream,
@@ -187,13 +214,16 @@ where
     let mut elems = vec![];
     let offset = input.get_pos()?;
     let mut span: BinaryElemSpan<'_, E, S> = BinaryElemSpan::new(input, Some(offset), None);
+
+    // read `size` elems directly from the stream, bail if run out
     for _ in 0..size {
         let elem = span.read_next_elem()?;
         match elem {
-            None => return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Unexpected EOF while reading literal chunk")),
             Some(elem) => elems.push(elem),
+            None => bail!("Unexpected EOF while reading literal chunk"),
         }
     }
+
     Ok(ChunkInfo::Literal(elems))
 }
 
@@ -208,7 +238,7 @@ where
 /// 
 /// Returns error if occurred.
 /// 
-pub fn write_literal_chunk_info<E, S>(output: &mut S, elems: &Vec<E>) -> io::Result<()>
+pub fn write_literal_chunk_info<E, S>(output: &mut S, elems: &Vec<E>) -> Result<()>
 where
     E: Elem,
     S: OutputBinaryStream,
@@ -228,13 +258,15 @@ where
 /// 
 /// * `bits` - A bit reader obtained from the key's input stream.
 /// * `size` - Reference chunk size.
+/// * `widths` - Expected header field widths.
 /// 
 /// Assumes there is data to read.
 /// Returns read chunk info, or error if occurred.
 /// 
 pub fn read_reference_chunk_info<E: Elem>(bits: &mut impl BitRead, size: ChunkSize,
-                                          widths: &ChunkInfoWidths) -> io::Result<ChunkInfo<E>> {
-    let index = bits.read::<ChunkIndex>(widths.index as u32)?;
+                                          widths: &ChunkInfoWidths) -> Result<ChunkInfo<E>> {
+    let index = bits.read::<ChunkIndex>(widths.index as u32)
+        .context("Failed to read \"index\" field")?;
     Ok(ChunkInfo::Reference { index, size })
 }
 
@@ -249,8 +281,9 @@ pub fn read_reference_chunk_info<E: Elem>(bits: &mut impl BitRead, size: ChunkSi
 /// 
 pub fn write_reference_chunk_info(bits: &mut impl BitWrite,
                                   index: ChunkIndex,
-                                  widths: &ChunkInfoWidths) -> io::Result<()> {
-    bits.write(widths.index as u32, index)?;
+                                  widths: &ChunkInfoWidths) -> Result<()> {
+    bits.write(widths.index as u32, index)
+        .context("Failed to write \"index\" field")?;
     Ok(())
 }
 
@@ -264,7 +297,7 @@ pub fn write_reference_chunk_info(bits: &mut impl BitWrite,
 /// 
 /// Returns error if occurred.
 /// 
-pub fn extract_literal<E, Out>(output: &mut Out, elems: &Vec<E>) -> io::Result<()>
+pub fn extract_literal<E, Out>(output: &mut Out, elems: &Vec<E>) -> Result<()>
 where
     E: Elem,
     Out: OutputElemStream<E>,
@@ -291,7 +324,7 @@ where
 pub fn extract_reference<E, Input, Output>(input: &mut Input,
                                            output: &mut Output,
                                            index: ChunkIndex,
-                                           size: ChunkSize) -> io::Result<()>
+                                           size: ChunkSize) -> Result<()>
 where
     E: Elem,
     Input: InputElemStream<E>,
@@ -301,7 +334,7 @@ where
     for _ in 0..size {
         let elem = match input.read_next_elem()? {
             Some(elem) => elem,
-            None => return Err(io::Error::new(io::ErrorKind::UnexpectedEof, "Hit EOF while reading input")),
+            None => bail!("Hit EOF while reading input"),
         };
         output.write_next_elem(elem)?;
     }

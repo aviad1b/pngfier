@@ -5,7 +5,9 @@ use pngfier_core::{
     chunks::{
         mapping::{ChunkMapper, reach::MatrixBasedReachMapper},
         storage::{ChunkInfoWidths, ChunksReader, ChunksWriter},
-    }, elems::{Elem, RuntimeElemIndexesMatrix}, streams::{
+    },
+    elems::{Elem, RuntimeElemIndexesMatrix},
+    streams::{
         grouping::GroupedBinaryStreams,
         traits::{
             InputBinaryStream,

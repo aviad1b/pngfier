@@ -225,8 +225,8 @@ impl<'a, E: ConstBinParsible, S: Stream> BinaryElemSpan<'a, E, S> {
         Self {
 			base: BinaryElemSpans::new(
 				stream,
-                GenericArray::from_array([byte_offset]),
-				GenericArray::from_array([byte_end]),
+                opt_arr(&[byte_offset]),
+				opt_arr(&[byte_end]),
 			)
 		}
     }

@@ -158,11 +158,11 @@ pub fn read_header(bits: &mut impl BitRead,
     // if reached EOF it means file ended before header so we return None
     let read_is_literal = bits.read::<u8>(widths.is_literal as u32);
     let is_literal = match read_is_literal {
+        Ok(is_literal) => 0 != is_literal,
         Err(err) => match err.kind() {
             io::ErrorKind::UnexpectedEof => return Ok(None),
             _ => return Err(err).context("Failed to read \"is_literal\" field"),
         },
-        Ok(is_literal) => 0 != is_literal,
     };
 
     // try reading size, 

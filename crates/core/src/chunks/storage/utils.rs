@@ -116,9 +116,13 @@ where
     S: OutputBinaryStream,
 {
     let header = match chunk {
+        // for reference chunk, header is is_literal=false, size=chunk_size
         ChunkInfo::Reference { size, .. } => (false, *size),
+
+        // for literal chunk, header is is_literal=true, size=values_len
         ChunkInfo::Literal(values) => (true, values.len() as ChunkSize)
     };
+
     let mut bits = obtain_bits_writer!(output, BigEndian)?;
     write_header(&mut bits, widths, header)?;
     match chunk {

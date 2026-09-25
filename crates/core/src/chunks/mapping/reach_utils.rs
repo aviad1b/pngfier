@@ -146,26 +146,10 @@ where
 		let bigram_indexes = img_matrix.at(prev, curr)?;
 		let mut error = Ok(());
 		paths.retain_mut(|path| {
-			// skip if had error
-			if !error.is_ok() { return true; }
-
-			// check if curr comes after prev in image (at last know path elem)
-			let found = match bigram_indexes.contains(&(path.src_start + path.len - 1)) {
-				Ok(found) => found,
-				Err(err) => { error = Err(err); return true; },
-			};
-
-			if found {
-				path.len += 1;
-
-				// if longer than current best, update best
-				if best.as_ref().is_none_or(|best| path.len > best.len) {
-					best = Some(*path);
-				}
-
-				true // path is still relevant
-			} else {
-				false // path no longer relevant (can't keep walking through)
+			if !error.is_ok() { return true; } // skip if had error
+			match walk_path_step(path, &bigram_indexes, &mut best) {
+				Err(err) => {error = Err(err); return true}, // propogate error, skip
+				Ok(res) => res, // return same as `walk_path_step`
 			}
 		});
 		error?; // propogate error if had any
@@ -175,4 +159,38 @@ where
 	}
 
 	Ok(best)
+}
+
+/// Utility function of `walk_paths`.
+/// Given a selected path, a slot of indexes matching elements bigram, and the
+/// currently-considered-best ("best"=="longers") path, walks one next step for
+/// path (if exists) and registers it as the (currently) longest one if needed.
+/// 
+/// * `Slot` - Indexes slot type.
+/// 
+/// * `path` - A path start, for path to walk through.
+/// * `bigram_indexes` - Slot of indexes matching elements bigram.
+/// * `best` - Path currently resigtered as "best" (longest), `None` if no path was checked yet.
+/// 
+/// Returns `true` if path should be kept (candidate for being "best"), otherwise `false`.
+/// Returns error if occurred.
+/// 
+fn walk_path_step<Slot>(path: &mut Path, bigram_indexes: &Slot, best: &mut Option<Path>) -> Result<bool>
+where
+	Slot: ElemIndexesMatrixSlot<ChunkIndex>,
+{
+	// check if curr comes after prev in image (at last know path elem)
+	if !bigram_indexes.contains(&(path.src_start + path.len - 1))? {
+		return Ok(false); // path no longer relevant (can't keep walking through)
+	}
+
+	// walk one step
+	path.len += 1;
+
+	// if longer than current best, update best
+	if best.as_ref().is_none_or(|best| path.len > best.len) {
+		*best = Some(*path);
+	}
+
+	Ok(true) // path is still relevant
 }

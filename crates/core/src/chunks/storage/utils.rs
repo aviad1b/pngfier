@@ -258,6 +258,7 @@ where
 /// 
 /// * `bits` - A bit reader obtained from the key's input stream.
 /// * `size` - Reference chunk size.
+/// * `widths` - Expected header field widths.
 /// 
 /// Assumes there is data to read.
 /// Returns read chunk info, or error if occurred.

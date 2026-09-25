@@ -18,8 +18,7 @@ pub mod reach_utils;
 /// * `E` - Element type (each chunk is made of elements).
 /// * `Reach` - An implementation of `ReachMapper<E>`, used as utility.
 /// 
-pub struct ChunkMapper<'a, E: Elem, Reach: ReachMapper<E>>
-{
+pub struct ChunkMapper<'a, E: Elem, Reach: ReachMapper<E>> {
     reach: &'a mut Reach,
     phantom: PhantomData<E>,
 }

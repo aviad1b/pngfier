@@ -60,6 +60,10 @@ impl BinaryFileStreamBase {
         Ok(())
     }
 
+    /// Gets current size of entire file.
+    /// 
+    /// Returns file size, or error if occurred.
+    /// 
     fn get_size(&mut self) -> io::Result<StreamPos> {
         let pos = self.file.stream_position()?;
         let size = self.file.seek(SeekFrom::End(0))?;

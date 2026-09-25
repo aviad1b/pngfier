@@ -26,7 +26,7 @@ use super::{
 };
 
 /// Makes a generic array of stream pos options from a slice of such.
-pub fn opt_array<N: ArrayLength>(vals: &[Option<StreamPos>]) -> GenericArray<Option<StreamPos>, N> {
+pub fn opt_arr<N: ArrayLength>(vals: &[Option<StreamPos>]) -> GenericArray<Option<StreamPos>, N> {
 	GenericArray::from_iter(vals.iter().copied())
 }
 

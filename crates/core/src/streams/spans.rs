@@ -446,8 +446,8 @@ impl<'a, S: Stream> BinarySpan<'a, S> {
         Self {
             base: BinarySpans::new(
                 stream,
-                GenericArray::from_array([offset]),
-                GenericArray::from_array([end]),
+                opt_arr(&[offset]),
+                opt_arr(&[end]),
             )
         }
     }

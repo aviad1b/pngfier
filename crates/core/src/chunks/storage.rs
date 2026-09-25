@@ -1,4 +1,6 @@
-use std::{io, marker::PhantomData};
+use anyhow::Result;
+
+use std::marker::PhantomData;
 
 use generic_array::typenum::U2;
 
@@ -74,7 +76,7 @@ where
     /// 
     /// Returns error if occurred.
     /// 
-    pub fn extract_all(&mut self) -> io::Result<()> {
+    pub fn extract_all(&mut self) -> Result<()> {
         let widths = self.read_widths()?;
         while let Some(_) = self.extract_next(&widths)? { }
         Ok(())
@@ -84,7 +86,7 @@ where
     /// 
     /// Returns read widths, or error if occurred.
     /// 
-    fn read_widths(&mut self) -> io::Result<ChunkInfoWidths> {
+    fn read_widths(&mut self) -> Result<ChunkInfoWidths> {
         let mut input = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.input);
         utils::read_widths(&mut input)
     }
@@ -96,7 +98,7 @@ where
     /// Returns `None` if reached end of chunks (no chunks are left).
     /// Returns error if occurred.
     /// 
-    fn extract_next(&mut self, widths: &ChunkInfoWidths) -> io::Result<Option<()>> {
+    fn extract_next(&mut self, widths: &ChunkInfoWidths) -> Result<Option<()>> {
         match self.read_next_chunk_info(widths)? {
             None => return Ok(None), // nothing more to read
             Some(ChunkInfo::Literal(elems)) =>
@@ -119,7 +121,7 @@ where
     /// Returns read chunk info, or `None` if no chunks are left.
     /// Returns error if occurred.
     /// 
-    fn read_next_chunk_info(&mut self, widths: &ChunkInfoWidths) -> io::Result<Option<ChunkInfo<E>>> {
+    fn read_next_chunk_info(&mut self, widths: &ChunkInfoWidths) -> Result<Option<ChunkInfo<E>>> {
         // only passing key stream to read_chunk_info
         let mut input = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.input);
         utils::read_chunk_info(&mut input, widths)
@@ -170,7 +172,7 @@ where
     /// 
     /// Returns error if occurred.
     /// 
-    pub fn write(&mut self) -> io::Result<()> {
+    pub fn write(&mut self) -> Result<()> {
         self.write_widths()?;
 
         let input = &mut *self.input;
@@ -195,7 +197,7 @@ where
     /// 
     /// Returns error if occurred.
     /// 
-    fn write_widths(&mut self) -> io::Result<()> {
+    fn write_widths(&mut self) -> Result<()> {
         let mut output = UngroupedBinaryStream::<'_, KEY_IDX, _, _>::new(self.output);
         utils::write_widths(&mut output, &self.widths)
     }
@@ -203,7 +205,7 @@ where
     /// Flushes vector of cached literals as one literal chunk.
     fn flush_cached_literals(output: &mut Out,
                              widths: &ChunkInfoWidths,
-                             cached_literals: &mut Vec<E>) -> io::Result<()> {
+                             cached_literals: &mut Vec<E>) -> Result<()> {
         if !cached_literals.is_empty() {
             let cached_literals = std::mem::take(cached_literals);
 

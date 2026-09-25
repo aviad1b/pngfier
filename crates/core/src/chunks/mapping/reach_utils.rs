@@ -1,0 +1,196 @@
+use anyhow::Result;
+
+use crate::{
+    elems::{Elem, ElemIndexesMatrix, ElemIndexesMatrixSlot, ElemIndexesMatrixSlotMut},
+    streams::{StreamPos, traits::InputElemStream},
+};
+
+use super::super::{ChunkIndex, ChunkSize};
+
+// To temporarily store paths of chunks that exist in both image and data
+// `src_start` is starting index at image.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Path {
+    pub len: ChunkSize,
+    pub src_start: ChunkIndex,
+}
+
+/// Initializes indexes matrix such that every slot i,j contains all indexes 
+/// in input image where element i comes before element j.
+/// 
+/// * `E` - Element type.
+/// * `ImageStream` - Type of stream used to read input image. Must implement `InputElemStream<E>`.
+/// * `M` - An implementation of `ElemIndexesMatrix`, used for storing indexes in a matrix as stated above.
+/// 
+/// * `image` - Stream used to read input image.
+/// * `img_matrix` - Matrix instance to use for mapping.
+/// 
+/// Returns error if occurred.
+/// 
+pub fn init_img_matrix<E, ImageStream, M>(image: &mut ImageStream,
+                                          img_matrix: &mut M) -> Result<()>
+where
+    E: Elem,
+    ImageStream: InputElemStream<E>,
+    M: ElemIndexesMatrix<E, ChunkIndex>,
+{
+    let mut i: ChunkIndex = 0;
+
+	image.rewind()?;
+
+	// read `prev` from first image elem if exists
+    let mut prev = match image.read_next_elem()? {
+        Some(first) => first,
+        None => return Ok(()),
+    };
+	
+	// read `curr` from second image elem, loop while has curr
+	let mut curr_opt = image.read_next_elem()?;
+	while let Some(curr) = curr_opt {
+		// `curr` comes after `prev` in index `i`
+		img_matrix.at_mut(prev, curr)?.insert(i)?;
+		
+		prev = curr;
+		curr_opt = image.read_next_elem()?;
+		i += 1;
+	}
+
+	Ok(())
+}
+
+/// For a given `data_start` index, gets vector of all possible starts to paths mutual for data and image.
+/// A "possible start" is an index where the same two elements appear in a row in both data and image.
+/// 
+/// * `E` - Element type.
+/// * `DataStream` - Type of stream used to read input data. Must implement `InputElemStream<E>`.
+/// * `M` - An implementation of `ElemIndexesMatrix`, used for storing indexes in a matrix as stated above.
+/// 
+/// * `data` - Stream used to read input data.
+/// * `img_matrix` - Matrix instance mapping indexes where one element value comes after another.
+/// * `data_start` - Index in data to find possible path starts for.
+/// 
+/// Returns vector of `Path`s, each of length two.
+/// Returns error if occurred.
+/// 
+pub fn get_path_starts_vec<E, DataStream, M>(data: &mut DataStream,
+                                             img_matrix: &M,
+                                             data_start: ChunkIndex) -> Result<Vec<Path>>
+where
+    E: Elem,
+    DataStream: InputElemStream<E>,
+    M: ElemIndexesMatrix<E, ChunkIndex>,
+{
+    // start at `data_start` in data
+	data.set_pos(data_start as StreamPos)?;
+
+	// read `prev` from first data elem if exists
+    let prev = match data.read_next_elem()? {
+        Some(first) => first,
+        None => return Ok(vec![]),
+    };
+	
+	// read `curr` from second data elem if exists
+    let curr = match data.read_next_elem()? {
+        Some(second) => second,
+        None => return Ok(vec![]),
+    };
+
+	// each place where `curr` comes after `prev` starts a possible path
+	Ok(img_matrix.at(prev, curr)?
+		.iter()?
+		.map(|&index| Path {
+			len: 2, // at least 2 elems in path, `first` and `second`
+			src_start: index,
+		})
+		.collect()
+	)
+}
+
+/// Given a `data_start` index and a mutual paths vector reference,
+/// walks through full paths while finding them and finds the longest one.
+/// 
+/// * `E` - Element type.
+/// * `ImageStream` - Type of stream used to read input image. Must implement `InputElemStream<E>`.
+/// * `DataStream` - Type of stream used to read input data. Must implement `InputElemStream<E>`.
+/// * `M` - An implementation of `ElemIndexesMatrix`, used for storing indexes in a matrix as stated above.
+/// 
+/// * `data_start` - A starting index for paths in data.
+/// * `paths` - A vector of paths starts, for paths to walk through.
+/// 
+/// Returns the longest path (or `None` if no paths were provided/found).
+/// Returns error if occurred.
+/// 
+/// NOTE: Takes ownership over `paths`.
+/// 
+pub fn walk_paths<E, DataStream, M>(data: &mut DataStream,
+                                    img_matrix: &M,
+                                    data_start: ChunkIndex,
+                                    mut paths: Vec<Path>) -> Result<Option<Path>>
+where
+    E: Elem,
+    DataStream: InputElemStream<E>,
+    M: ElemIndexesMatrix<E, ChunkIndex>,
+{
+    let mut best: Option<Path> = paths.first().copied();
+
+	// start at element `data_start+1` in data (assumes first elem was read when path was created)
+	data.set_pos((data_start + 1) as StreamPos)?;
+
+	// read `prev` from first data elem if exists,
+	// read `curr_opt` from second data elem
+	let mut prev = match data.read_next_elem()? { Some(elem) => elem, None => return Ok(best) };
+	let mut curr_opt = data.read_next_elem()?;
+
+	// while curr exists and there's still some path that has just been walked through
+	while let Some(curr) = curr_opt && !paths.is_empty() {
+		let bigram_indexes = img_matrix.at(prev, curr)?;
+		let mut error = Ok(());
+		paths.retain_mut(|path| {
+			if !error.is_ok() { return true; } // skip if had error
+			match walk_path_step(path, &bigram_indexes, &mut best) {
+				Err(err) => {error = Err(err); return true}, // propogate error, skip
+				Ok(res) => res, // return same as `walk_path_step`
+			}
+		});
+		error?; // propogate error if had any
+
+		prev = curr;
+		curr_opt = data.read_next_elem()?;
+	}
+
+	Ok(best)
+}
+
+/// Utility function of `walk_paths`.
+/// Given a selected path, a slot of indexes matching elements bigram, and the
+/// currently-considered-best ("best"=="longers") path, walks one next step for
+/// path (if exists) and registers it as the (currently) longest one if needed.
+/// 
+/// * `Slot` - Indexes slot type.
+/// 
+/// * `path` - A path start, for path to walk through.
+/// * `bigram_indexes` - Slot of indexes matching elements bigram.
+/// * `best` - Path currently resigtered as "best" (longest), `None` if no path was checked yet.
+/// 
+/// Returns `true` if path should be kept (candidate for being "best"), otherwise `false`.
+/// Returns error if occurred.
+/// 
+fn walk_path_step<Slot>(path: &mut Path, bigram_indexes: &Slot, best: &mut Option<Path>) -> Result<bool>
+where
+	Slot: ElemIndexesMatrixSlot<ChunkIndex>,
+{
+	// check if curr comes after prev in image (at last know path elem)
+	if !bigram_indexes.contains(&(path.src_start + path.len - 1))? {
+		return Ok(false); // path no longer relevant (can't keep walking through)
+	}
+
+	// walk one step
+	path.len += 1;
+
+	// if longer than current best, update best
+	if best.as_ref().is_none_or(|best| path.len > best.len) {
+		*best = Some(*path);
+	}
+
+	Ok(true) // path is still relevant
+}

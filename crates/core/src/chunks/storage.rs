@@ -5,8 +5,17 @@ use std::marker::PhantomData;
 use generic_array::typenum::U2;
 
 use crate::{
-    chunks::ChunkSize, elems::Elem, streams::{
-        grouping::UngroupedBinaryStream, spans::BinaryElemSpan, traits::{InputBinaryStreams, OutputBinaryStreams, OutputElemStream, Stream},
+    chunks::ChunkSize,
+    elems::Elem,
+    streams::{
+        grouping::UngroupedBinaryStream,
+        spans::BinaryElemSpan,
+        traits::{
+            InputBinaryStreams,
+            OutputBinaryStreams,
+            OutputElemStream,
+            Stream,
+        },
     },
 };
 

@@ -24,6 +24,12 @@ use crate::{
     },
 };
 
+/// Reads header field widths from given input stream.
+/// 
+/// * `input` - Input stream to read widths from.
+/// 
+/// Returns read field widths, or error if occurred.
+/// 
 pub fn read_widths<S: InputBinaryStream>(input: &mut S) -> io::Result<ChunkInfoWidths> {
     let mut res = ChunkInfoWidths { is_literal: 0, size: 0, index: 0 };
     input.read_bytes(std::slice::from_mut(&mut res.is_literal))?;
@@ -32,6 +38,13 @@ pub fn read_widths<S: InputBinaryStream>(input: &mut S) -> io::Result<ChunkInfoW
     Ok(res)
 }
 
+/// Writes header field widths to given output stream.
+/// 
+/// * `output` - Output stream to write widths to.
+/// * `widths` - Field widths to write.
+/// 
+/// Returns error if occurred.
+/// 
 pub fn write_widths<S: OutputBinaryStream>(output: &mut S, widths: &ChunkInfoWidths) -> io::Result<()> {
     output.write_bytes(std::slice::from_ref(&widths.is_literal))?;
     output.write_bytes(std::slice::from_ref(&widths.size))?;

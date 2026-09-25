@@ -214,6 +214,8 @@ where
     let mut elems = vec![];
     let offset = input.get_pos()?;
     let mut span: BinaryElemSpan<'_, E, S> = BinaryElemSpan::new(input, Some(offset), None);
+
+    // read `size` elems directly from the stream, bail if run out
     for _ in 0..size {
         let elem = span.read_next_elem()?;
         match elem {
@@ -221,6 +223,7 @@ where
             None => bail!("Unexpected EOF while reading literal chunk"),
         }
     }
+
     Ok(ChunkInfo::Literal(elems))
 }
 

@@ -12,3 +12,6 @@ mod test_chunk_mapping;
 
 #[cfg(test)]
 mod test_chunk_storage;
+
+#[cfg(test)]
+mod test_png_riding;

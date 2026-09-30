@@ -31,5 +31,9 @@ pub fn lookup<E: Eq>(stream_start: StreamPos,
 
     // if data_index managed to go through entire data, return stream_index
     // otherwise, data wasn't found (return `None`)
-    return if data_index < data.len() { Ok(None) } else { Ok(Some(stream_index)) };
+    return if data_index < data.len() {
+        Ok(None)
+    } else {
+        Ok(Some(stream_index))
+    };
 }

@@ -1,6 +1,12 @@
 use generic_array::{GenericArray, typenum::U2};
 
-use crate::{png::riding::{PNGR_TLR_IDX, PngRider}, streams::{dummy::DummyBinaryStream, traits::{ConstBinParsible, InputElemStreams, OutputElemStreams}}};
+use crate::{
+    png::riding::{PNGR_TLR_IDX, PngRider},
+    streams::{
+        dummy::DummyBinaryStream,
+        traits::{ConstBinParsible, InputElemStreams, OutputElemStreams},
+    },
+};
 
 /// Parsible element used for testing.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

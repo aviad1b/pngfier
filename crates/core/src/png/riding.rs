@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 use generic_array::typenum::U2;
 
 use crate::streams::{
@@ -26,6 +26,8 @@ impl<'a, E: ConstBinParsible, S: InputBinaryStream> PngRider<'a, E, S> {
                 Some(x) => x,
             }
         } + IEND.len() as StreamPos;
+        stream.rewind()
+            .context("Failed to rewind during construction of PNG rider")?;
 
         // tailer starts at `png_end`, image ends at `png_end`
         let mut byte_offsets = [None, None];

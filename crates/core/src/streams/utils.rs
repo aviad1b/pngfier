@@ -34,6 +34,6 @@ pub fn lookup<E: Eq>(stream_start: StreamPos,
     return if data_index < data.len() {
         Ok(None)
     } else {
-        Ok(Some(stream_index))
+        Ok(Some(stream_index - data.len() as StreamPos))
     };
 }

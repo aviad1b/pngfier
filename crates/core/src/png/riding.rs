@@ -1,4 +1,5 @@
 use anyhow::{Context, Result, bail};
+
 use generic_array::typenum::U2;
 
 use crate::streams::{
@@ -9,14 +10,20 @@ use crate::streams::{
 
 const IEND: &[u8] = &[0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82];
 
-pub const PNGR_IMG_IDX: usize = 0; // image index
-pub const PNGR_TLR_IDX: usize = 1; // tailer index
-
-pub struct PngRider<'a, E: ConstBinParsible, S: InputBinaryStream> {
+pub struct PngRider<'a, const IDX_IMG: usize, const IDX_TLR: usize, E, S>
+where
+    E: ConstBinParsible,
+    S: InputBinaryStream,
+{
     pub streams: BinaryElemSpans<'a, E, S, U2>,
 }
 
-impl<'a, E: ConstBinParsible, S: InputBinaryStream> PngRider<'a, E, S> {
+impl<'a, const IDX_IMG: usize, const IDX_TLR: usize, E: ConstBinParsible, S: InputBinaryStream>
+PngRider<'a, IDX_IMG, IDX_TLR, E, S>
+where
+    E: ConstBinParsible,
+    S: InputBinaryStream,
+{
     pub fn new(stream: &'a mut S) -> Result<Self> {
         // tailer comes after IEND chunk (lookup + len)
         let png_end = {
@@ -32,8 +39,8 @@ impl<'a, E: ConstBinParsible, S: InputBinaryStream> PngRider<'a, E, S> {
         // tailer starts at `png_end`, image ends at `png_end`
         let mut byte_offsets = [None, None];
         let mut byte_ends = [None, None];
-        byte_offsets[PNGR_TLR_IDX] = Some(png_end);
-        byte_ends[PNGR_IMG_IDX] = Some(png_end);
+        byte_offsets[IDX_TLR] = Some(png_end);
+        byte_ends[IDX_IMG] = Some(png_end);
 
         Ok(PngRider { streams: BinaryElemSpans::new(
             stream,

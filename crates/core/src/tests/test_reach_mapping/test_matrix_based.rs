@@ -1,9 +1,10 @@
 use std::{collections::HashSet, hash::Hash};
+use generic_array::GenericArray;
 
 use crate::{
     chunks::ChunkIndex,
     elems::{ElemIndexesMatrix, ElemIndexesMatrixSlot, RuntimeElemIndexesMatrix},
-    streams::dummy::DummyInputElemStream,
+    streams::{dummy::DummyInputElemStream, grouping::GroupedElemStreams},
 };
 
 use super::super::super::chunks::mapping::{reach::*, reach_utils::*};
@@ -211,7 +212,12 @@ fn reach_mapping_roundtrip() {
     let mut data = DummyInputElemStream::new(b"ABEFABCDZABCDDA".to_vec());
     let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
 
-    let reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
+    const IDX_IMG: usize = 0;
+    const IDX_DAT: usize = 1;
+    let mut streams = GroupedElemStreams::new(GenericArray::from_array([&mut image, &mut data]));
+    let reach = MatrixBasedReachMapper::<'_, '_, IDX_IMG, IDX_DAT, _, _, _>::new(
+        &mut streams, &mut img_matrix
+    ).unwrap();
 
     // 	match ABEFABCD, only one candidate
     let info = reach.get(0).unwrap();
@@ -313,7 +319,12 @@ fn reach_mapping_gives_correct_length() {
     let mut data = DummyInputElemStream::new(b"ABEFABCDZABCDDA".to_vec());
     let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
 
-    let reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
+    const IDX_IMG: usize = 0;
+    const IDX_DAT: usize = 1;
+    let mut streams = GroupedElemStreams::new(GenericArray::from_array([&mut image, &mut data]));
+    let reach = MatrixBasedReachMapper::<'_, '_, IDX_IMG, IDX_DAT, _, _, _>::new(
+        &mut streams, &mut img_matrix
+    ).unwrap();
 
     assert_eq!(reach.len().unwrap(), 15);
 }
@@ -324,7 +335,12 @@ fn get_elems_works_for_entire_range() {
     let mut data = DummyInputElemStream::new(b"ABEFABCDZABCDDA".to_vec());
     let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
 
-    let mut reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
+    const IDX_IMG: usize = 0;
+    const IDX_DAT: usize = 1;
+    let mut streams = GroupedElemStreams::new(GenericArray::from_array([&mut image, &mut data]));
+    let mut reach = MatrixBasedReachMapper::<'_, '_, IDX_IMG, IDX_DAT, _, _, _>::new(
+        &mut streams, &mut img_matrix
+    ).unwrap();
 
     let elems = reach.get_elems(0, 15).unwrap();
     assert_eq!(elems, b"ABEFABCDZABCDDA".to_vec());

@@ -4,7 +4,12 @@ use generic_array::typenum::U2;
 use std::marker::PhantomData;
 
 use crate::{
-    elems::{Elem, ElemIndexesMatrix}, streams::{StreamPos, grouping::UngroupedElemStream, traits::InputElemStreams},
+    elems::{Elem, ElemIndexesMatrix},
+    streams::{
+        StreamPos,
+        grouping::UngroupedElemStream,
+        traits::InputElemStreams
+    },
 };
 
 use super::{reach_utils::{self, Path}, super::{ChunkIndex, ChunkSize}};

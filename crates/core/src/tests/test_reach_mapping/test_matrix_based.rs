@@ -1,5 +1,4 @@
 use std::{collections::HashSet, hash::Hash};
-
 use generic_array::GenericArray;
 
 use crate::{

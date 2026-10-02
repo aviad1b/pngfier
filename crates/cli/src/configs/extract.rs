@@ -1,8 +1,11 @@
 use anyhow::{Context, Result};
+
 use generic_array::{GenericArray, typenum::U2};
 use pngfier_core::{
     elems::Elem, streams::{
-        files::{InputBinaryFileStream, OutputBinaryFileStream}, grouping::GroupedBinaryStreams, spans::BinaryElemSpan,
+        files::{InputBinaryFileStream, OutputBinaryFileStream},
+        grouping::GroupedBinaryStreams,
+        spans::BinaryElemSpan,
     },
 };
 

@@ -1,10 +1,10 @@
 use anyhow::{Context, Result};
 
+use generic_array::typenum::U2;
 use std::marker::PhantomData;
 
 use crate::{
-    elems::{Elem, ElemIndexesMatrix},
-    streams::{StreamPos, traits::InputElemStream},
+    elems::{Elem, ElemIndexesMatrix}, streams::{StreamPos, grouping::UngroupedElemStream, traits::InputElemStreams},
 };
 
 use super::{reach_utils::{self, Path}, super::{ChunkIndex, ChunkSize}};
@@ -58,55 +58,51 @@ pub trait ReachMapper<E: Elem> {
     fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> Result<Vec<E>>;
 }
 
+
 /// `ReachMapper` implementation that is based on a matrix of index sets, mapped by elements.
 /// A slot i,j in the matrix contains all indexes in the input image where element i comes after element j.
 /// 
+/// * `IDX_IMG` - Input image stream index.
+/// * `IDX_DAT` - Input data stream index.
 /// * `E` - Element type.
-/// * `ImageStream` - Type of stream used to read input image. Must implement `InputElemStream<E>`.
-/// * `DataStream` - Type of stream used to read input data. Must implement `InputElemStream<E>`.
+/// * `Streams` - Type of streams used to read input image and data. Must implement `InputElemStreams<E, U2>`.
 /// * `M` - An implementation of `ElemIndexesMatrix`, used for storing indexes in a matrix as stated above.
 /// 
-pub struct MatrixBasedReachMapper<'a, 'b, 'c, E, ImageStream, DataStream, M>
+pub struct MatrixBasedReachMapper<'a, 'b, const IDX_IMG: usize, const IDX_DAT: usize, E, Streams, M>
 where
     E: Elem,
-    ImageStream: InputElemStream<E>,
-    DataStream: InputElemStream<E>,
+    Streams: InputElemStreams<E, U2>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
     reach: Vec<MatchInfo>,
 
-    image: &'a mut ImageStream,
-    data: &'b mut DataStream,
+    streams: &'a mut Streams,
 
     // `img_matrix[prev,curr]` is all indexes in image wheren `curr` comes after `prev`
-    img_matrix: &'c mut M,
+    img_matrix: &'b mut M,
     
     phantom: PhantomData<E>,
 }
 
-impl<'a, 'b, 'c, E, ImageStream, DataStream, M>
-MatrixBasedReachMapper<'a, 'b, 'c, E, ImageStream, DataStream, M>
+impl<'a, 'b, const IDX_IMG: usize, const IDX_DAT: usize, E, Streams, M>
+MatrixBasedReachMapper<'a, 'b, IDX_IMG, IDX_DAT, E, Streams, M>
 where
     E: Elem,
-    ImageStream: InputElemStream<E>,
-    DataStream: InputElemStream<E>,
+    Streams: InputElemStreams<E, U2>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
     /// Constructs a new instance.
     /// 
-    /// * `image` - Stream used to read input image.
-    /// * `data` - Stream used to read input data.
+    /// * `streams` - Streams used to read input image and data.
     /// * `img_matrix` - Matrix instance to use for mapping.
     /// 
     /// Returns constructed instance, or error if occurred.
     /// 
-    pub fn new(image: &'a mut ImageStream,
-               data: &'b mut DataStream,
-               img_matrix: &'c mut M) -> Result<Self> {
+    pub fn new(streams: &'a mut Streams,
+               img_matrix: &'b mut M) -> Result<Self> {
         let mut res = Self{
             reach: Vec::new(),
-            image,
-            data,
+            streams,
             img_matrix,
             phantom: PhantomData,
         };
@@ -123,7 +119,8 @@ where
     /// Returns error if occurred.
     /// 
     fn init_img_matrix(&mut self) -> Result<()> {
-        reach_utils::init_img_matrix(self.image, self.img_matrix)
+        let mut image = UngroupedElemStream::<'_, IDX_IMG, _, _, _>::new(self.streams);
+        reach_utils::init_img_matrix(&mut image, self.img_matrix)
             .context("Failed to initialize image matrix")
     }
 
@@ -134,10 +131,10 @@ where
     /// Returns error if occurred.
     /// 
     fn init_reach(&mut self) -> Result<()> {
-        self.data.rewind()?;
-        self.image.rewind()?;
+        self.streams.rewind::<IDX_DAT>()?;
+        self.streams.rewind::<IDX_IMG>()?;
 
-        let data_size = self.data.get_size()?;
+        let data_size = self.streams.get_size::<IDX_DAT>()?;
         self.reach.resize(data_size as usize, MatchInfo { reach: 0, src_start: -1 });
         for data_start in 0..data_size {
             self.init_reach_for(data_start)?;
@@ -185,7 +182,8 @@ where
     /// Returns error if occurred.
     /// 
     fn get_path_starts_vec(&mut self, data_start: ChunkIndex) -> Result<Vec<Path>> {
-        reach_utils::get_path_starts_vec(self.data, self.img_matrix, data_start)
+        let mut data = UngroupedElemStream::<'_, IDX_DAT, _, _, _>::new(self.streams);
+        reach_utils::get_path_starts_vec(&mut data, self.img_matrix, data_start)
             .context("Failed to get vector of path starts")
     }
 
@@ -201,17 +199,17 @@ where
     /// NOTE: Takes ownership over `paths`.
     /// 
     fn walk_paths(&mut self, data_start: ChunkIndex, paths: Vec<Path>) -> Result<Option<Path>> {
-        reach_utils::walk_paths(self.data, self.img_matrix, data_start, paths)
+        let mut data = UngroupedElemStream::<'_, IDX_DAT, _, _, _>::new(self.streams);
+        reach_utils::walk_paths(&mut data, self.img_matrix, data_start, paths)
             .context("Failed to walk paths")
     }
 }
 
-impl<'a, 'b, 'c, E, ImageStream, DataStream, M>
-ReachMapper<E> for MatrixBasedReachMapper<'a, 'b, 'c, E, ImageStream, DataStream, M>
+impl<'a, 'b, const IDX_IMG: usize, const IDX_DAT: usize, E, Streams, M>
+ReachMapper<E> for MatrixBasedReachMapper<'a, 'b, IDX_IMG, IDX_DAT, E, Streams, M>
 where
     E: Elem,
-    ImageStream: InputElemStream<E>,
-    DataStream: InputElemStream<E>,
+    Streams: InputElemStreams<E, U2>,
     M: ElemIndexesMatrix<E, ChunkIndex>,
 {
     fn len(&self) -> Result<ChunkIndex> {
@@ -223,9 +221,9 @@ where
     }
 
     fn get_elems(&mut self, start: ChunkIndex, count: ChunkSize) -> Result<Vec<E>> {
-        self.data.set_pos(start as StreamPos)?;
+        self.streams.set_pos::<IDX_DAT>(start as StreamPos)?;
         (0..count).map(|_| {
-            self.data.read_next_elem()?
+            self.streams.read_next_elem::<IDX_DAT>()?
                 .context("ReachMapper::get_elems: ran out of data")
         }).collect()
     }

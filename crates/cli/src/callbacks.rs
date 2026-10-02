@@ -8,7 +8,7 @@ use pngfier_core::{
     },
     elems::{Elem, RuntimeElemIndexesMatrix},
     streams::{
-        grouping::GroupedBinaryStreams,
+        grouping::{GroupedBinaryStreams, GroupedElemStreams},
         traits::{
             InputBinaryStream,
             InputElemStream,
@@ -38,21 +38,28 @@ where
     let min_cap = widths.total_size_bytes();
     let max_cap = widths.max_size();
 
-    const IMG_IDX: usize = 0;
-    const KEY_IDX: usize = 1;
-    let mut output = GroupedBinaryStreams::new(
-        GenericArray::from_array([&mut streams.out_img, &mut streams.out_key])
-    );
+    const IN_IDX_IMG: usize = 0;
+    const IN_IDX_DAT: usize = 1;
+    let mut input = GroupedElemStreams::new(GenericArray::from_array([
+        &mut streams.in_img, &mut streams.in_data
+    ]));
+
+    const OUT_IDX_IMG: usize = 0;
+    const OUT_IDX_KEY: usize = 1;
+    let mut output = GroupedBinaryStreams::new(GenericArray::from_array([
+        &mut streams.out_img, &mut streams.out_key
+    ]));
 
     let mut img_matrix = RuntimeElemIndexesMatrix::new();
-    let mut reach = MatrixBasedReachMapper::new(&mut streams.in_img, &mut streams.in_data, &mut img_matrix)
-        .context("Failed to construct reach mapper")?;
+    let mut reach = MatrixBasedReachMapper::<'_, '_, IN_IDX_IMG, IN_IDX_DAT, _, _, _>::new(
+        &mut input, &mut img_matrix
+    ).context("Failed to construct reach mapper")?;
 
     let chunks = ChunkMapper::new(&mut reach)
         .map_chunks(Some(min_cap), Some(max_cap))
         .context("Failed to map chunks")?;
     let chunks = &mut chunks.iter();
-    let mut writer = ChunksWriter::<'_, '_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(
+    let mut writer = ChunksWriter::<'_, '_, '_, OUT_IDX_IMG, OUT_IDX_KEY, _, _, _>::new(
         *widths, chunks, &mut output
     );
 

@@ -1,6 +1,8 @@
+use generic_array::GenericArray;
+
 use crate::{
     elems::{Elem, RuntimeElemIndexesMatrix},
-    streams::dummy::DummyInputElemStream,
+	streams::{dummy::DummyInputElemStream, grouping::GroupedElemStreams},
 };
 
 use super::super::chunks::{ChunkInfo, ChunkSize, mapping::{self::*, reach::*}};
@@ -19,7 +21,14 @@ fn run_mapper(image_bytes: &[u8], data_bytes: &[u8], min_cap: Option<ChunkSize>,
 	let mut image = DummyInputElemStream::new(image_bytes.to_vec());
 	let mut data = DummyInputElemStream::new(data_bytes.to_vec());
 	let mut img_matrix = RuntimeElemIndexesMatrix::<u8, _>::new();
-	let mut reach = MatrixBasedReachMapper::new(&mut image, &mut data, &mut img_matrix).unwrap();
+
+	const IDX_IMG: usize = 0;
+    const IDX_DAT: usize = 1;
+    let mut streams = GroupedElemStreams::new(GenericArray::from_array([&mut image, &mut data]));
+    let mut reach = MatrixBasedReachMapper::<'_, '_, IDX_IMG, IDX_DAT, _, _, _>::new(
+        &mut streams, &mut img_matrix
+    ).unwrap();
+	
 	let mut mapper = ChunkMapper::new(&mut reach);
 	mapper.map_chunks(min_cap, max_cap).unwrap()
 }

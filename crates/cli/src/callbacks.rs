@@ -1,24 +1,30 @@
 use anyhow::{Context, Result};
 
-use generic_array::GenericArray;
+use generic_array::typenum::U2;
 use pngfier_core::{
     chunks::{
         mapping::{ChunkMapper, reach::MatrixBasedReachMapper},
         storage::{ChunkInfoWidths, ChunksReader, ChunksWriter},
     },
     elems::{Elem, RuntimeElemIndexesMatrix},
-    streams::{
-        grouping::{GroupedBinaryStreams, GroupedElemStreams},
-        traits::{
-            InputBinaryStream,
-            InputElemStream,
-            OutputBinaryStream,
-            OutputElemStream,
-        },
+    streams::traits::{
+        InputBinaryStreams,
+        InputElemStreams,
+        OutputBinaryStreams,
+        OutputElemStream,
     },
 };
 
-use crate::streams::{CompileStreams, ExtractStreams};
+use crate::streams::{
+    COMPL_IN_IDX_DAT,
+    COMPL_IN_IDX_IMG,
+    COMPL_OUT_IDX_IMG,
+    COMPL_OUT_IDX_KEY,
+    XTRCT_OUT_IDX_IMG,
+    XTRCT_OUT_IDX_KEY,
+    CompileStreams,
+    ExtractStreams,
+};
 
 /// Callback function which performs compile operation.
 /// 
@@ -30,44 +36,34 @@ use crate::streams::{CompileStreams, ExtractStreams};
 pub fn compile<E, In, Out>(widths: &ChunkInfoWidths, streams: &mut CompileStreams<E, In, Out>) -> Result<f64>
 where
     E: Elem,
-    In: InputElemStream<E>,
-    Out: OutputBinaryStream,
+    In: InputElemStreams<E, U2>,
+    Out: OutputBinaryStreams<U2>,
 {
     // cap minimum reference chunk size by size of fields sum (reference chunk size)
     // cap maximum reference chunk size by maximum representable chunk size
     let min_cap = widths.total_size_bytes();
     let max_cap = widths.max_size();
 
-    const IN_IDX_IMG: usize = 0;
-    const IN_IDX_DAT: usize = 1;
-    let mut input = GroupedElemStreams::new(GenericArray::from_array([
-        &mut streams.in_img, &mut streams.in_data
-    ]));
-
-    const OUT_IDX_IMG: usize = 0;
-    const OUT_IDX_KEY: usize = 1;
-    let mut output = GroupedBinaryStreams::new(GenericArray::from_array([
-        &mut streams.out_img, &mut streams.out_key
-    ]));
-
     let mut img_matrix = RuntimeElemIndexesMatrix::new();
-    let mut reach = MatrixBasedReachMapper::<'_, '_, IN_IDX_IMG, IN_IDX_DAT, _, _, _>::new(
-        &mut input, &mut img_matrix
+    let mut reach = MatrixBasedReachMapper::<'_, '_, COMPL_IN_IDX_IMG, COMPL_IN_IDX_DAT, _, _, _>::new(
+        streams.input, &mut img_matrix
     ).context("Failed to construct reach mapper")?;
 
     let chunks = ChunkMapper::new(&mut reach)
         .map_chunks(Some(min_cap), Some(max_cap))
         .context("Failed to map chunks")?;
     let chunks = &mut chunks.iter();
-    let mut writer = ChunksWriter::<'_, '_, '_, OUT_IDX_IMG, OUT_IDX_KEY, _, _, _>::new(
-        *widths, chunks, &mut output
+    let mut writer = ChunksWriter::<'_, '_, '_, COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, _, _, _>::new(
+        *widths, chunks, streams.output
     );
 
     writer.write().context("Failed to write chunks into output")?;
 
     // overhead is defined as (dst_size-src_size)/src_size
-    let src_size = streams.in_data.get_size()? + streams.in_img.get_size()?;
-    let dst_size = streams.out_img.get_size()? + streams.out_key.get_size()?;
+    let src_size = streams.input.get_size::<COMPL_IN_IDX_DAT>()? + 
+        streams.input.get_size::<COMPL_IN_IDX_IMG>()?;
+    let dst_size = streams.output.get_size::<COMPL_OUT_IDX_IMG>()? + 
+        streams.output.get_size::<COMPL_OUT_IDX_KEY>()?;
     Ok((dst_size - src_size) as f64 / dst_size as f64)
 }
 
@@ -80,17 +76,11 @@ where
 pub fn extract<E, In, Out>(streams: &mut ExtractStreams<E, In, Out>) -> Result<()>
 where
     E: Elem,
-    In: InputBinaryStream,
+    In: InputBinaryStreams<U2>,
     Out: OutputElemStream<E>,
 {
-    const IMG_IDX: usize = 0;
-    const KEY_IDX: usize = 1;
-    let mut input = GroupedBinaryStreams::new(
-        GenericArray::from_array([&mut streams.in_img, &mut streams.in_key])
-    );
-
-    let mut reader = ChunksReader::<'_, '_, IMG_IDX, KEY_IDX, _, _, _>::new(
-        &mut input, &mut streams.out_data
+    let mut reader = ChunksReader::<'_, '_, XTRCT_OUT_IDX_IMG, XTRCT_OUT_IDX_KEY, _, _, _>::new(
+        streams.input, streams.out_data
     );
 
     reader.extract_all().context("Failed to extract chunks")?;

@@ -1,8 +1,9 @@
 use anyhow::{Context, Result};
+use generic_array::{GenericArray, typenum::U2};
 use pngfier_core::{
-    elems::Elem,
-    streams::{
+    elems::Elem, streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream},
+        grouping::{GroupedBinaryStreams, GroupedElemStreams},
         spans::BinaryElemSpan,
     },
 };
@@ -25,27 +26,36 @@ pub fn path_with_key<E, Callback>(mut callback: Callback,
                                   out_img_path: &str, out_key_path: &str) -> Result<f64>
 where
     E: Elem,
-    Callback: for <'a> FnMut(&mut CompileStreams<E,
-                                                 BinaryElemSpan::<'a, E, InputBinaryFileStream>,
-                                                 OutputBinaryFileStream>) -> Result<f64>,
+    Callback: for <'a, 'b> FnMut(
+        &mut CompileStreams<E,
+                            GroupedElemStreams<'a, E, U2, BinaryElemSpan<'b, E, InputBinaryFileStream>>,
+                            GroupedBinaryStreams<'a, U2, OutputBinaryFileStream>>) -> Result<f64>,
 {
     // output image is identical to input one in this config
     std::fs::copy(in_img_path, out_img_path)
         .context("Failed to copy source to output")?;
-    let out_img = OutputBinaryFileStream::new(&out_img_path)
+    let mut out_img = OutputBinaryFileStream::new(&out_img_path)
         .context("Failed to write to output file")?;
 
     // key is stored separately in this config
-    let out_key = OutputBinaryFileStream::new(&out_key_path)
+    let mut out_key = OutputBinaryFileStream::new(&out_key_path)
         .context("Failed to write to key file")?;
+
+    let mut output = GroupedBinaryStreams::new(GenericArray::from_array([
+        &mut out_img, &mut out_key
+    ]));
 
     let mut in_img = InputBinaryFileStream::new(&in_img_path)
         .context("Failed to write to output")?;
-    let in_img = BinaryElemSpan::<'_, E, _>::new(&mut in_img, None, None);
+    let mut in_img = BinaryElemSpan::<'_, E, _>::new(&mut in_img, None, None);
 
     let mut in_data = InputBinaryFileStream::new(&in_data_path)
         .context("Failed to read from input data")?;
-    let in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
+    let mut in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
 
-    callback(&mut CompileStreams::new(in_img, in_data, out_img, out_key))
+    let mut input = GroupedElemStreams::new(GenericArray::from_array([
+        &mut in_data, &mut in_img
+    ]));
+
+    callback(&mut CompileStreams::new(&mut input, &mut output))
 }

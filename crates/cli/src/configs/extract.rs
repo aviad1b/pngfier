@@ -12,7 +12,7 @@ use pngfier_core::{
 use crate::streams::ExtractStreams;
 
 /// Generates configuration for extract operation with input key path, 
-/// then performs compile operation via a given callback.
+/// then performs extract operation via a given callback.
 /// 
 /// * `callback` - Callback function which performs extract operation on streams.
 /// * `in_img_path` - Path to input compiled image file.

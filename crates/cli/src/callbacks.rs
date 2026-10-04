@@ -20,8 +20,8 @@ use crate::streams::{
     COMPL_IN_IDX_IMG,
     COMPL_OUT_IDX_IMG,
     COMPL_OUT_IDX_KEY,
-    XTRCT_OUT_IDX_IMG,
-    XTRCT_OUT_IDX_KEY,
+    XTRCT_IN_IDX_IMG,
+    XTRCT_IN_IDX_KEY,
     CompileStreams,
     ExtractStreams,
 };
@@ -79,7 +79,7 @@ where
     In: InputBinaryStreams<U2>,
     Out: OutputElemStream<E>,
 {
-    let mut reader = ChunksReader::<'_, '_, XTRCT_OUT_IDX_IMG, XTRCT_OUT_IDX_KEY, _, _, _>::new(
+    let mut reader = ChunksReader::<'_, '_, XTRCT_IN_IDX_IMG, XTRCT_IN_IDX_KEY, _, _, _>::new(
         streams.input, streams.out_data
     );
 

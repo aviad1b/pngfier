@@ -1,33 +1,13 @@
-use generic_array::{GenericArray, typenum::U2};
-
 use crate::{
     png::riding::PngRider,
     streams::{
         dummy::DummyBinaryStream,
-        traits::{ConstBinParsible, InputElemStreams, OutputElemStreams},
+        traits::{InputBinaryStreams, OutputBinaryStreams},
     },
 };
 
 const IDX_IMG: usize = 0;
 const IDX_TLR: usize = 1;
-
-/// Parsible element used for testing.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct TestElem(u16);
-
-impl ConstBinParsible for TestElem {
-	type BuffSize = U2;
-
-	fn const_bin_parse(buff: &GenericArray<u8, U2>) -> Self {
-		TestElem(u16::from_be_bytes([buff[0], buff[1]]))
-	}
-
-	fn const_bin_unparse(&self, buff: &mut GenericArray<u8, U2>) {
-		let bytes = self.0.to_be_bytes();
-		buff[0] = bytes[0];
-		buff[1] = bytes[1];
-	}
-}
 
 #[test]
 fn png_riding_data_read_correctly() {
@@ -39,10 +19,15 @@ fn png_riding_data_read_correctly() {
 
     let mut input = DummyBinaryStream::new(data);
 
-    let mut rider = PngRider::<'_, IDX_IMG, IDX_TLR, TestElem, _>::new(&mut input).unwrap();
+    let mut rider = PngRider::<'_, IDX_IMG, IDX_TLR, _>::new(&mut input).unwrap();
 
-    assert_eq!(TestElem(0xABCD), rider.streams.read_next_elem::<IDX_TLR>().unwrap().unwrap());
-    assert_eq!(TestElem(0xEF12), rider.streams.read_next_elem::<IDX_TLR>().unwrap().unwrap());
+    let mut buff = [0_u8; 2];
+
+    rider.streams.read_bytes::<IDX_TLR>(&mut buff).unwrap();
+    assert_eq!(&buff, &[0xAB, 0xCD]);
+
+    rider.streams.read_bytes::<IDX_TLR>(&mut buff).unwrap();
+    assert_eq!(&buff, &[0xEF, 0x12]);
 }
 
 #[test]
@@ -55,10 +40,10 @@ fn png_riding_data_written_correctly() {
 
     let mut output = DummyBinaryStream::new(data);
 
-    let mut rider = PngRider::<'_, IDX_IMG, IDX_TLR, TestElem, _>::new(&mut output).unwrap();
+    let mut rider = PngRider::<'_, IDX_IMG, IDX_TLR, _>::new(&mut output).unwrap();
 
-    rider.streams.write_next_elem::<IDX_TLR>(TestElem(0xAABB)).unwrap();
-    rider.streams.write_next_elem::<IDX_TLR>(TestElem(0xFFEE)).unwrap();
+    rider.streams.write_bytes::<IDX_TLR>(&[0xAA, 0xBB]).unwrap();
+    rider.streams.write_bytes::<IDX_TLR>(&[0xFF, 0xEE]).unwrap();
 
     let data = output.get_all();
     assert_eq!(

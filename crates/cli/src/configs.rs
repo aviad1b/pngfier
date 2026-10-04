@@ -47,6 +47,9 @@ pub fn apply_extract<E: Elem>(in_img: &String, out_file: &String, key_file: &Opt
             |streams| callbacks::extract::<E, _, _>(streams),
             in_img, in_key_path, out_file
         ),
-        None => bail!("Key file is mandatory for now."),
+        None => extract::no_key(
+            |streams| callbacks::extract::<E, _, _>(streams),
+            in_img, out_file
+        )
     }
 }

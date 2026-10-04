@@ -11,8 +11,8 @@ use pngfier_core::{
 
 use crate::streams::{COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, CompileStreams};
 
-/// Generates configuration for compile operation with source image path and no output key file, 
-/// (key is to be stored using PNG riding) then performs compile operation via a given callback.
+/// Generates configuration for compile operation with source image path and no output key file 
+/// (key is to be stored using PNG riding), then performs compile operation via a given callback.
 /// 
 /// * `callback` - Callback function which performs compile operation on streams (returns space overhead).
 /// * `in_img_path` - Path to input image file.

@@ -1,7 +1,8 @@
 use anyhow::{Context, Result};
 use generic_array::{GenericArray, typenum::U2};
 use pngfier_core::{
-    elems::Elem, png::riding::PngRider,
+    elems::Elem,
+    png::riding::PngRider,
     streams::{
         files::{InputBinaryFileStream, OutputBinaryFileStream, TwoWayBinaryFileStream},
         grouping::{GroupedBinaryStreams, GroupedElemStreams},

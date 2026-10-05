@@ -62,11 +62,11 @@ where
     }
 }
 
-/// Extract streams index of output image in output streams set.
-pub const XTRCT_OUT_IDX_IMG: usize = 0;
+/// Extract streams index of input image in output streams set.
+pub const XTRCT_IN_IDX_IMG: usize = 0;
 
-/// ComExtractpile streams index of output key in output streams set.
-pub const XTRCT_OUT_IDX_KEY: usize = 1;
+/// ComExtractpile streams index of input key in output streams set.
+pub const XTRCT_IN_IDX_KEY: usize = 1;
 
 /// Holds input & output streams for extract operation.
 /// 

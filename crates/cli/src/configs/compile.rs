@@ -1,14 +1,60 @@
 use anyhow::{Context, Result};
 use generic_array::{GenericArray, typenum::U2};
 use pngfier_core::{
-    elems::Elem, streams::{
-        files::{InputBinaryFileStream, OutputBinaryFileStream},
+    elems::Elem,
+    png::riding::PngRider,
+    streams::{
+        files::{InputBinaryFileStream, OutputBinaryFileStream, TwoWayBinaryFileStream},
         grouping::{GroupedBinaryStreams, GroupedElemStreams},
-        spans::BinaryElemSpan,
+        spans::{BinaryElemSpan, BinarySpans},
     },
 };
 
-use crate::streams::CompileStreams;
+use crate::streams::{COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, CompileStreams};
+
+/// Generates configuration for compile operation with source image path and no output key file 
+/// (key is to be stored using PNG riding), then performs compile operation via a given callback.
+/// 
+/// * `callback` - Callback function which performs compile operation on streams (returns space overhead).
+/// * `in_img_path` - Path to input image file.
+/// * `in_data_path` - Path to input data file.
+/// * `out_img_path` - Path to output image file.
+/// 
+/// Returns space overhead (fraction), or error if occurred.
+/// 
+pub fn path_no_key<E, Callback>(mut callback: Callback, in_img_path: &str,
+                                in_data_path: &str, out_img_path: &str) -> Result<f64>
+where
+    E: Elem,
+    Callback: for <'a, 'b> FnMut(
+        &mut CompileStreams<E,
+                            GroupedElemStreams<'a, E, U2, BinaryElemSpan<'b, E, InputBinaryFileStream>>,
+                            BinarySpans<'a, TwoWayBinaryFileStream, U2>>) -> Result<f64>,
+{
+    // output image is identical to input one in this config
+    std::fs::copy(in_img_path, out_img_path)
+        .context("Failed to copy source to output")?;
+    let mut out_file = TwoWayBinaryFileStream::new(&out_img_path)
+        .context("Failed to write to output file")?;
+
+    // key is stored using PNG riding
+    let mut output = PngRider::<'_, COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, _>::new(&mut out_file)
+        .context("Failed to initialize PNG rider")?;
+
+    let mut in_img = InputBinaryFileStream::new(&in_img_path)
+        .context("Failed to write to output")?;
+    let mut in_img = BinaryElemSpan::<'_, E, _>::new(&mut in_img, None, None);
+
+    let mut in_data = InputBinaryFileStream::new(&in_data_path)
+        .context("Failed to read from input data")?;
+    let mut in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
+
+    let mut input = GroupedElemStreams::new(GenericArray::from_array([
+        &mut in_data, &mut in_img
+    ]));
+
+    callback(&mut CompileStreams::new(&mut input, &mut output.streams))
+}
 
 /// Generates configuration for compile operation with source image path and output key path, 
 /// then performs compile operation via a given callback.

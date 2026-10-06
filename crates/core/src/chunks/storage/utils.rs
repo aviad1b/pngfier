@@ -51,11 +51,11 @@ pub fn read_widths<S: InputBinaryStream>(input: &mut S) -> Result<ChunkInfoWidth
 /// 
 pub fn write_widths<S: OutputBinaryStream>(output: &mut S, widths: &ChunkInfoWidths) -> Result<()> {
     output.write_bytes(std::slice::from_ref(&widths.is_literal))
-        .context("Failed to write \"is_literal\" width field")?;
+        .context(format!("Failed to write \"is_literal\" width field: {}", &widths.is_literal))?;
     output.write_bytes(std::slice::from_ref(&widths.size))
-        .context("Failed to write \"size\" width field")?;
+        .context(format!("Failed to write \"size\" width field: {}", &widths.size))?;
     output.write_bytes(std::slice::from_ref(&widths.index))
-        .context("Failed to write \"index\" width field")?;
+        .context(format!("Failed to write \"index\" width field: {}", &widths.index))?;
     Ok(())
 }
 
@@ -188,9 +188,9 @@ pub fn write_header(bits: &mut impl BitWrite,
                     header: (bool, ChunkSize)) -> Result<()> {
     let (is_literal, size) = header;
     bits.write(widths.is_literal as u32, if is_literal { 1 } else { 0 })
-        .context("Failed to write \"is_literal\" field")?;
+        .context(format!("Failed to write \"is_literal\" field: {}", is_literal))?;
     bits.write(widths.size as u32, size)
-        .context("Failed to write \"size\" field")?;
+        .context(format!("Failed to write \"size\" field: {}", size))?;
     Ok(())
 }
 
@@ -283,7 +283,7 @@ pub fn write_reference_chunk_info(bits: &mut impl BitWrite,
                                   index: ChunkIndex,
                                   widths: &ChunkInfoWidths) -> Result<()> {
     bits.write(widths.index as u32, index)
-        .context("Failed to write \"index\" field")?;
+        .context(format!("Failed to write \"index\" field: {}", index))?;
     Ok(())
 }
 

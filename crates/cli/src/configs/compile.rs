@@ -50,7 +50,7 @@ where
     let mut in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
 
     let mut input = GroupedElemStreams::new(GenericArray::from_array([
-        &mut in_data, &mut in_img
+        &mut in_img, &mut in_data
     ]));
 
     callback(&mut CompileStreams::new(&mut input, &mut output.streams))
@@ -100,7 +100,7 @@ where
     let mut in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
 
     let mut input = GroupedElemStreams::new(GenericArray::from_array([
-        &mut in_data, &mut in_img
+        &mut in_img, &mut in_data
     ]));
 
     callback(&mut CompileStreams::new(&mut input, &mut output))

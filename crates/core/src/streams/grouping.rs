@@ -59,6 +59,10 @@ impl<'a, E, N: ArrayLength, S: Stream> Streams<N> for GroupedElemStreams<'a, E, 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
         self.streams[I].get_size()
     }
+
+    fn update<const I: usize>(&mut self) -> io::Result<()> {
+        self.streams[I].update()
+    }
 }
 
 impl<'a, E, N: ArrayLength, S: InputElemStream<E>> InputElemStreams<E, N>

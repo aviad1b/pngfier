@@ -382,6 +382,10 @@ impl<'a, S: Stream, N: ArrayLength> Streams<N> for BinarySpans<'a, S, N> {
 
         Ok(actual_size)
     }
+
+    fn update<const I: usize>(&mut self) -> io::Result<()> {
+        self.update_pos::<I>()
+    }
 }
 
 impl<'a, S: InputBinaryStream, N: ArrayLength> InputBinaryStreams<N> for BinarySpans<'a, S, N> {

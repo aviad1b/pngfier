@@ -261,6 +261,10 @@ Stream for UngroupedBinaryStream<'a, I, N, S> {
     fn get_size(&mut self) -> io::Result<StreamPos> {
         self.streams.get_size::<I>()
     }
+
+    fn update(&mut self) -> io::Result<()> {
+        self.streams.update::<I>()
+    }
 }
 
 impl<'a, const I: usize, N: ArrayLength, S: InputBinaryStreams<N>>

@@ -59,6 +59,10 @@ impl<'a, E, N: ArrayLength, S: Stream> Streams<N> for GroupedElemStreams<'a, E, 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
         self.streams[I].get_size()
     }
+
+    fn update<const I: usize>(&mut self) -> io::Result<()> {
+        self.streams[I].update()
+    }
 }
 
 impl<'a, E, N: ArrayLength, S: InputElemStream<E>> InputElemStreams<E, N>
@@ -121,6 +125,10 @@ Stream for UngroupedElemStream<'a, I, E, N, S> {
     fn get_size(&mut self) -> io::Result<StreamPos> {
         self.streams.get_size::<I>()
     }
+
+    fn update(&mut self) -> io::Result<()> {
+        self.streams.update::<I>()
+    }
 }
 
 impl<'a, const I: usize, E, N: ArrayLength, S: InputElemStreams<E, N>>
@@ -179,6 +187,10 @@ impl<'a, N: ArrayLength, S: Stream> Streams<N> for GroupedBinaryStreams<'a, N, S
 
     fn get_size<const I: usize>(&mut self) -> io::Result<StreamPos> {
         self.streams[I].get_size()
+    }
+
+    fn update<const I: usize>(&mut self) -> io::Result<()> {
+        self.streams[I].update()
     }
 }
 
@@ -248,6 +260,10 @@ Stream for UngroupedBinaryStream<'a, I, N, S> {
 
     fn get_size(&mut self) -> io::Result<StreamPos> {
         self.streams.get_size::<I>()
+    }
+
+    fn update(&mut self) -> io::Result<()> {
+        self.streams.update::<I>()
     }
 }
 

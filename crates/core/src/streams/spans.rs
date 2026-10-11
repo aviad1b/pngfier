@@ -150,6 +150,10 @@ impl<'a, E: ConstBinParsible, S: Stream, N: ArrayLength> Streams<N> for BinaryEl
 
         Ok(actual_byte_size / Self::elem_size())
     }
+
+    fn update<const I: usize>(&mut self) -> io::Result<()> {
+        self.update_pos::<I>()
+    }
 }
 
 impl<'a, E: ConstBinParsible, S: InputBinaryStream, N: ArrayLength>
@@ -377,6 +381,10 @@ impl<'a, S: Stream, N: ArrayLength> Streams<N> for BinarySpans<'a, S, N> {
         });
 
         Ok(actual_size)
+    }
+
+    fn update<const I: usize>(&mut self) -> io::Result<()> {
+        self.update_pos::<I>()
     }
 }
 

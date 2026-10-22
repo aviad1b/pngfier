@@ -30,7 +30,8 @@ struct Cli {
     command: Command,
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Command::Compile { out_img, in_file, img_query, img_path, key_file } =>

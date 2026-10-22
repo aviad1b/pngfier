@@ -15,6 +15,16 @@ use crate::{streams::{COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, CompileStreams}, uti
 
 const IMG_LIMIT: usize = 3;
 
+/// Generates configuration for compile operation with source image query and no output key file 
+/// (key is to be stored using PNG riding), then performs compile operation via a given callback.
+/// 
+/// * `callback` - Callback function which performs compile operation on streams (returns space overhead).
+/// * `in_img_quert` - Query for input image file.
+/// * `in_data_path` - Path to input data file.
+/// * `out_img_path` - Path to output image file.
+/// 
+/// Returns space overhead (fraction), or error if occurred.
+/// 
 pub async fn query_no_key<E, Callback>(mut callback: Callback, in_img_query: &str,
                                        in_data_path: &str, out_img_path: &str) -> Result<f64>
 where

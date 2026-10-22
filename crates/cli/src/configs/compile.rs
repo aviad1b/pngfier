@@ -12,6 +12,18 @@ use pngfier_core::{
 
 use crate::streams::{COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, CompileStreams};
 
+pub fn query_no_key<E, Callback>(mut callback: Callback, in_img_query: &str,
+                                 in_data_path: &str, out_img_path: &str) -> Result<f64>
+where
+    E: Elem,
+    Callback: for <'a, 'b> FnMut(
+        &mut CompileStreams<E,
+                            GroupedElemStreams<'a, E, U2, BinaryElemSpan<'b, E, InputBinaryFileStream>>,
+                            BinarySpans<'a, TwoWayBinaryFileStream, U2>>) -> Result<f64>,
+{
+    todo!() // TODO: Implement
+}
+
 /// Generates configuration for compile operation with source image path and no output key file 
 /// (key is to be stored using PNG riding), then performs compile operation via a given callback.
 /// 

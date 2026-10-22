@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
         Command::Compile { out_img, in_file, img_query, img_path, key_file } =>
-            handle_compile(out_img, in_file, ImgSrc::from_args(img_query, img_path)?, key_file),
+            handle_compile(out_img, in_file, ImgSrc::from_args(img_query, img_path)?, key_file).await,
         Command::Extract { in_img, out_file, key_file } =>
             handle_extract(in_img, out_file, key_file),
     }
@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
 /// 
 /// Returns error if occured.
 /// 
-fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
+async fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
     let overhead = configs::apply_compile::<E>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
 
     println!("Output saved at {}", &out_img);

@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
 /// Returns error if occured.
 /// 
 async fn handle_compile(out_img: String, in_file: String, img_src: ImgSrc, key_file: Option<String>) -> Result<()> {
-    let overhead = configs::apply_compile::<E>(&WIDTHS, &out_img, &in_file, &img_src, &key_file)?;
+    let overhead = configs::apply_compile::<E>(&WIDTHS, &out_img, &in_file, &img_src, &key_file).await?;
 
     println!("Output saved at {}", &out_img);
     println!();

@@ -20,7 +20,10 @@ pub async fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
                                     out_img: &String, in_file: &String,
                                     img_src: &ImgSrc, key_file: &Option<String>) -> Result<f64> {
     match (img_src, key_file) {
-        (ImgSrc::Query(_), None) => bail!("Query-based compiling is not supported yet."),
+        (ImgSrc::Query(in_img_query), None) => compile::query_no_key(
+            |streams| callbacks::compile::<E, _, _>(widths, streams),
+            in_img_query, in_file, out_img
+        ).await,
         (ImgSrc::Query(_), Some(_)) => bail!("Query-based compiling is not supported yet."),
         (ImgSrc::Path(in_img_path), None) => compile::path_no_key(
             |streams| callbacks::compile::<E, _, _>(widths, streams),

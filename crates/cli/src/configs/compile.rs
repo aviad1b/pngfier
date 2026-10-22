@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use generic_array::{GenericArray, typenum::U2};
+use image_search::{Arguments, download};
 use pngfier_core::{
     elems::Elem,
     png::riding::PngRider,
@@ -10,10 +11,12 @@ use pngfier_core::{
     },
 };
 
-use crate::streams::{COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, CompileStreams};
+use crate::{streams::{COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, CompileStreams}, utils::TempDir};
 
-pub fn query_no_key<E, Callback>(mut callback: Callback, in_img_query: &str,
-                                 in_data_path: &str, out_img_path: &str) -> Result<f64>
+const IMG_LIMIT: usize = 3;
+
+pub async fn query_no_key<E, Callback>(mut callback: Callback, in_img_query: &str,
+                                       in_data_path: &str, out_img_path: &str) -> Result<f64>
 where
     E: Elem,
     Callback: for <'a, 'b> FnMut(
@@ -21,7 +24,46 @@ where
                             GroupedElemStreams<'a, E, U2, BinaryElemSpan<'b, E, InputBinaryFileStream>>,
                             BinarySpans<'a, TwoWayBinaryFileStream, U2>>) -> Result<f64>,
 {
-    todo!() // TODO: Implement
+    let dir = TempDir::new().context("Failed to create temporary directory")?;
+    let args = Arguments::new(in_img_query, IMG_LIMIT)
+        .directory(dir.path_str());
+    let paths = download(args).await.context("Failed to download image(s)")?;
+    let mut overheads = vec![];
+
+    // try compiling based on each downloaded image
+    for path in &paths {
+        let path = &path.display().to_string();
+        let mut out_file = TwoWayBinaryFileStream::new(&path)
+            .context("Failed to write to output file")?;
+
+        // key is stored using PNG riding
+        let mut output = PngRider::<'_, COMPL_OUT_IDX_IMG, COMPL_OUT_IDX_KEY, _>::new(&mut out_file)
+            .context("Failed to initialize PNG rider")?;
+
+        let mut in_img = InputBinaryFileStream::new(&path)
+            .context("Failed to write to output")?;
+        let mut in_img = BinaryElemSpan::<'_, E, _>::new(&mut in_img, None, None);
+
+        let mut in_data = InputBinaryFileStream::new(&in_data_path)
+            .context("Failed to read from input data")?;
+        let mut in_data = BinaryElemSpan::<'_, E, _>::new(&mut in_data, None, None);
+
+        let mut input = GroupedElemStreams::new(GenericArray::from_array([
+            &mut in_img, &mut in_data
+        ]));
+
+        overheads.push(callback(&mut CompileStreams::new(&mut input, &mut output.streams))?);
+    }
+
+    // select image with minimal overhead and copy onto output
+    let (min_idx, min_overhead) = overheads.iter().enumerate()
+        .min_by(|(_, a), (_, b)| f64::total_cmp(a, b))
+        .context("Failed to find fitting image")?;
+    
+    std::fs::copy(&paths[min_idx], out_img_path)
+        .context("Failed to copy result to output")?;
+
+    Ok(*min_overhead)
 }
 
 /// Generates configuration for compile operation with source image path and no output key file 

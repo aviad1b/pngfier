@@ -9,6 +9,7 @@ mod callbacks;
 mod commands;
 mod streams;
 mod configs;
+mod utils;
 
 /// Element type used in I/O operation.
 type E = u8;

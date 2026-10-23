@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::Result;
 use pngfier_core::{chunks::storage::ChunkInfoWidths, elems::Elem};
 
 use crate::{callbacks, commands::ImgSrc};
@@ -24,7 +24,10 @@ pub async fn apply_compile<E: Elem>(widths: &ChunkInfoWidths,
             |streams| callbacks::compile::<E, _, _>(widths, streams),
             in_img_query, in_file, out_img
         ).await,
-        (ImgSrc::Query(_), Some(_)) => bail!("Query-based compiling is not supported yet."),
+        (ImgSrc::Query(in_img_query), Some(out_key_path)) => compile::query_with_key(
+            |streams| callbacks::compile::<E, _, _>(widths, streams),
+            in_img_query, in_file, out_img, out_key_path
+        ).await,
         (ImgSrc::Path(in_img_path), None) => compile::path_no_key(
             |streams| callbacks::compile::<E, _, _>(widths, streams),
             in_img_path, in_file, out_img
